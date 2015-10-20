@@ -3,31 +3,40 @@
 
 var VERSION = "0.0.1";
 
+console.log("brackets server");
+console.log("version: " + VERSION);
+
 var websocket = require("websocket");
 var http = require("http");
 var fs = require("fs");
 var path = require("path");
 var mime = require("mime");
+var cheerio = require("cheerio");
 
 var connections = [];
 var port = 1337;
 
 //TODO: this is all temporary
-var webRoot = "/home/mason/Git/lentils-as-a-service/mockups/";
+var webRoot = "/home/mason/git/lentils-as-a-service/mockups/";
 var defaultFile = "index.html";
 var currentFile = "index.html";
 
 //TODO this is also temporary
-var currentFileSrc = ""
+var currentFileSrc = "";
+var templateSrc = "";
 
-fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
-	if(!err){
-		currentFileSrc = data;
-	}
+fs.readFile(path.resolve("frontend.js"), function(err, data){
+	templateSrc = data.toString();
+	fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
+		currentFileSrc = data.toString();
+		$ = cheerio.load(currentFileSrc);
+		$("*").each(function(i, elem){
+			$(this).attr('data-brackets-id', i);
+		});
+		$("head").append('<script>' + templateSrc + '</script>');
+		currentFileSrc = $.html();
+	});
 });
-
-console.log("brackets server");
-console.log("version: " + VERSION);
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
