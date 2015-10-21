@@ -17,7 +17,7 @@ var connections = [];
 var port = 1337;
 
 //TODO: this is all temporary
-var webRoot = "/home/mason/Git/lentils-as-a-service/mockups/";
+var webRoot = "/home/mason/git/lentils-as-a-service/mockups/";
 var defaultFile = "index.html";
 var currentFile = "index.html";
 
