@@ -17,24 +17,29 @@ var connections = [];
 var port = 1337;
 
 //TODO: this is all temporary
-var webRoot = "/home/mason/git/lentils-as-a-service/mockups/";
+var webRoot = "/home/mason/Git/lentils-as-a-service/mockups/";
 var defaultFile = "index.html";
 var currentFile = "index.html";
 
 //TODO this is also temporary
 var currentFileSrc = "";
-var templateSrc = "";
+var injectedJs = "";
+var injectedCss = "";
 
-fs.readFile(path.resolve("frontend.js"), function(err, data){
-	templateSrc = data.toString();
-	fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
-		currentFileSrc = data.toString();
-		$ = cheerio.load(currentFileSrc);
-		$("*").each(function(i, elem){
-			$(this).attr('data-brackets-id', i);
+fs.readFile(path.resolve("frontend.css"), function(err, data){
+	injectedCss = data.toString();
+	fs.readFile(path.resolve("frontend.js"), function(err, data){
+		injectedJs = data.toString();
+		fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
+			currentFileSrc = data.toString();
+			$ = cheerio.load(currentFileSrc);
+			$("*").each(function(i, elem){
+				$(this).attr('data-brackets-id', i);
+			});
+			$("head").append('<script>' + injectedJs + '</script>');
+			$("head").append('<style>' + injectedCss + '</style>');
+			currentFileSrc = $.html();
 		});
-		$("head").append('<script>' + templateSrc + '</script>');
-		currentFileSrc = $.html();
 	});
 });
 
@@ -43,8 +48,19 @@ var server = http.createServer(function(request, response){
 
 	if(request.url == "/"){
 		if(request.method == "POST"){
+			var postData = '';
+
+			request.on('data', function(data){
+				postData += data;
+			});
+
+			request.on('end', function(){
+				console.log(JSON.parse(postData));
+				broadcast(postData);
+			});
+
 			response.writeHead(200);
-			response.end("brackets " + VERSION);
+			response.end();
 		}else{
 			response.writeHead(302, {
 				'Location': defaultFile
@@ -75,6 +91,7 @@ webSocketServer = new websocket.server({
 });
 
 webSocketServer.on('request', function(request){
+	console.log("websocket connected");
 	var connection = request.accept('', request.origin);
 	connections.push(connection)
 	var i = connections.length - 1;
