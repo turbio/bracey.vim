@@ -1,3 +1,31 @@
+@keyframes temp-highlight{
+	0% {
+		-webkit-filter: brightness(1);
+		filter: brightness(1);
+	}
+	25% {
+		-webkit-filter: brightness(1.5);
+		filter: brightness(1.5);
+	}
+	50% {
+		-webkit-filter: brightness(1);
+		filter: brightness(1);
+	}
+	75% {
+		-webkit-filter: brightness(1.5);
+		filter: brightness(1.5);
+	}
+	100% {
+		-webkit-filter: brightness(1);
+		filter: brightness(1);
+	}
+}
+
 .brackets-currently-selected{
-	background: red !important;
+	outline-color: rgba(0, 85, 255, 0.75);
+	outline-style: solid;
+	outline-width: medium;
+
+	animation-name: temp-highlight;
+	animation-duration: 0.75s;
 }
