@@ -9,6 +9,12 @@
 				console.log("selecting item: " + message['selector']);
 				setHighlighted(message['selector']);
 				break;
+			case 'reload':
+				location.reload();
+				break;
+			case 'goto':
+				window.location.href = message['location'];
+				break;
 		}
 	};
 })();
