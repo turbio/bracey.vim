@@ -9,11 +9,18 @@
 				console.log("selecting item: " + message['selector']);
 				setHighlighted(message['selector']);
 				break;
-			case 'reload':
+			case 'reload_page':
 				location.reload();
 				break;
 			case 'goto':
 				window.location.href = message['location'];
+				break;
+			case 'edit':
+				change = document.querySelector('[data-brackets-id="' + message['element'] + '"]');
+				change.innerHTML = message['content'];
+				break;
+			case 'eval':
+				eval(message['js'];);
 				break;
 		}
 	};
