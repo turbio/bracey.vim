@@ -2,7 +2,8 @@
 	var webSocket = new WebSocket('ws://127.0.0.1:1337');
 	webSocket.onopen = function(event){};
 	webSocket.onclose = function(event){};
-	socket.onerror = function(event){};
+	webSocket.onerror = function(event){};
+
 	webSocket.onmessage = function(event){
 		message = JSON.parse(event.data);
 		switch(message['command']){
