@@ -9,6 +9,7 @@ endfunction
 
 function! brackets#setupHandlers()
 	au CursorMoved * call brackets#moveCursor()
+	au CursorMovedI * call brackets#moveCursor()
 endfunction
 
 function! brackets#stop()
@@ -17,7 +18,7 @@ function! brackets#stop()
 endfunction
 
 function! brackets#moveCursor()
-	call browserlink#sendCommand("test")
+	call browserlink#sendCommand('p' . line('.') . ':' . col('.'))
 endfunction
 
 python3 <<EOF
