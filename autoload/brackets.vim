@@ -1,19 +1,31 @@
 let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! brackets#start()
+	write
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
 	call system("node brackets.js > " . g:brackets_serverlog . " &")
 	execute 'cd -'
 	call brackets#setupHandlers()
+	call brackets#switchFile()
 endfunction
 
 function! brackets#setupHandlers()
-	autocmd CursorMoved,CursorMovedI,InsertChange html,js,css call brackets#moveCursor()
+	autocmd CursorMoved,CursorMovedI,InsertChange *.html,*.js,*.css call brackets#moveCursor()
+	autocmd BufEnter *.html,*.js,*.css call brackets#switchFile()
 endfunction
 
 function! brackets#stop()
 	"echom s:server_pid
 	"call system("node brackets.js > " . g:brackets_serverlog . " &")
+endfunction
+
+function! brackets#reload()
+	write
+	call brackets#sendCommand('r:'.expand('%'))
+endfunction
+
+function! brackets#switchFile()
+	call brackets#sendCommand('f:'.expand('%'))
 endfunction
 
 function! brackets#moveCursor()

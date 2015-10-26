@@ -23,3 +23,4 @@ let g:brackets_state = 0
 
 command! -nargs=0 BracketsStart call brackets#start()
 command! -nargs=0 BracketsStop  call brackets#stop()
+command! -nargs=0 BracketsReload call brackets#reload()
