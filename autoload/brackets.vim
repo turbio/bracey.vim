@@ -8,9 +8,7 @@ function! brackets#start()
 endfunction
 
 function! brackets#setupHandlers()
-	au CursorMoved * call brackets#moveCursor()
-	au CursorMovedI * call brackets#moveCursor()
-	au InsertChange * call brackets#moveCursor()
+	autocmd CursorMoved,CursorMovedI,InsertChange html,js,css call brackets#moveCursor()
 endfunction
 
 function! brackets#stop()
