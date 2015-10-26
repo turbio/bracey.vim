@@ -10,6 +10,7 @@ endfunction
 function! brackets#setupHandlers()
 	au CursorMoved * call brackets#moveCursor()
 	au CursorMovedI * call brackets#moveCursor()
+	au InsertChange * call brackets#moveCursor()
 endfunction
 
 function! brackets#stop()
@@ -18,19 +19,24 @@ function! brackets#stop()
 endfunction
 
 function! brackets#moveCursor()
-	call browserlink#sendCommand('p' . line('.') . ':' . col('.'))
+	call brackets#sendCommand('p:'.line('.').':'.col('.')."\nl:".getline('.'))
 endfunction
 
 python3 <<EOF
 import sys
 import requests
 import vim
+
+url = vim.eval("g:brackets_serverpath")
 EOF
 
-function! browserlink#sendCommand(data)
+function! brackets#sendCommand(data)
 python3 <<EOF
-requests.post(
-	vim.eval("g:brackets_serverpath"),
-	data=vim.eval("a:data"))
+try:
+	requests.post(
+		url,
+		data=vim.eval("a:data"))
+except:
+	pass #for now
 EOF
 endfunction
