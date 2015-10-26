@@ -55,8 +55,8 @@ var server = http.createServer(function(request, response){
 			});
 
 			request.on('end', function(){
-				console.log(JSON.parse(postData));
-				broadcast(postData);
+				console.log(postData);
+				//broadcast(postData);
 			});
 
 			response.writeHead(200);
