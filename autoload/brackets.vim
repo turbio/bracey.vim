@@ -6,12 +6,12 @@ function! brackets#start()
 	call system("node brackets.js > " . g:brackets_serverlog . " &")
 	execute 'cd -'
 	call brackets#setupHandlers()
-	call brackets#switchFile()
+	call brackets#setFile()
 endfunction
 
 function! brackets#setupHandlers()
-	autocmd CursorMoved,CursorMovedI,InsertChange *.html,*.js,*.css call brackets#moveCursor()
-	autocmd BufEnter *.html,*.js,*.css call brackets#switchFile()
+	autocmd CursorMoved,CursorMovedI,InsertChange *.html,*.js,*.css call brackets#setCursor()
+	autocmd BufEnter *.html,*.js,*.css call brackets#setFile()
 endfunction
 
 function! brackets#stop()
@@ -24,11 +24,11 @@ function! brackets#reload()
 	call brackets#sendCommand('r:'.expand('%'))
 endfunction
 
-function! brackets#switchFile()
+function! brackets#setFile()
 	call brackets#sendCommand('f:'.expand('%'))
 endfunction
 
-function! brackets#moveCursor()
+function! brackets#setCursor()
 	call brackets#sendCommand('p:'.line('.').':'.col('.')."\nl:".getline('.'))
 endfunction
 
