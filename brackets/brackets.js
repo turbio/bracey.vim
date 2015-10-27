@@ -20,9 +20,12 @@ var port = 1337;
 var webRoot = "/home/mason/git/lentils-as-a-service/mockups/";
 var defaultFile = "index.html";
 var currentFile = "index.html";
+var currentFileX = 0;
+var currentFileY = 0;
 
 //TODO this is also temporary
 var currentFileSrc = "";
+var currentEditorSrc = "";
 var injectedJs = "";
 var injectedCss = "";
 
@@ -32,6 +35,7 @@ fs.readFile(path.resolve("frontend.css"), function(err, data){
 		injectedJs = data.toString();
 		fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
 			currentFileSrc = data.toString();
+			currentEditorSrc = currentFileSrc;
 			$ = cheerio.load(currentFileSrc);
 			$("*").each(function(i, elem){
 				$(this).attr('data-brackets-id', i);
@@ -55,8 +59,31 @@ var server = http.createServer(function(request, response){
 			});
 
 			request.on('end', function(){
-				console.log(postData);
-				//broadcast(postData);
+				postCommands = postData.split('\n');
+				for(i = 0; i < postCommands.length; i++){
+					message = postCommands[i];
+					if(message.length > 2){
+						command = message[0];
+						content = message.substring(2);
+						switch(command){
+							case 'p':
+								cords = content.split(':');
+								currentFileX = cords[1];
+								currentFileY = cords[0];
+								break;
+							case 'l':
+								lines = currentEditorSrc.split('\n');
+								if(lines[currentFileY - 1] != content){
+									lines[currentFileY - 1] = content
+									currentEditorSrc = lines.join('\n');
+									console.log('not the same');
+								}
+								break;
+						}
+					}
+				}
+				console.log(currentFileX);
+				console.log(currentFileY);
 			});
 
 			response.writeHead(200);
