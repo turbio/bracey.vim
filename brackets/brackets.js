@@ -9,7 +9,6 @@ console.log("version: " + VERSION);
 var websocket = require("websocket");
 var http = require("http");
 var fs = require("fs");
-var path = require("path");
 var mime = require("mime");
 var cheerio = require("cheerio");
 
@@ -93,7 +92,7 @@ var server = http.createServer(function(request, response){
 		response.writeHead(200);
 		response.end(currentFileSrc);
 	}else{
-		fs.readFile(path.resolve(webRoot + request.url), function(err, data){
+		fs.readFile(webRoot + request.url, function(err, data){
 			if(err){
 				response.writeHead(404);
 				response.end(err.toString());
