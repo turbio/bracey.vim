@@ -64,14 +64,14 @@ var server = http.createServer(function(request, response){
 								currentFileX = cords[1] - 1;
 								currentFileY = cords[0] - 1;
 								break;
-							case 'l':
-								lines = currentEditorSrc.split('\n');
-								if(lines[currentFileY] != content){
-									lines[currentFileY] = content
-									currentEditorSrc = lines.join('\n');
-									console.log('not the same');
-								}
-								break;
+							//case 'l':
+								//lines = currentEditorSrc.split('\n');
+								//if(lines[currentFileY] != content){
+									//lines[currentFileY] = content
+									//currentEditorSrc = lines.join('\n');
+									//console.log('not the same');
+								//}
+								//break;
 						}
 					}
 				}
@@ -130,4 +130,10 @@ function broadcast(message){
 	for(var i = 0; i < connections.length; i++){
 		connections[i].sendUTF(message);
 	}
+}
+
+//returns an elements brackets-id by it's x and y position in the editors's
+//source
+function elementIdByPos(x, y){
+	return 0;
 }
