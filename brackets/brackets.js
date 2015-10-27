@@ -11,6 +11,7 @@ var http = require("http");
 var fs = require("fs");
 var mime = require("mime");
 var cheerio = require("cheerio");
+var domtosource = require('domtosource');
 
 var connections = [];
 var port = 1337;
@@ -23,15 +24,10 @@ var currentFileX = 0;
 var currentFileY = 0;
 
 //TODO this is also temporary
-var currentFileSrc = "";
-var currentEditorSrc = "";
-var injectedJs = "";
-var injectedCss = "";
-
-injectedCss = fs.readFileSync("frontend.css");
-injectedJs = fs.readFileSync("frontend.js");
-currentFileSrc = fs.readFileSync(webRoot + currentFile);
-currentEditorSrc = currentFileSrc;
+var injectedCss = fs.readFileSync("frontend.css", 'utf8');
+var injectedJs = fs.readFileSync("frontend.js", 'utf8');
+var currentFileSrc = fs.readFileSync(webRoot + currentFile, 'utf8');
+var currentEditorSrc = currentFileSrc;
 
 $ = cheerio.load(currentFileSrc);
 $("*").each(function(i, elem){
