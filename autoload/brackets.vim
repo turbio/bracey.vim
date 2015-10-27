@@ -12,11 +12,16 @@ endfunction
 function! brackets#setupHandlers()
 	autocmd CursorMoved,CursorMovedI,InsertChange *.html,*.js,*.css call brackets#setCursor()
 	autocmd BufEnter *.html,*.js,*.css call brackets#setFile()
+	autocmd BufWritePost *.js call brackets#evalFile()
 endfunction
 
 function! brackets#stop()
 	"echom s:server_pid
 	"call system("node brackets.js > " . g:brackets_serverlog . " &")
+endfunction
+
+function! brackets#evalFile()
+	call brackets#sendCommand('e:'.expand('%'))
 endfunction
 
 function! brackets#reload()
