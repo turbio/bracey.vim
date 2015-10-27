@@ -29,13 +29,16 @@ var injectedJs = fs.readFileSync("frontend.js", 'utf8');
 var currentFileSrc = fs.readFileSync(webRoot + currentFile, 'utf8');
 var currentEditorSrc = currentFileSrc;
 
-$ = cheerio.load(currentFileSrc);
-$("*").each(function(i, elem){
-	$(this).attr('data-brackets-id', i);
-});
-$("head").append('<script>' + injectedJs + '</script>');
-$("head").append('<style>' + injectedCss + '</style>');
-currentFileSrc = $.html();
+//$ = cheerio.load(currentFileSrc);
+//$("*").each(function(i, elem){
+	//$(this).attr('data-brackets-id', i);
+//});
+//$("head").append('<script>' + injectedJs + '</script>');
+//$("head").append('<style>' + injectedCss + '</style>');
+//currentFileSrc = $.html();
+
+//dts = domtosource.find(currentFileSrc, "*");
+//console.log(dts);
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
@@ -58,13 +61,13 @@ var server = http.createServer(function(request, response){
 						switch(command){
 							case 'p':
 								cords = content.split(':');
-								currentFileX = cords[1];
-								currentFileY = cords[0];
+								currentFileX = cords[1] - 1;
+								currentFileY = cords[0] - 1;
 								break;
 							case 'l':
 								lines = currentEditorSrc.split('\n');
-								if(lines[currentFileY - 1] != content){
-									lines[currentFileY - 1] = content
+								if(lines[currentFileY] != content){
+									lines[currentFileY] = content
 									currentEditorSrc = lines.join('\n');
 									console.log('not the same');
 								}
