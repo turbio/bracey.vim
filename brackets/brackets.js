@@ -29,23 +29,18 @@ var currentEditorSrc = "";
 var injectedJs = "";
 var injectedCss = "";
 
-fs.readFile(path.resolve("frontend.css"), function(err, data){
-	injectedCss = data.toString();
-	fs.readFile(path.resolve("frontend.js"), function(err, data){
-		injectedJs = data.toString();
-		fs.readFile(path.resolve(webRoot + currentFile), function(err, data){
-			currentFileSrc = data.toString();
-			currentEditorSrc = currentFileSrc;
-			$ = cheerio.load(currentFileSrc);
-			$("*").each(function(i, elem){
-				$(this).attr('data-brackets-id', i);
-			});
-			$("head").append('<script>' + injectedJs + '</script>');
-			$("head").append('<style>' + injectedCss + '</style>');
-			currentFileSrc = $.html();
-		});
-	});
+injectedCss = fs.readFileSync("frontend.css");
+injectedJs = fs.readFileSync("frontend.js");
+currentFileSrc = fs.readFileSync(webRoot + currentFile);
+currentEditorSrc = currentFileSrc;
+
+$ = cheerio.load(currentFileSrc);
+$("*").each(function(i, elem){
+	$(this).attr('data-brackets-id', i);
 });
+$("head").append('<script>' + injectedJs + '</script>');
+$("head").append('<style>' + injectedCss + '</style>');
+currentFileSrc = $.html();
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
