@@ -27,10 +27,9 @@ var currentFileY = 0;
 var injectedCss = fs.readFileSync("frontend.css", 'utf8');
 var injectedJs = fs.readFileSync("frontend.js", 'utf8');
 
-var webSrc = fs.readFileSync(webRoot + currentFile, 'utf8');
-var vimSrc = webSrc;
+var vimSrc = fs.readFileSync(webRoot + currentFile, 'utf8');;
 
-webSrc = cheerio.load(webSrc);
+var webSrc = cheerio.load(vimSrc);
 webSrc("*").each(function(i, elem){
 	webSrc(this).attr('data-brackets-id', i);
 });
