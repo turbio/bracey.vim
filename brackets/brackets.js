@@ -26,19 +26,16 @@ var currentFileY = 0;
 //TODO this is also temporary
 var injectedCss = fs.readFileSync("frontend.css", 'utf8');
 var injectedJs = fs.readFileSync("frontend.js", 'utf8');
-var currentFileSrc = fs.readFileSync(webRoot + currentFile, 'utf8');
-var currentEditorSrc = currentFileSrc;
 
-//$ = cheerio.load(currentFileSrc);
-//$("*").each(function(i, elem){
-	//$(this).attr('data-brackets-id', i);
-//});
-//$("head").append('<script>' + injectedJs + '</script>');
-//$("head").append('<style>' + injectedCss + '</style>');
-//currentFileSrc = $.html();
+var webSrc = fs.readFileSync(webRoot + currentFile, 'utf8');
+var vimSrc = webSrc;
 
-//dts = domtosource.find(currentFileSrc, "*");
-//console.log(dts);
+webSrc = cheerio.load(webSrc);
+webSrc("*").each(function(i, elem){
+	webSrc(this).attr('data-brackets-id', i);
+});
+webSrc("head").append('<script>' + injectedJs + '</script>');
+webSrc("head").append('<style>' + injectedCss + '</style>');
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
@@ -89,7 +86,7 @@ var server = http.createServer(function(request, response){
 		}
 	}else if(request.url == "/" + currentFile){
 		response.writeHead(200);
-		response.end(currentFileSrc);
+		response.end(webSrc.html());
 	}else{
 		fs.readFile(webRoot + request.url, function(err, data){
 			if(err){
