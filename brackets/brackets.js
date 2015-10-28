@@ -59,6 +59,10 @@ var server = http.createServer(function(request, response){
 								cords = content.split(':');
 								currentFileX = cords[1] - 1;
 								currentFileY = cords[0] - 1;
+								broadcast({
+									'command': 'select',
+									'selector': '[data-brackets-id=\"' + elementIdByPos(currentFileX, currentFileY) + '\"]'
+								});
 								break;
 							//case 'l':
 								//lines = currentEditorSrc.split('\n');
@@ -71,8 +75,6 @@ var server = http.createServer(function(request, response){
 						}
 					}
 				}
-				console.log(currentFileX);
-				console.log(currentFileY);
 			});
 
 			response.writeHead(200);
@@ -122,14 +124,18 @@ webSocketServer.on('request', function(request){
 	});
 });
 
-function broadcast(message){
+function broadcast(command){
 	for(var i = 0; i < connections.length; i++){
-		connections[i].sendUTF(message);
+		connections[i].sendUTF(JSON.stringify(command));
 	}
 }
 
 //returns an elements brackets-id by it's x and y position in the editors's
 //source
 function elementIdByPos(x, y){
-	return 0;
+	//var webSrc = cheerio.load(vimSrc);
+	//webSrc("*").each(function(i, elem){
+		//webSrc(this).attr('data-brackets-id', i);
+	//});
+	return y;
 }

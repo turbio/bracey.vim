@@ -6,9 +6,9 @@
 
 	webSocket.onmessage = function(event){
 		message = JSON.parse(event.data);
+		console.log("recieved: " + message);
 		switch(message['command']){
 			case 'select':
-				console.log("selecting item: " + message['selector']);
 				setHighlighted(message['selector']);
 				break;
 			case 'reload_page':
