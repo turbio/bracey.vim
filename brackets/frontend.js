@@ -1,3 +1,6 @@
+/*
+ * this is what will be injected into whatever page is being viewed
+ */
 (function(){
 	var webSocket = new WebSocket('ws://127.0.0.1:1337');
 	webSocket.onopen = function(event){};
@@ -6,7 +9,7 @@
 
 	webSocket.onmessage = function(event){
 		message = JSON.parse(event.data);
-		console.log("recieved: " + message);
+		console.log("recieved: " + event.data);
 		switch(message['command']){
 			case 'select':
 				setHighlighted(message['selector']);

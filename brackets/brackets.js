@@ -17,7 +17,7 @@ var connections = [];
 var port = 1337;
 
 //TODO: this is all temporary
-var webRoot = "/home/mason/git/lentils-as-a-service/mockups/";
+var webRoot = "/home/mason/git/lentils-as-a-service/mockups";
 var defaultFile = "index.html";
 var currentFile = "index.html";
 var currentFileX = 0;
@@ -27,14 +27,8 @@ var currentFileY = 0;
 var injectedCss = fs.readFileSync("frontend.css", 'utf8');
 var injectedJs = fs.readFileSync("frontend.js", 'utf8');
 
-var vimSrc = fs.readFileSync(webRoot + currentFile, 'utf8');;
-
-var webSrc = cheerio.load(vimSrc);
-webSrc("*").each(function(i, elem){
-	webSrc(this).attr('data-brackets-id', i);
-});
-webSrc("head").append('<script>' + injectedJs + '</script>');
-webSrc("head").append('<style>' + injectedCss + '</style>');
+var vimSrc = fs.readFileSync(webRoot + '/' + currentFile, 'utf8');
+var webSrc = parseVimSource(vimSrc);
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
@@ -132,10 +126,80 @@ function broadcast(command){
 
 //returns an elements brackets-id by it's x and y position in the editors's
 //source
-function elementIdByPos(x, y){
-	//var webSrc = cheerio.load(vimSrc);
-	//webSrc("*").each(function(i, elem){
-		//webSrc(this).attr('data-brackets-id', i);
-	//});
-	return y;
+function elementIdByPos(column, line){
+	var $ = cheerio.load(vimSrc);
+	elementFromPos(column, line, $.root());
+	return line;
+}
+
+function elementFromPos(column, line, root, l, curColumn, curLine){
+	if(typeof(l) === 'undefined'){
+		l = 0;
+	}
+	if(typeof(curColumn) === 'undefined'){
+		curColumn = 0;
+	}
+
+	if(typeof(curLine) === 'undefined'){
+		curLine = 0;
+	}
+
+
+	if(!('type' in root)){
+		root = root[0];
+	}
+
+	content = '';
+
+	if(root['type'] == 'text'){
+		console.log(p(l) + 'tex: ' + root['data'].replace('\n', '\\n').replace('\t', '\\t'));
+		content = root['data'];
+	}else{
+		console.log(p(l) + 'tag: ' + root['name']);
+		content = cheerio(root).html();
+	}
+
+	height = content.split('\n').length;
+	width = Math.max.apply(Math, content.split('\n').map(function(item){
+		return item.length;
+	}));
+	console.log(p(l) + 'dim: ' + width + 'x' + height);
+	if(curLine
+
+	if('children' in root){
+		root['children'].forEach(function(item){
+			elementFromPos(line, column, item, l + 1);
+		});
+	}
+}
+
+function p(n){
+	s = "";
+	while(n > 0){
+		n--;
+		s += "│";
+	}
+	return s;
+}
+
+function elementFromId(id){
+	return null;
+}
+
+function idFromElement(element){
+	return null;
+}
+
+//parse vim source into web source (and return that)
+function parseVimSource(src){
+	var $ = cheerio.load(vimSrc);
+
+	$("*").each(function(i, elem){
+		$(this).attr('data-brackets-id', i);
+	});
+
+	$("head").append('<script>' + injectedJs + '</script>');
+	$("head").append('<style>' + injectedCss + '</style>');
+
+	return $;
 }
