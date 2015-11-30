@@ -10,8 +10,7 @@ var websocket = require("websocket");
 var http = require("http");
 var fs = require("fs");
 var mime = require("mime");
-var cheerio = require("cheerio");
-var domtosource = require('domtosource');
+var htmlfile = require("./htmlfile.js");
 
 var connections = [];
 var port = 1337;
@@ -19,16 +18,10 @@ var port = 1337;
 //TODO: this is all temporary
 var webRoot = "/home/mason/git/lentils-as-a-service/mockups";
 var defaultFile = "index.html";
-var currentFile = "index.html";
 var currentFileX = 0;
 var currentFileY = 0;
 
-//TODO this is also temporary
-var injectedCss = fs.readFileSync("frontend.css", 'utf8');
-var injectedJs = fs.readFileSync("frontend.js", 'utf8');
-
-var vimSrc = fs.readFileSync(webRoot + '/' + currentFile, 'utf8');
-var webSrc = parseVimSource(vimSrc);
+var currentFile = new htmlfile(webRoot + '/index.html');
 
 var server = http.createServer(function(request, response){
 	console.log("requested: " + request.url);
@@ -55,7 +48,11 @@ var server = http.createServer(function(request, response){
 								currentFileY = cords[0] - 1;
 								broadcast({
 									'command': 'select',
-									'selector': '[data-brackets-id=\"' + elementFromPos(currentFileX, currentFileY) + '\"]'
+									'selector': '[data-brackets-id=\"'
+										+ currentFile.tagNumFromPos(
+											currentFileX,
+											currentFileY)
+										+ '\"]'
 								});
 								break;
 							//case 'l':
@@ -79,9 +76,9 @@ var server = http.createServer(function(request, response){
 			});
 			response.end();
 		}
-	}else if(request.url == "/" + currentFile){
+	}else if(webRoot + request.url == currentFile.path){
 		response.writeHead(200);
-		response.end(webSrc.html());
+		response.end(currentFile.webSrc());
 	}else{
 		fs.readFile(webRoot + request.url, function(err, data){
 			if(err){
@@ -122,100 +119,4 @@ function broadcast(command){
 	for(var i = 0; i < connections.length; i++){
 		connections[i].sendUTF(JSON.stringify(command));
 	}
-}
-
-//returns an elements brackets-id by it's x and y position in the editors's
-//source
-//function elementIdByPos(column, line){
-	//var $ = cheerio.load(vimSrc);
-	//elementFromPos(column, line, $.root());
-	//return line;
-//}
-
-function elementFromPos(column, line){
-	console.log(findParentTag(column, line));
-}
-
-function findParentTag(column, line){
-	vimSrcLines = vimSrc.split('\n');
-
-	curLine = line;
-	curColumn = column;
-
-	tagText = "";
-	inTag = false;
-	moveBack = true;
-
-	//go backwards until a tag is found or at the beginning of the current tag
-	tagFound = false;
-	while(!tagFound){
-		curChar = vimSrcLines[curLine][curColumn];
-		switch(curChar){
-			case '<':
-				if(inTag){
-					tagFound = true;
-				}else{
-					moveBack = false;
-					inTag = true;
-				}
-				break;
-			case '>':
-				if(inTag){
-					//tagText = '';
-					moveBack = true;
-				}
-
-				inTag = true;
-
-				break;
-		}
-
-		if(inTag && moveBack){
-			tagText = curChar + tagText;
-		}
-
-		if(moveBack){
-			if(curColumn >= 0){
-				curColumn--;
-			}else if(curLine >= 0){
-				curLine--;
-				curColumn = vimSrcLines[curLine].length;
-			}else{
-				return null;
-			}
-		}else{
-			if(curColumn < vimSrcLines[curLine].length - 1){
-				curColumn++;
-			}else if(curLine < vimSrcLines.length - 1){
-				curLine++;
-				curColumn = 0;
-			}else{
-				return null;
-			}
-		}
-	}
-
-	return tagText;
-}
-
-function elementFromId(id){
-	return null;
-}
-
-function idFromElement(element){
-	return null;
-}
-
-//parse vim source into web source (and return that)
-function parseVimSource(src){
-	var $ = cheerio.load(vimSrc);
-
-	$("*").each(function(i, elem){
-		$(this).attr('data-brackets-id', i);
-	});
-
-	$("head").append('<script>' + injectedJs + '</script>');
-	$("head").append('<style>' + injectedCss + '</style>');
-
-	return $;
 }
