@@ -85,7 +85,9 @@ var server = http.createServer(function(request, response){
 				response.writeHead(404);
 				response.end(err.toString());
 			}else{
-				response.writeHead(200, {"Content-Type": mime.lookup(request.url)});
+				response.writeHead(200, {
+					"Content-Type": mime.lookup(request.url)
+				});
 				response.end(data, "binary");
 			}
 		});
