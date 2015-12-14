@@ -153,10 +153,13 @@ HtmlFile.prototype.createElementPositions = function(){
 			if(state == undefined){
 				state = {
 					line: 0,
-					column: 0,
+					column: 0
 				};
 			}
 
+			//parse the tag after the current cursor line and column
+			//if it's null (because there is no tag after the cursor) return
+			//null
 			if((state.tag = this.parseTag(state.line, state.column)) == null){
 				return null;
 			}
@@ -166,39 +169,52 @@ HtmlFile.prototype.createElementPositions = function(){
 				return state.tag;
 			}
 
-			//otherwise, find the next tag starting from the last tag's
-			//ending point
-			nextTag = this.parseNext({
-				line: state.tag.end[0],
-				column: state.tag.end[1]
-			});
+			//otherwise, continue finding the next tag after this tag until
+			//it's either a closing tag or null (there is no next tag)
+			//at which point, return
+			var lastTag = state.tag;
+			while(true){
+				var nextTag = this.parseNext({
+					line: lastTag.end[0],
+					column: lastTag.end[1]
+				});
 
-			//if there's no next tag, return this frame's tag
-			if(nextTag == null){
-				return state.tag;
-			}
-
-			//if the next tag is closing
-			if(nextTag.closing){
-				//see if it closes this tag
-				if(state.tag.name == nextTag.name){
-					//and if so, change this tags end to where it's closing
-					//tag (the next tag) ends, and return this
-					state.tag.end = nextTag.end;
-					return state.tag;
-				}else{
-					//if the next tag is closing, but does not close this tag,
-					//this is (probably) a self closing tag
-					//state.tag.children.push(nextTag);
+				//if there's no next tag (it's null)
+				if(nextTag == null){
+					//and this tag is not closing (as determined earier),
+					//it must be selfclosing
+					state.tag.children = [];
 					state.tag.selfclosing = true;
-					nextTag.children.push(state.tag);
-					return nextTag;
+					return state.tag;
 				}
-			}else{
-				state.tag.children.push(nextTag);
-			}
 
-			return state.tag;
+				//if the next tag is closing
+				if(nextTag.closing){
+					//see if it closes this tag
+					if(state.tag.name == nextTag.name){
+						//and if so, change this tags end to where it's closing
+						//tag (the next tag) ends
+						state.tag.end = nextTag.end;
+						state.tag.children = state.tag.children.concat(nextTag.children);
+						return state.tag;
+					}else{
+						//if the next tag is closing, but does not close this tag,
+						//this is  a self closing tag
+						state.tag.selfclosing = true;
+						state.tag.children = [];
+						return state.tag;
+					}
+				}else{
+					//otherwise add the next tag to this tags children
+					state.tag.children.push(nextTag);
+
+					//set the next tag as the last tag
+					lastTag = nextTag
+
+					//and continue the loop looking for this tag's closing tag
+					//or the end of the file
+				}
+			}
 		},
 		tagName(tagStr){
 			return tagStr.match(/<\/?\s*([a-zA-Z0-9]+).*>/)[1];
@@ -206,10 +222,10 @@ HtmlFile.prototype.createElementPositions = function(){
 	}
 
 	//start parsing
-	console.time('parsing');
+	//console.time('parsing');
 	console.log(JSON.stringify(parser.parse(), null, 2));
 	//console.log(parser.parse());
-	console.timeEnd('parsing');
+	//console.timeEnd('parsing');
 }
 
 function cloneObject(obj){
