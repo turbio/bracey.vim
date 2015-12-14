@@ -138,6 +138,7 @@ HtmlFile.prototype.createElementPositions = function(){
 			//if we go to this point, it's (probably) a tag and thus
 			//we can (probably) safely create a tag object
 			var tag = {
+				index: this.index,
 				text: tagEnd.data,
 				name: this.tagName(tagEnd.data),
 				closing: tagEnd.data.startsWith('</'),
@@ -167,6 +168,12 @@ HtmlFile.prototype.createElementPositions = function(){
 			//if this tag closes, just return it
 			if(state.tag.closing){
 				return state.tag;
+			}
+
+			if(this.index == undefined){
+				this.index = 0;
+			}else{
+				this.index++;
 			}
 
 			//otherwise, continue finding the next tag after this tag until
@@ -199,7 +206,7 @@ HtmlFile.prototype.createElementPositions = function(){
 						return state.tag;
 					}else{
 						//if the next tag is closing, but does not close this tag,
-						//this is  a self closing tag
+						//this is a self closing tag
 						state.tag.selfclosing = true;
 						state.tag.children = [];
 						return state.tag;
@@ -221,21 +228,9 @@ HtmlFile.prototype.createElementPositions = function(){
 		}
 	}
 
-	//start parsing
-	//console.time('parsing');
-	console.log(JSON.stringify(parser.parse(), null, 2));
-	//console.log(parser.parse());
-	//console.timeEnd('parsing');
-}
-
-function cloneObject(obj){
-	var target = {};
-	for(var i in obj){
-		if(obj.hasOwnProperty(i)){
-			target[i] = obj[i];
-		}
-	}
-	return target;
+	//parse the current file
+	this.parsedHtml = parser.parse();
+	console.log(JSON.stringify(this.parsedHtml, null, 2));
 }
 
 module.exports = HtmlFile;
