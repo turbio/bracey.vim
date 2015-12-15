@@ -41,11 +41,23 @@ HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
 		//this element
 		//OR
 		//if on the start line of tag, must not be before the start column of the tag
-		//AND if on the end line of tag, must not be past the end column of the tag
+		//OR
+		//if on the end line of tag, must not be past the end column of the tag
+		//OR
+		//if on the same line as the tag begins and ends, the column must be
+		//between the start and end
 		//then we are inside this tag
 		if((line > elem.children[i].start[0] && line < elem.children[i].end[0])
-			|| ((line == elem.children[i].start[0] && column >= elem.children[i].start[1])
-				&& (line == elem.children[i].end[0] && column <= elem.children[i].end[1]))){
+				|| (line == elem.children[i].start[0]
+					&& line == elem.children[i].end[0]
+					&& column <= elem.children[i].end[1]
+					&& column >= elem.children[i].start[1])
+				|| (line == elem.children[i].start[0]
+					&& line != elem.children[i].end[0]
+					&& column >= elem.children[i].start[1])
+				|| (line == elem.children[i].end[0]
+					&& line != elem.children[i].start[0]
+					&& column <= elem.children[i].end[1])){
 			var child = this.tagNumFromPos(line, column, elem.children[i]);
 			if(child != null){
 				return child;
@@ -254,7 +266,6 @@ HtmlFile.prototype.createElementPositions = function(){
 
 	//parse the current file
 	this.parsedHtml = parser.parse();
-	//console.log(JSON.stringify(this.parsedHtml, null, 2));
 }
 
 module.exports = HtmlFile;
