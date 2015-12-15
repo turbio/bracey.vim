@@ -50,8 +50,8 @@ var server = http.createServer(function(request, response){
 									'command': 'select',
 									'selector': '[data-brackets-id=\"'
 										+ currentFile.tagNumFromPos(
-											currentFileX,
-											currentFileY)
+											currentFileY,
+											currentFileX).index
 										+ '\"]'
 								});
 								break;

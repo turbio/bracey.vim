@@ -24,18 +24,42 @@ HtmlFile.prototype.webSrc = function(){
 	if(this.webParsed != undefined){
 		return this.webParsed.html();
 	}else{
-		throw 'source not parsed';
+		throw 'source not yet parsed to web';
 	}
 };
 
-HtmlFile.prototype.tagNumFromPos = function(column, line){
-	throw 'not implemented';
+HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
+	if(this.parsedHtml == undefined){
+		throw 'tag positions not yet parsed';
+	}
+	if(elem == undefined){
+		elem = {name: 'none', children: this.parsedHtml};
+	}
+
+	for(i = 0; i < elem.children.length; i++){
+		//if between the lines that the start and end tags are on, we are in
+		//this element
+		//OR
+		//if on the start line of tag, must not be before the start column of the tag
+		//AND if on the end line of tag, must not be past the end column of the tag
+		//then we are inside this tag
+		if((line > elem.children[i].start[0] && line < elem.children[i].end[0])
+			|| ((line == elem.children[i].start[0] && column >= elem.children[i].start[1])
+				&& (line == elem.children[i].end[0] && column <= elem.children[i].end[1]))){
+			var child = this.tagNumFromPos(line, column, elem.children[i]);
+			if(child != null){
+				return child;
+			}
+		}
+	}
+
+	return elem;
 }
 
 //parse vim source into web source
 HtmlFile.prototype.parseToWeb = function(){
 	var webParsed = cheerio.load(this.rawSource, {
-		normalizeWhitespace: true	//just cause
+		normalizeWhitespace: false	//just cause
 	});
 
 	webParsed("*").each(function(i, elem){
@@ -230,7 +254,7 @@ HtmlFile.prototype.createElementPositions = function(){
 
 	//parse the current file
 	this.parsedHtml = parser.parse();
-	console.log(JSON.stringify(this.parsedHtml, null, 2));
+	//console.log(JSON.stringify(this.parsedHtml, null, 2));
 }
 
 module.exports = HtmlFile;
