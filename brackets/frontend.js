@@ -33,7 +33,16 @@
 		}
 	};
 
+	var lastSelection = '';
+
 	var  setHighlighted = function(selector){
+		//if the same selection is sent multiple times, no need to repeat it
+		if(lastSelection == selector){
+			return;
+		}else{
+			lastSelection = selector;
+		}
+
 		existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
 		for(var i = 0, len = existingSelectors.length; i < len; i++){
 			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
