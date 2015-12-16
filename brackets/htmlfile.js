@@ -153,6 +153,12 @@ HtmlFile.prototype.createElementPositions = function(){
 				});
 			}
 
+			//give all the tags an index
+			tags.forEach(this.giveIndexes, {
+				giveIndexes: this.giveIndexes,
+				index: 0
+			});
+
 			return tags;
 		},
 		parseTag: function(line, column){
@@ -174,7 +180,6 @@ HtmlFile.prototype.createElementPositions = function(){
 			//if we go to this point, it's (probably) a tag and thus
 			//we can (probably) safely create a tag object
 			var tag = {
-				index: this.index,
 				text: tagEnd.data,
 				name: this.tagName(tagEnd.data),
 				closing: tagEnd.data.startsWith('</'),
@@ -190,7 +195,7 @@ HtmlFile.prototype.createElementPositions = function(){
 			if(state == undefined){
 				state = {
 					line: 0,
-					column: 0
+					column: 0,
 				};
 			}
 
@@ -204,12 +209,6 @@ HtmlFile.prototype.createElementPositions = function(){
 			//if this tag closes, just return it
 			if(state.tag.closing){
 				return state.tag;
-			}
-
-			if(this.index == undefined){
-				this.index = 0;
-			}else{
-				this.index++;
 			}
 
 			//otherwise, continue finding the next tag after this tag until
@@ -259,8 +258,13 @@ HtmlFile.prototype.createElementPositions = function(){
 				}
 			}
 		},
-		tagName(tagStr){
+		tagName: function(tagStr){
 			return tagStr.match(/<\/?\s*([a-zA-Z0-9]+).*>/)[1];
+		},
+		giveIndexes: function(elem, index, array){
+			elem.index = this.index;
+			this.index++;
+			elem.children.forEach(this.giveIndexes, this);
 		}
 	}
 
