@@ -35,35 +35,28 @@ var server = http.createServer(function(request, response){
 			});
 
 			request.on('end', function(){
-				postCommands = postData.split('\n');
-				for(i = 0; i < postCommands.length; i++){
-					message = postCommands[i];
-					if(message.length > 2){
-						command = message[0];
-						content = message.substring(2);
-						switch(command){
-							case 'p':
-								cords = content.split(':');
-								currentFileX = cords[1] - 1;
-								currentFileY = cords[0] - 1;
-								broadcast({
-									'command': 'select',
-									'selector': '[data-brackets-id=\"'
-										+ currentFile.tagNumFromPos(
-											currentFileY,
-											currentFileX).index
-										+ '\"]'
-								});
-								break;
-							//case 'l':
-								//lines = currentEditorSrc.split('\n');
-								//if(lines[currentFileY] != content){
-									//lines[currentFileY] = content
-									//currentEditorSrc = lines.join('\n');
-									//console.log('not the same');
-								//}
-								//break;
-						}
+				if(postData.length > 2){
+					command = postData[0];
+					content = postData.substring(2);
+					console.log(postData);
+					switch(command){
+						//cursor position command
+						case 'p':
+							cords = content.split(':');
+							currentFileX = cords[1] - 1;
+							currentFileY = cords[0] - 1;
+							broadcast({
+								'command': 'select',
+								'selector': '[data-brackets-id=\"'
+									+ currentFile.tagNumFromPos(
+										currentFileY,
+										currentFileX).index
+									+ '\"]'
+							});
+							break;
+						case 'b':
+							//asdf
+							break;
 					}
 				}
 			});
