@@ -55,7 +55,7 @@ var server = http.createServer(function(request, response){
 							});
 							break;
 						case 'b':
-							//asdf
+							currentFile.setContent(content);
 							break;
 					}
 				}
