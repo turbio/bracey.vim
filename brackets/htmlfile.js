@@ -28,7 +28,7 @@ HtmlFile.prototype.setContent = function(str, callback){
 
 HtmlFile.prototype.parse = function(){
 	this.parseToWeb();
-	this.createElementPositions();
+	this.parsedHtml = new htmlparser(this.rawSource).parse();
 };
 
 HtmlFile.prototype.webSrc = function(){
@@ -93,14 +93,6 @@ HtmlFile.prototype.parseToWeb = function(){
 	webParsed("head").append('<style>' + injectedCss + '</style>');
 
 	this.webParsed = webParsed;
-}
-
-//make a list of elementNumbers and their corresponding start and end line
-//this makes it much easier to get an elementNumber from the current
-//cursor positions in the future
-HtmlFile.prototype.createElementPositions = function(){
-	//parse the current file
-	this.parsedHtml = new htmlparser(this.rawSource).parse();
 }
 
 module.exports = HtmlFile;
