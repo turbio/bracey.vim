@@ -15,6 +15,16 @@ function HtmlFile(path){
 	}
 }
 
+//takes a string which will be the new content
+//parses said string
+//compares the parsed string with the current contents
+//calls the callback with a list of differences between the new contents and current
+//or, if there are no differences, doesn't call it
+//changes this files contents to the new contents
+HtmlFile.prototype.setContent = function(str, callback){
+	throw 'not implemented';
+};
+
 HtmlFile.prototype.parse = function(){
 	this.parseToWeb();
 	this.createElementPositions();
