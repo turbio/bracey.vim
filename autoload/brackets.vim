@@ -8,13 +8,14 @@ function! brackets#start()
 		write
 		call brackets#setFile()
 	catch
-		call brackets#sendContents()
+		call brackets#sendCurrentBuffer()
 	endtry
 	call brackets#setupHandlers()
 endfunction
 
 function! brackets#setupHandlers()
-	autocmd CursorMoved,CursorMovedI,InsertChange *.html,*.js,*.css call brackets#setCursor()
+	autocmd CursorMoved,CursorMovedI *.html,*.js,*.css call brackets#setCursor()
+	autocmd TextChanged,TextChangedI * call brackets#bufferChange()
 	autocmd BufEnter *.html,*.js,*.css call brackets#setFile()
 	autocmd BufWritePost *.js call brackets#evalFile()
 endfunction
@@ -24,8 +25,8 @@ function! brackets#stop()
 	"call system("node brackets.js > " . g:brackets_serverlog . " &")
 endfunction
 
-function! brackets#sendContents()
-	call brackets#sendCommand('c:'.join(getline(1, '$'), "\n"))
+function! brackets#sendCurrentBuffer()
+	call brackets#sendCommand('b:'.join(getline(1, '$'), "\n"))
 endfunction
 
 function! brackets#evalFile()
@@ -41,8 +42,16 @@ function! brackets#setFile()
 	call brackets#sendCommand('f:'.expand('%'))
 endfunction
 
+function! brackets#bufferChange()
+	"one day... this will be better, but for now... just send the whole buffer
+	"every time there is a single change
+	"this ends up sending WAY to much (like 1Mb/s according to ifconfig) over
+	"the internal ip stack and also probably lags vim a lot if requests aren't async call
+	brackets#sendCurrentBuffer()
+endfunction
+
 function! brackets#setCursor()
-	call brackets#sendCommand('p:'.line('.').':'.col('.')."\nl:".getline('.'))
+	call brackets#sendCommand('p:'.line('.').':'.col('.'))
 endfunction
 
 python3 <<EOF
@@ -51,15 +60,18 @@ import requests
 import vim
 
 url = vim.eval("g:brackets_serverpath")
+
+def send(msg):
+	try:
+		requests.post(
+			url,
+			data=msg)
+	except:
+		pass #for now
 EOF
 
-function! brackets#sendCommand(data)
+function! brackets#sendCommand(msg)
 python3 <<EOF
-try:
-	requests.post(
-		url,
-		data=vim.eval("a:data"))
-except:
-	pass #for now
+send(vim.eval("a:msg"))
 EOF
 endfunction
