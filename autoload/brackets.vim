@@ -47,7 +47,7 @@ function! brackets#bufferChange()
 	"every time there is a single change
 	"this ends up sending WAY to much (like 1Mb/s according to ifconfig) over
 	"the internal ip stack and also probably lags vim a lot if requests aren't async call
-	brackets#sendCurrentBuffer()
+	call brackets#sendCurrentBuffer()
 endfunction
 
 function! brackets#setCursor()
