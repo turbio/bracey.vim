@@ -1,3 +1,7 @@
+//all this does is just take in some html as a string and parse it into a json
+//object.
+//yeah... there are probably quite a few existing packages that will do this but
+//i need some specific tag information that is not always supplied
 function HtmlParser(source){
 	this.lines = source.split('\n');
 	this.maxLine = this.lines.length;
@@ -172,6 +176,10 @@ HtmlParser.prototype.parseNext = function(state){
 
 HtmlParser.prototype.tagName = function(tagStr){
 	return tagStr.match(/<\/?\s*([a-zA-Z0-9]+).*>/)[1];
+}
+
+HtmlParser.prototype.tagAttrib = function(tagStr){
+	throw 'not implemented';
 }
 
 HtmlParser.prototype.giveIndexes = function(elem, index, array){

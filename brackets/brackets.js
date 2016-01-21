@@ -16,7 +16,7 @@ var connections = [];
 var port = 1337;
 
 //TODO: this is all temporary
-var webRoot = "/home/mason/git/lentils-as-a-service/mockups";
+var webRoot = "./test";
 var defaultFile = "index.html";
 var currentFileX = 0;
 var currentFileY = 0;
@@ -24,8 +24,6 @@ var currentFileY = 0;
 var currentFile = new htmlfile(webRoot + '/index.html');
 
 var server = http.createServer(function(request, response){
-	console.log("requested: " + request.url);
-
 	if(request.url == "/"){
 		if(request.method == "POST"){
 			var postData = '';
@@ -38,7 +36,6 @@ var server = http.createServer(function(request, response){
 				if(postData.length > 2){
 					command = postData[0];
 					content = postData.substring(2);
-					console.log(postData);
 					switch(command){
 						//cursor position command
 						case 'p':

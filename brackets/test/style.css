@@ -1,0 +1,55 @@
+body{
+	color: #333;
+	font-family: sans-serif;
+	max-width: 50%;
+	min-width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+hr{
+	border: none;
+	height: 1px;
+	background: #333;
+}
+td{
+	border-color: #333;
+	border-style: solid;
+	border-width: 2px;
+	padding: 5px;
+}
+tr:nth-child(even){
+	background: #eee;
+}
+div{
+	background: #eee;
+	margin: 1em;
+	padding: 1em;
+}
+.classy{
+	background: #B2FF9E;
+}
+#identifiable{
+	background: #FFCD82;
+}
+#relative{
+	position: relative;
+	left: 50%;
+	width: 10em;
+	background: #A0C9FB;
+}
+#fixed{
+	position: fixed;
+	background: #FF8AFF;
+	bottom: 0;
+	right: 0;
+}
+#absolute{
+	position: absolute;
+	right: 0;
+	top: 50%;
+	background: #FF9E9E;
+}
+.floaty{
+	float: left;
+	background: #FFFF87;
+}

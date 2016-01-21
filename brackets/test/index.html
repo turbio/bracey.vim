@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!-- heres a commend containing just some regular text -->
+
+<!-- and now one with html: -->
+<!--<this><is><a><test>-->
+<html>
+<head>
+	<title>this is a test</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<style type="text/css">
+		body::after{
+			content: "looks like internal css is working just fine";
+		}
+		.internal{
+			background: #888;
+			color: white;
+		}
+		.internal+.first{
+			text-align: left;
+		}
+		.internal+.second{
+			text-align: right;
+		}
+	</style>
+</head>
+<body>
+	<!-- everything in the script tag should be ignored, even if it looks JUST like html -->
+	<script>
+		<this>
+		<is>
+		<some>
+			<valid></valid>
+			<looking><html></html></looking>
+		</some>
+		</this>
+		<!-- but it really shouldn't be parsed -->
+		//no matter what's in it </script>
+		at this point tho... you're kinda pushing it <!--
+		even vim fucks up a bit
+	</script>
+	<h1>this is a test</h1>
+	<p>it should contain some tricky html to test the parser</p>
+	<p>here's a paragraph</p>
+	<p>and another</p>
+	<h2>how about some lists</h2>
+	<hr>
+	<ol>
+		<li>a</li>
+		<li>b</li>
+		<li>c</li>
+	</ol>
+	<ul>
+		<li>a</li>
+		<li>b</li>
+		<li>c</li>
+	</ul>
+	<h2>and a table</h2>
+	<hr>
+	<table>
+		<tr>
+			<td>a</td>
+			<td>b</td>
+			<td>c</td>
+			<td>d</td>
+		</tr>
+		<tr>
+			<td>e</td>
+			<td>f</td>
+			<td>g</td>
+			<td>h</td>
+		</tr>
+		<tr>
+			<td>i</td>
+			<td>j</td>
+			<td>k</td>
+			<td>l</td>
+		</tr>
+		<tr>
+			<td>m</td>
+			<td>n</td>
+			<td>o</td>
+			<td>p</td>
+		</tr>
+	</table>
+	<h2>now for the divs</h2>
+	<hr>
+	<div>just a normal div</div>
+	<div class="classy">a div with class</div>
+	<div id="identifiable">an div with id</div>
+	<div id="relative">relative positioned div</div>
+	<div id="fixed">fixed positioned div</div>
+	<div id="absolute">absolute positioned div</div>
+	<div style="overflow: hidden">
+		<p>some floating divs:</p>
+		<div class="floaty">first</div>
+		<div class="floaty">second</div>
+		<div class="floaty">third</div>
+		<div class="floaty">fourth</div>
+		<div class="floaty">fifth</div>
+		<div class="floaty">sixth</div>
+	</div>
+	<h2>and last but not least internal css</h2>
+	<hr>
+	<div class="internal first">this is styled by internal css</div>
+	<div class="internal second">and so is this</div>
+</body>
+</html>

@@ -22,9 +22,35 @@ function HtmlFile(path){
 //calls the callback with a list of differences between the new contents and current
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
-HtmlFile.prototype.setContent = function(str, callback){
-	throw 'not implemented';
+HtmlFile.prototype.setContent = function(newHtml, callback){
+	var newParsedHtml = new htmlparser(newHtml).parse();
+	console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
 };
+
+//takes two arrays of json dom elements and returns the difference
+function diffParsedHtml(a, b){
+	var differences = [];
+
+	var diffHtmlObject = function(a, b){
+		var keyListA = [];
+		var keyListB = [];
+
+		for(var key in a){
+			keyListA.push(key);
+		}
+
+		for(var key in b){
+			keyListB.push(key);
+		}
+
+		console.log(keyListA);
+		console.log(keyListB);
+	}
+
+	a.forEach(function(elem, index, array){
+		diffHtmlObject(elem, b[index]);
+	});
+}
 
 HtmlFile.prototype.parse = function(){
 	this.parseToWeb();
