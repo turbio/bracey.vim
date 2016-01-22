@@ -1,6 +1,6 @@
 var cheerio = require("cheerio");
 var fs = require("fs");
-var htmlparser = require("./htmlparser.js");
+var htmlparser = require("htmlparser2");
 
 var injectedCss = fs.readFileSync("frontend.css", 'utf8');
 var injectedJs = fs.readFileSync("frontend.js", 'utf8');
@@ -54,7 +54,21 @@ function diffParsedHtml(a, b){
 
 HtmlFile.prototype.parse = function(){
 	this.parseToWeb();
-	this.parsedHtml = new htmlparser(this.rawSource).parse();
+	//this.parsedHtml = new htmlparser(this.rawSource).parse();
+
+	var handler = new htmlparser.DomHandler({withStartIndices: true});
+
+	//for whatever reason, the domhandler doesn't have an option to add the
+	//end index to elements, so this rewrites the function to do so
+	handler._addDomElement = function(element){
+		htmlparser.DomHandler.prototype._addDomElement.call(this, element);
+		element.endIndex = this._parser.endIndex;
+	}
+
+	var parser = new htmlparser.Parser(handler);
+	parser.write(this.rawSource);
+	parser.done();
+	console.log(handler.dom);
 };
 
 HtmlFile.prototype.webSrc = function(){
