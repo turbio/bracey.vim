@@ -1,8 +1,8 @@
 var fs = require("fs");
 var htmlparser = require("htmlparser2");
 
-var injectedCss = fs.readFileSync("frontend.css", 'utf8');
-var injectedJs = fs.readFileSync("frontend.js", 'utf8');
+var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
+var injectedJS = fs.readFileSync("frontend.js", 'utf8');
 
 function HtmlFile(path){
 	if(path != undefined){
@@ -67,15 +67,44 @@ HtmlFile.prototype.parse = function(){
 
 	this.parsedHtml = handler.dom;
 
-	//webParsed("*").each(function(i, elem){
-		//webParsed(this).attr('data-brackets-id', i);
-	//});
+	//give each element an id
+	var elementIndex = 1;	//0 is for root
+	htmlparser.DomUtils.filter(function(elem){
+		if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
+			elem.attribs['meta-element-index'] = elementIndex;
+			elem.index = elementIndex;
+			elementIndex++;
+		}
+	}, this.parsedHtml);
 
-	//webParsed("head").append('<script>' + injectedJs + '</script>');
-	//webParsed("head").append('<style>' + injectedCss + '</style>');
+	//and for now... just assume this is a full html document
+	//this basically just adds the required css and js to the head
+	head = htmlparser.DomUtils.filter(function(elem){
+		return htmlparser.DomUtils.getName(elem) == 'head';
+	}, this.parsedHtml)[0];
 
-	//this.webParsed = webParsed;
-
+	if(head !== undefined){
+		htmlparser.DomUtils.appendChild(head, {
+			type: 'script',
+			name: 'script',
+			attribs: {language: 'javascript'},
+			children: [{
+				data: injectedJS,
+				type: 'text'
+			}]
+		});
+		htmlparser.DomUtils.appendChild(head, {
+			type: 'style',
+			name: 'style',
+			attribs: {type: 'test/css'},
+			children: [{
+				data: injectedCSS,
+				type: 'text'
+			}]
+		});
+	}else{
+		throw 'currently, only a full html document is supported';
+	}
 };
 
 HtmlFile.prototype.webSrc = function(){
