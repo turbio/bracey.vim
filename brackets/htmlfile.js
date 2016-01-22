@@ -71,7 +71,7 @@ HtmlFile.prototype.parse = function(){
 	var elementIndex = 1;	//0 is for root
 	htmlparser.DomUtils.filter(function(elem){
 		if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
-			elem.attribs['meta-element-index'] = elementIndex;
+			elem.attribs['meta-brackets-element-index'] = elementIndex;
 			elem.index = elementIndex;
 			elementIndex++;
 		}
