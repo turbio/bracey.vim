@@ -1,4 +1,3 @@
-var cheerio = require("cheerio");
 var fs = require("fs");
 var htmlparser = require("htmlparser2");
 
@@ -53,9 +52,6 @@ function diffParsedHtml(a, b){
 }
 
 HtmlFile.prototype.parse = function(){
-	this.parseToWeb();
-	//this.parsedHtml = new htmlparser(this.rawSource).parse();
-
 	var handler = new htmlparser.DomHandler({withStartIndices: true});
 
 	//for whatever reason, the domhandler doesn't have an option to add the
@@ -70,14 +66,20 @@ HtmlFile.prototype.parse = function(){
 	parser.done();
 
 	this.parsedHtml = handler.dom;
+
+	//webParsed("*").each(function(i, elem){
+		//webParsed(this).attr('data-brackets-id', i);
+	//});
+
+	//webParsed("head").append('<script>' + injectedJs + '</script>');
+	//webParsed("head").append('<style>' + injectedCss + '</style>');
+
+	//this.webParsed = webParsed;
+
 };
 
 HtmlFile.prototype.webSrc = function(){
-	if(this.webParsed != undefined){
-		return this.webParsed.html();
-	}else{
-		throw 'source not yet parsed to web';
-	}
+	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
 };
 
 HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
@@ -118,22 +120,6 @@ HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
 	}
 
 	return elem;
-}
-
-//parse vim source into web source
-HtmlFile.prototype.parseToWeb = function(){
-	var webParsed = cheerio.load(this.rawSource, {
-		normalizeWhitespace: false	//just cause
-	});
-
-	webParsed("*").each(function(i, elem){
-		webParsed(this).attr('data-brackets-id', i);
-	});
-
-	webParsed("head").append('<script>' + injectedJs + '</script>');
-	webParsed("head").append('<style>' + injectedCss + '</style>');
-
-	this.webParsed = webParsed;
 }
 
 module.exports = HtmlFile;
