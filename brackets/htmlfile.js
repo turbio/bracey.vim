@@ -68,7 +68,8 @@ HtmlFile.prototype.parse = function(){
 	var parser = new htmlparser.Parser(handler);
 	parser.write(this.rawSource);
 	parser.done();
-	console.log(handler.dom);
+
+	this.parsedHtml = handler.dom;
 };
 
 HtmlFile.prototype.webSrc = function(){
