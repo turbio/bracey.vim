@@ -21,10 +21,10 @@ function HtmlFile(path){
 //calls the callback with a list of differences between the new contents and current
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
-HtmlFile.prototype.setContent = function(newHtml, callback){
-	var newParsedHtml = new htmlparser(newHtml).parse();
-	console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
-};
+//HtmlFile.prototype.setContent = function(newHtml, callback){
+	//var newParsedHtml = new htmlparser(newHtml).parse();
+	//console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
+//};
 
 //takes two arrays of json dom elements and returns the difference
 function diffParsedHtml(a, b){
@@ -56,10 +56,22 @@ HtmlFile.prototype.parse = function(){
 
 	//for whatever reason, the domhandler doesn't have an option to add the
 	//end index to elements, so this rewrites the function to do so
-	handler._addDomElement = function(element){
-		htmlparser.DomHandler.prototype._addDomElement.call(this, element);
-		element.endIndex = this._parser.endIndex;
-	}
+	handler._setEnd = function(elem){
+		elem.endIndex = this._parser.endIndex;
+	};
+	handler.onprocessinginstruction = function(name, data){
+		this._parser.endIndex = this._parser._tokenizer._index;
+		htmlparser.DomHandler.prototype.onprocessinginstruction.call(this, name, data);
+	};
+	handler._addDomElement = function(elem){
+		htmlparser.DomHandler.prototype._addDomElement.call(this, elem);
+		this._setEnd(elem);
+	};
+	handler.onclosetag =
+	handler.oncommentend =
+	handler.oncdataend = function onElemEnd() {
+		this._setEnd(this._tagStack.pop());
+	};
 
 	var parser = new htmlparser.Parser(handler);
 	parser.write(this.rawSource);
@@ -67,7 +79,7 @@ HtmlFile.prototype.parse = function(){
 
 	this.parsedHtml = handler.dom;
 
-	//give each element an id
+	//give each element an index
 	var elementIndex = 1;	//0 is for root
 	htmlparser.DomUtils.filter(function(elem){
 		if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
@@ -111,37 +123,36 @@ HtmlFile.prototype.webSrc = function(){
 	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
 };
 
-HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
+HtmlFile.prototype.tagNumFromPos = function(line, column){
 	if(this.parsedHtml == undefined){
 		throw 'tag positions not yet parsed';
 	}
-	if(elem == undefined){
-		elem = {name: 'none', children: this.parsedHtml};
+
+	//convert the line and column into a character index
+	var charIndex = 0;
+
+	var lines = this.rawSource.split('\n');
+	charIndex += column;
+	line--;
+	while(line >= 0){
+		charIndex += lines[line].length + 1;
+		line--;
 	}
 
+	return tagNumFromIndex(charIndex, {
+		name: 'none',
+		index: 0,
+		children: this.parsedHtml
+	});
+};
+
+function tagNumFromIndex(index, elem){
 	for(i = 0; i < elem.children.length; i++){
-		//if between the lines that the start and end tags are on, we are in
-		//this element
-		//OR
-		//if on the start line of tag, must not be before the start column of the tag
-		//OR
-		//if on the end line of tag, must not be past the end column of the tag
-		//OR
-		//if on the same line as the tag begins and ends, the column must be
-		//between the start and end
-		//then we are inside this tag
-		if((line > elem.children[i].start[0] && line < elem.children[i].end[0])
-				|| (line == elem.children[i].start[0]
-					&& line == elem.children[i].end[0]
-					&& column <= elem.children[i].end[1]
-					&& column >= elem.children[i].start[1])
-				|| (line == elem.children[i].start[0]
-					&& line != elem.children[i].end[0]
-					&& column >= elem.children[i].start[1])
-				|| (line == elem.children[i].end[0]
-					&& line != elem.children[i].start[0]
-					&& column <= elem.children[i].end[1])){
-			var child = this.tagNumFromPos(line, column, elem.children[i]);
+		var child = elem.children[i];
+		if(child.type == 'tag'
+				&& index >= child.startIndex
+				&& index <= child.endIndex){
+			child = tagNumFromIndex(index, elem.children[i]);
 			if(child != null){
 				return child;
 			}
@@ -149,6 +160,6 @@ HtmlFile.prototype.tagNumFromPos = function(line, column, elem){
 	}
 
 	return elem;
-}
+};
 
 module.exports = HtmlFile;

@@ -42,14 +42,13 @@ var server = http.createServer(function(request, response){
 							cords = content.split(':');
 							currentFileX = cords[1] - 1;
 							currentFileY = cords[0] - 1;
-							broadcast({
-								'command': 'select',
-								'selector': '[data-brackets-id=\"'
-									+ currentFile.tagNumFromPos(
-										currentFileY,
-										currentFileX).index
-									+ '\"]'
-							});
+							elem = currentFile.tagNumFromPos(currentFileY, currentFileX);
+							if(elem != null){
+								broadcast({
+									'command': 'select',
+									'selector': '[meta-brackets-element-index=\"' + elem.index + '\"]'
+								});
+							}
 							break;
 						case 'b':
 							currentFile.setContent(content);
