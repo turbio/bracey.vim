@@ -11,18 +11,18 @@
 }
 
 .brackets-currently-selected-highlight{
-	position: absolute;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-	border-style: solid;
-	border-color: rgba(30, 182, 255, 0.69);
-	border-width: 2px;
-	border-radius: 4px;
-	pointer-events: none;
-	overflow-x: hidden;
-	overflow-y: hidden;
+	position: absolute !important;
+	-moz-box-sizing: border-box !important;
+	-webkit-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+	border-style: solid !important;
+	border-color: rgba(30, 182, 255, 0.69) !important;
+	border-width: 2px !important;
+	border-radius: 4px !important;
+	pointer-events: none !important;
+	overflow-x: hidden !important;
+	overflow-y: hidden !important;
 
-	animation-name: temp-highlight;
-	animation-duration: 0.75s;
+	animation-name: temp-highlight !important;
+	animation-duration: 0.75s !important;
 }
