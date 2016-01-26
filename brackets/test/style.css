@@ -12,9 +12,7 @@ hr{
 	background: #333;
 }
 td{
-	border-color: #333;
-	border-style: solid;
-	border-width: 2px;
+	border: none;
 	padding: 5px;
 }
 tr:nth-child(even){
