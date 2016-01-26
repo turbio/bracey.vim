@@ -10,7 +10,7 @@ function HtmlFile(path){
 		var self = this;
 		fs.readFile(path, 'utf8', function(err, data){
 			self.rawSource = data;
-			self.parse();
+			self.parsedHtml = parse(data);
 		});
 	}
 }
@@ -51,7 +51,7 @@ function diffParsedHtml(a, b){
 	});
 }
 
-HtmlFile.prototype.parse = function(){
+function parse(inputSrc){
 	var handler = new htmlparser.DomHandler({withStartIndices: true});
 
 	//for whatever reason, the domhandler doesn't have an option to add the
@@ -74,10 +74,10 @@ HtmlFile.prototype.parse = function(){
 	};
 
 	var parser = new htmlparser.Parser(handler);
-	parser.write(this.rawSource);
+	parser.write(inputSrc);
 	parser.done();
 
-	this.parsedHtml = handler.dom;
+	var parsedHtml = handler.dom;
 
 	//give each element an index
 	var elementIndex = 1;	//0 is for root
@@ -86,7 +86,9 @@ HtmlFile.prototype.parse = function(){
 			elem.index = elementIndex;
 			elementIndex++;
 		}
-	}, this.parsedHtml);
+	}, parsedHtml);
+
+	return parsedHtml;
 };
 
 HtmlFile.prototype.webSrc = function(){
