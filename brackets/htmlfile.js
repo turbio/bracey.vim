@@ -15,16 +15,77 @@ function HtmlFile(path){
 	}
 }
 
+HtmlFile.prototype.webSrc = function(){
+	//transform the internal html sturcture into websource only when it's requested
+
+	//and for now... just assume this is a full html document
+	//this basically just adds the required css and js to the head
+	//also set the index attribute
+	var head = htmlparser.DomUtils.filter(function(elem){
+		if(elem.index != undefined){
+			elem.attribs['meta-brackets-element-index'] = elem.index;
+		}
+		return htmlparser.DomUtils.getName(elem) == 'head';
+	}, this.parsedHtml)[0];
+
+	if(head !== undefined){
+		htmlparser.DomUtils.appendChild(head, {
+			type: 'script',
+			name: 'script',
+			attribs: {language: 'javascript'},
+			children: [{
+				data: injectedJS,
+				type: 'text'
+			}]
+		});
+		htmlparser.DomUtils.appendChild(head, {
+			type: 'style',
+			name: 'style',
+			children: [{
+				data: injectedCSS,
+				type: 'text'
+			}]
+		});
+	}else{
+		throw 'currently, only a full html document is supported';
+	}
+
+	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
+};
+
+HtmlFile.prototype.tagNumFromPos = function(line, column){
+	if(this.parsedHtml == undefined){
+		throw 'tag positions not yet parsed';
+	}
+
+	//convert the line and column into a character index
+	var charIndex = 0;
+
+	var lines = this.rawSource.split('\n');
+	charIndex += column;
+	line--;
+	while(line >= 0){
+		charIndex += lines[line].length + 1;
+		line--;
+	}
+
+	return tagNumFromIndex(charIndex, {
+		name: 'none',
+		index: 0,
+		children: this.parsedHtml
+	});
+};
+
 //takes a string which will be the new content
 //parses said string
 //compares the parsed string with the current contents
 //calls the callback with a list of differences between the new contents and current
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
-//HtmlFile.prototype.setContent = function(newHtml, callback){
-	//var newParsedHtml = new htmlparser(newHtml).parse();
-	//console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
-//};
+HtmlFile.prototype.setContent = function(newHtml, callback){
+	var newParsedHtml = new htmlparser(newHtml).parse();
+	console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
+};
 
 //takes two arrays of json dom elements and returns the difference
 function diffParsedHtml(a, b){
@@ -89,67 +150,6 @@ function parse(inputSrc){
 	}, parsedHtml);
 
 	return parsedHtml;
-};
-
-HtmlFile.prototype.webSrc = function(){
-	//transform the internal html sturcture into websource only when it's requested
-
-	//and for now... just assume this is a full html document
-	//this basically just adds the required css and js to the head
-	//also set the index attribute
-	var head = htmlparser.DomUtils.filter(function(elem){
-		if(elem.index != undefined){
-			elem.attribs['meta-brackets-element-index'] = elem.index;
-		}
-		return htmlparser.DomUtils.getName(elem) == 'head';
-	}, this.parsedHtml)[0];
-
-	if(head !== undefined){
-		htmlparser.DomUtils.appendChild(head, {
-			type: 'script',
-			name: 'script',
-			attribs: {language: 'javascript'},
-			children: [{
-				data: injectedJS,
-				type: 'text'
-			}]
-		});
-		htmlparser.DomUtils.appendChild(head, {
-			type: 'style',
-			name: 'style',
-			children: [{
-				data: injectedCSS,
-				type: 'text'
-			}]
-		});
-	}else{
-		throw 'currently, only a full html document is supported';
-	}
-
-	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
-};
-
-HtmlFile.prototype.tagNumFromPos = function(line, column){
-	if(this.parsedHtml == undefined){
-		throw 'tag positions not yet parsed';
-	}
-
-	//convert the line and column into a character index
-	var charIndex = 0;
-
-	var lines = this.rawSource.split('\n');
-	charIndex += column;
-	line--;
-	while(line >= 0){
-		charIndex += lines[line].length + 1;
-		line--;
-	}
-
-	return tagNumFromIndex(charIndex, {
-		name: 'none',
-		index: 0,
-		children: this.parsedHtml
-	});
 };
 
 function tagNumFromIndex(index, elem){
