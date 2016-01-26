@@ -67,10 +67,10 @@
 			var top  = box.top +  scrollTop - clientTop;
 			var left = box.left + scrollLeft - clientLeft;
 
-			newHighlight.style.top = top;
-			newHighlight.style.left = left;
-			newHighlight.style.width = box.right - box.left;
-			newHighlight.style.height = box.bottom - box.top;
+			newHighlight.style.top = top + 'px';
+			newHighlight.style.left = left + 'px';
+			newHighlight.style.width = (box.right - box.left) + 'px';
+			newHighlight.style.height = (box.bottom - box.top) + 'px';
 
 			document.body.appendChild(newHighlight);
 		}

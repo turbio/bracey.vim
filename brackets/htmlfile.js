@@ -108,7 +108,6 @@ HtmlFile.prototype.parse = function(){
 		htmlparser.DomUtils.appendChild(head, {
 			type: 'style',
 			name: 'style',
-			attribs: {type: 'test/css'},
 			children: [{
 				data: injectedCSS,
 				type: 'text'

@@ -22,6 +22,9 @@
 	pointer-events: none !important;
 	overflow-x: hidden !important;
 	overflow-y: hidden !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: none !important;
 
 	animation-name: temp-highlight !important;
 	animation-duration: 0.75s !important;
