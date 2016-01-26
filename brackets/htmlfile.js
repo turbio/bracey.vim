@@ -83,15 +83,22 @@ HtmlFile.prototype.parse = function(){
 	var elementIndex = 1;	//0 is for root
 	htmlparser.DomUtils.filter(function(elem){
 		if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
-			elem.attribs['meta-brackets-element-index'] = elementIndex;
 			elem.index = elementIndex;
 			elementIndex++;
 		}
 	}, this.parsedHtml);
+};
+
+HtmlFile.prototype.webSrc = function(){
+	//transform the internal html sturcture into websource only when it's requested
 
 	//and for now... just assume this is a full html document
 	//this basically just adds the required css and js to the head
-	head = htmlparser.DomUtils.filter(function(elem){
+	//also set the index attribute
+	var head = htmlparser.DomUtils.filter(function(elem){
+		if(elem.index != undefined){
+			elem.attribs['meta-brackets-element-index'] = elem.index;
+		}
 		return htmlparser.DomUtils.getName(elem) == 'head';
 	}, this.parsedHtml)[0];
 
@@ -116,9 +123,7 @@ HtmlFile.prototype.parse = function(){
 	}else{
 		throw 'currently, only a full html document is supported';
 	}
-};
 
-HtmlFile.prototype.webSrc = function(){
 	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
 };
 
