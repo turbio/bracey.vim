@@ -22,7 +22,6 @@ var currentFileY = 0;
 var currentFile;
 
 function Server(){
-	console.log(htmlfile);
 }
 
 Server.prototype.start = function(port){
