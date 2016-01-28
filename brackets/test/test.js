@@ -1,5 +1,6 @@
 var should = require('chai').should();
 var expect = require('chai').expect;
+var http = require('http');
 
 describe('htmlfile', function(){
 	before(function(){
