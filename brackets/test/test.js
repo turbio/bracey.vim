@@ -39,6 +39,7 @@ describe('htmlfile', function(){
 		});
 		it('should return null when given an out of bound line or column', function(){
 			expect(this.file.tagFromPosition(10000, 0)).to.be.null;
+			expect(this.file.tagFromPosition(0, 10000)).to.be.null;
 		});
 	});
 });

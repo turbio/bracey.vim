@@ -66,15 +66,27 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 	if(this.parsedHtml == undefined){
 		throw 'tag positions not yet parsed';
 	}
+
+	var lines = this.rawSource.split('\n');
+
 	//negative lines and columns don't correspond to any element
 	if(line < 0 || column < 0){
+		return null;
+	}
+	//if the line requested is larger than the number of lines in
+	//the file, then it must be out of bounds
+	if(line >= lines.length){
+		return null;
+	}
+	//if the column requested is larger than the number of columns in the
+	//requested line, then is must be out of bounds
+	if(column >= lines[line].length){
 		return null;
 	}
 
 	//convert the line and column into a character index
 	var charIndex = 0;
 
-	var lines = this.rawSource.split('\n');
 	charIndex += column;
 	line--;
 	while(line >= 0){
