@@ -19,7 +19,7 @@ function HtmlFile(path, callback){
 			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
-			if(ballback){
+			if(callback){
 				callback(null);
 			}
 		});
