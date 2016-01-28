@@ -15,6 +15,7 @@ function HtmlFile(path, callback){
 		fs.readFile(path, 'utf8', function(err, data){
 			if(callback !== undefined && err){
 				callback(err);
+				return;
 			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
@@ -64,6 +65,10 @@ HtmlFile.prototype.webSrc = function(){
 HtmlFile.prototype.tagNumFromPos = function(line, column){
 	if(this.parsedHtml == undefined){
 		throw 'tag positions not yet parsed';
+	}
+	//negative lines and columns don't correspond to any element
+	if(line < 0 || column < 0){
+		return null;
 	}
 
 	//convert the line and column into a character index

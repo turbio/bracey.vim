@@ -24,7 +24,18 @@ describe('htmlfile', function(){
 					done();
 				});
 			});
-			it('should have errors with invalid file');
+			it('should have errors with invalid html');
+		});
+	});
+
+	describe('tag number from position', function(){
+		before(function(done){
+			this.file = new this.htmlfile('test/index.html', function(err){
+				done(err);
+			});
+		});
+		it('should return null when given an out of bounds index', function(){
+			expect(this.file.tagNumFromPos(-1, -1)).to.be.null;
 		});
 	});
 });
