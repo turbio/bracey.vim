@@ -35,7 +35,7 @@ describe('htmlfile', function(){
 			});
 		});
 		it('should return null when given an out of bounds index', function(){
-			expect(this.file.tagNumFromPos(-1, -1)).to.be.null;
+			expect(this.file.tagFromPosition(-1, -1)).to.be.null;
 		});
 	});
 });

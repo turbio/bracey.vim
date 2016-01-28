@@ -62,7 +62,7 @@ HtmlFile.prototype.webSrc = function(){
 	return htmlparser.DomUtils.getOuterHTML(this.parsedHtml);
 };
 
-HtmlFile.prototype.tagNumFromPos = function(line, column){
+HtmlFile.prototype.tagFromPosition = function(line, column){
 	if(this.parsedHtml == undefined){
 		throw 'tag positions not yet parsed';
 	}

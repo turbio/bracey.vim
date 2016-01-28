@@ -42,7 +42,7 @@ var server = http.createServer(function(request, response){
 							cords = content.split(':');
 							currentFileX = cords[1] - 1;
 							currentFileY = cords[0] - 1;
-							elem = currentFile.tagNumFromPos(currentFileY, currentFileX);
+							elem = currentFile.tagFromPosition(currentFileY, currentFileX);
 							if(elem != null){
 								broadcast({
 									'command': 'select',
