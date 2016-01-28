@@ -19,7 +19,9 @@ function HtmlFile(path, callback){
 			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
-			callback(null);
+			if(ballback){
+				callback(null);
+			}
 		});
 	}
 }
