@@ -59,3 +59,14 @@ describe('htmlfile', function(){
 		}, this);
 	});
 });
+
+describe('server', function(){
+	before(function(){
+		var server = require('../server.js');
+		this.server = new server();
+		this.server.start();
+	});
+	after(function(){
+		this.server.stop();
+	});
+});
