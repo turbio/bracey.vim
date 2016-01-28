@@ -37,5 +37,8 @@ describe('htmlfile', function(){
 		it('should return null when given a negative line or column', function(){
 			expect(this.file.tagFromPosition(-1, -1)).to.be.null;
 		});
+		it('should return null when given an out of bound line or column', function(){
+			expect(this.file.tagFromPosition(10000, 0)).to.be.null;
+		});
 	});
 });
