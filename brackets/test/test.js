@@ -28,13 +28,13 @@ describe('htmlfile', function(){
 		});
 	});
 
-	describe('tag number from position', function(){
+	describe('#tagFromPosition()', function(){
 		before(function(done){
 			this.file = new this.htmlfile('test/index.html', function(err){
 				done(err);
 			});
 		});
-		it('should return null when given an out of bounds index', function(){
+		it('should return null when given a negative line or column', function(){
 			expect(this.file.tagFromPosition(-1, -1)).to.be.null;
 		});
 	});
