@@ -12,7 +12,10 @@
     "mime": "^1.3.4",
     "websocket": "^1.0.22"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*"
+  },
   "scripts": {
     "test": "true"
   },

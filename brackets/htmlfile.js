@@ -4,13 +4,21 @@ var htmlparser = require("htmlparser2");
 var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
 var injectedJS = fs.readFileSync("frontend.js", 'utf8');
 
-function HtmlFile(path){
+//takes an optinal path and an opional callback
+//if there is a path, read and parse said file
+//if reading it or parsing it causes a problem, call the callback
+//stating the problem
+function HtmlFile(path, callback){
 	if(path != undefined){
 		this.path = path;
 		var self = this;
 		fs.readFile(path, 'utf8', function(err, data){
+			if(callback !== undefined && err){
+				callback(err);
+			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
+			callback(null);
 		});
 	}
 }
