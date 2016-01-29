@@ -24,7 +24,6 @@ function HtmlFile(path, callback){
 			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
-			console.log(self.parsedHtml);
 			if(callback){
 				callback(null);
 			}
