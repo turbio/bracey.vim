@@ -118,4 +118,31 @@ describe('server', function(){
 		});
 		send('ping');
 	});
+
+	describe('position', function(){
+		[
+			{command: 'p:2:1', expected: 1},
+			{command: 'p:4:1', expected: 2},
+			{command: 'p:4:2', expected: 3},
+			{command: 'p:22:5', expected: 6},
+			{command: 'p:31:2', expected: 13},
+			{command: 'p:53:2', expected: 29},
+			{command: 'p:54:2', expected: 23},
+		].forEach(function(test){
+			it('correctly responds to the position command "' + test.command + '"', function(done){
+				recieve(function(msg){
+					msg.should.deep.equal({
+						"command": "select",
+						"selector": "[meta-brackets-element-index=\"" + test.expected + "\"]"
+					});
+					done();
+				});
+				send(test.command);
+			});
+		}, this);
+	});
+
+	describe('set contents', function(){
+		it('correctly responds to buffer changes');
+	});
 });
