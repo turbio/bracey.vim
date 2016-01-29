@@ -1,6 +1,8 @@
 var should = require('chai').should();
 var expect = require('chai').expect;
 var http = require('http');
+var WebSocketClient = require('websocket').client;
+var port = 1337;
 
 describe('htmlfile', function(){
 	before(function(){
@@ -61,12 +63,58 @@ describe('htmlfile', function(){
 });
 
 describe('server', function(){
-	before(function(){
-		var server = require('../server.js');
-		this.server = new server();
-		this.server.start();
+	var  connection;
+
+	function send(msg){
+		var options = {
+			hostname: 'localhost',
+			port: port,
+			path: '/',
+			method: 'POST',
+		};
+
+		var request = http.request(options, function(response){
+			expect(response.statusCode).to.equal(200);
+		});
+		request.write(msg);
+		request.end();
+	}
+
+	var callbacks = [];
+	function recieve(callback){
+		callbacks.push(callback);
+	}
+
+	before(function(done){
+		var brackets = require('../server.js');
+		server = new brackets();
+		server.start(port);
+
+		var client = new WebSocketClient();
+		client.connect('ws://localhost:' + port);
+		client.on('connect', function(c){
+			connection = c;
+			connection.on('message', function(msg){
+				if(callbacks.length > 0){
+					callbacks.pop()(msg);
+				}
+			});
+			done();
+		});
+		client.on('connectFailed', function(err){
+			done(err);
+		});
 	});
 	after(function(){
-		this.server.stop();
+		if(connection){
+			connection.close();
+		}
+		server.stop();
+	});
+	it('can send messages to the server', function(done){
+		recieve(function(msg){
+			done();
+		});
+		send('p:10:10');
 	});
 });

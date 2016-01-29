@@ -3,8 +3,6 @@
 
 var VERSION = "0.0.1";
 
-console.log("brackets server");
-
 var websocket = require("websocket");
 var http = require("http");
 var fs = require("fs");
@@ -101,7 +99,6 @@ var webSocketServer = new websocket.server({
 webSocketServer.on('request', webSocketRequest);
 
 function webSocketRequest(request){
-	console.log("websocket connected");
 	var connection = request.accept('', request.origin);
 	connections.push(connection)
 	var i = connections.length - 1;
