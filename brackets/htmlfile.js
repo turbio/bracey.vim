@@ -1,5 +1,10 @@
 var fs = require("fs");
 var htmlparser = require("htmlparser2");
+var differ = require("jsondiffpatch").create({
+	objectHash: function(obj) {
+		return obj.index;
+	}
+});
 
 var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
 var injectedJS = fs.readFileSync("frontend.js", 'utf8');
@@ -19,6 +24,7 @@ function HtmlFile(path, callback){
 			}
 			self.rawSource = data;
 			self.parsedHtml = parse(data);
+			console.log(self.parsedHtml);
 			if(callback){
 				callback(null);
 			}
@@ -110,33 +116,13 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
-	var newParsedHtml = new htmlparser(newHtml).parse();
+	var newParsedHtml = parse(newHtml);
 	console.log(diffParsedHtml(this.parsedHtml, newParsedHtml));
 };
 
 //takes two arrays of json dom elements and returns the difference
 function diffParsedHtml(a, b){
-	var differences = [];
-
-	var diffHtmlObject = function(a, b){
-		var keyListA = [];
-		var keyListB = [];
-
-		for(var key in a){
-			keyListA.push(key);
-		}
-
-		for(var key in b){
-			keyListB.push(key);
-		}
-
-		console.log(keyListA);
-		console.log(keyListB);
-	}
-
-	a.forEach(function(elem, index, array){
-		diffHtmlObject(elem, b[index]);
-	});
+	return differ.diff(a, b);
 }
 
 function parse(inputSrc){
@@ -152,7 +138,16 @@ function parse(inputSrc){
 		htmlparser.DomHandler.prototype.onprocessinginstruction.call(this, name, data);
 	};
 	handler._addDomElement = function(elem){
-		htmlparser.DomHandler.prototype._addDomElement.call(this, elem);
+		var parent = this._tagStack[this._tagStack.length - 1];
+		var siblings = parent ? parent.children : this.dom;
+
+		elem.startIndex = this._parser.startIndex;
+
+		if (this._options.withDomLvl1) {
+			elem.__proto__ = elem.type === "tag" ? ElementPrototype : NodePrototype;
+		}
+
+		siblings.push(elem);
 		this._setEnd(elem);
 	};
 	handler.onclosetag =
