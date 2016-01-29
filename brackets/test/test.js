@@ -96,7 +96,7 @@ describe('server', function(){
 			connection = c;
 			connection.on('message', function(msg){
 				if(callbacks.length > 0){
-					callbacks.pop()(msg);
+					callbacks.pop()(JSON.parse(msg.utf8Data));
 				}
 			});
 			done();
@@ -111,10 +111,11 @@ describe('server', function(){
 		}
 		server.stop();
 	});
-	it('can send messages to the server', function(done){
+	it('responds with pong when send ping', function(done){
 		recieve(function(msg){
+			msg.should.deep.equal({"command": "pong"});
 			done();
 		});
-		send('p:10:10');
+		send('ping');
 	});
 });

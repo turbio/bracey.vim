@@ -42,6 +42,10 @@ var httpServer = http.createServer(function(request, response){
 
 			request.on('end', function(){
 				if(postData.length > 2){
+					if(postData == 'ping'){
+						broadcast({'command': 'pong'});
+						return;
+					}
 					command = postData[0];
 					content = postData.substring(2);
 					switch(command){
