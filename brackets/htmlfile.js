@@ -1,5 +1,6 @@
 var fs = require("fs");
 var htmlparser = require("htmlparser2");
+var util = require('util');
 
 var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
 var injectedJS = fs.readFileSync("frontend.js", 'utf8');
@@ -111,14 +112,162 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
 	var newParsedHtml = parse(newHtml);
-	console.log(JSON.stringify(diffParsedHtml(this.parsedHtml, newParsedHtml), null, 2));
+	callback(diffParsedHtml(this.parsedHtml, newParsedHtml, true));
+	this.parsedHtml = newParsedHtml;
 };
 
-//takes two arrays of json dom elements and returns the difference
-function diffParsedHtml(left, right){
-	var diffList = [];
+//takes an html element and returns a string represtenting it's hash, if two
+//elements have the same hash, they are likely the same element
+function hashElem(elem){
+	if(elem.type == 'text'){
+		return elem.type;
+	}else{
+		return elem.type + elem.name;
+	}
+}
 
-	return diffList;
+function arrayDiff(left, right, hashFunc, edit_left){
+	if(edit_left != true){
+		left = left.slice();
+	}
+	var diff = [];
+
+	function addDiff(action, index, arg){
+		newAction = {
+			'action': action,
+			'index': index,
+		}
+		switch(action){
+			case 'add':
+				newAction['value'] = arg;
+				left.splice(index, 0, arg)
+				break;
+			case 'remove':
+				left.splice(index, 1)
+				break;
+			case 'move':
+				newAction['to'] = arg;
+				var temp = left[index];
+				left.splice(index, 1)
+				left.splice(arg, 0, temp)
+				break;
+		}
+
+		diff.push(newAction);
+	}
+
+	for(var i = 0; i < Math.max(left.length, right.length); i++){
+		if(left[i] == undefined){
+			addDiff('add', i, right[i]);
+			continue;
+		}
+		if(right[i] == undefined){
+			addDiff('remove', i);
+			continue;
+		}
+
+		if(hashFunc(left[i]) == hashFunc(right[i])){
+			continue;
+		}
+
+		//try to find left value in right
+		for(var j = i; j < left.length; j++){
+			if(hashFunc(left[j]) == hashFunc(right[i])){
+				addDiff('move', j, i);
+				break;
+			}else if(j == left.length - 1){
+				addDiff('remove', i);
+				if(left[i] == undefined || hashFunc(left[i]) != hashFunc(right[i])){
+					addDiff('add', i, right[i]);
+				}
+				break;
+			}
+		}
+	}
+
+	return diff;
+}
+
+//takes an element created by htmlparser2 and strips the meta information
+function stripElement(elem){
+	var newElem = {
+		type: elem.type
+	};
+
+	if(elem.type == "text"){
+		newElem.data = elem.data;
+	}else{
+		newElem.name = elem.name;
+		newElem.index = elem.index;
+		newElem.attribs = elem.attribs;
+
+		if(elem.children != undefined){
+			newElem.children = elem.children.slice();
+			newElem.children.forEach(function(value, index, array){
+				array[index] = stripElement(value);
+			});
+		}
+	}
+
+	return newElem;
+}
+
+//takes two arrays of json dom elements and returns the difference
+function diffParsedHtml(left, right, edit_left, parent){
+	if(parent == undefined){
+		parent = 0;
+	}
+	if(edit_left != true){
+		left = left.slice();
+	}
+
+	var diff = [];
+
+	var selfDiff = {
+		'element': parent,
+		'changes': []
+	};
+
+	var changes = arrayDiff(left, right, hashElem, true);
+	changes.forEach(function(change, index){
+		if(change.action == 'add'){
+			change.value = stripElement(change.value);
+			selfDiff.changes.push(change);
+		}else{
+			selfDiff.changes.push(change);
+		}
+	});
+
+	left.forEach(function(leftElem, i){
+		var rightElem = right[i];
+		if(leftElem.type == 'text'){
+			if(leftElem.data != rightElem.data){
+				selfDiff.changes.push({
+					'index': i,
+					'action': 'change',
+					'what': 'text',
+					'value': rightElem.data
+				});
+			}
+		}else{
+			if(leftElem.children != undefined && rightElem.children != undefined){
+				var subDiff = diffParsedHtml(
+						leftElem.children,
+						rightElem.children,
+						true,
+						leftElem.index);
+				if(subDiff.length > 0){
+					diff = diff.concat(subDiff);
+				}
+			}
+		}
+	});
+
+	if(selfDiff.changes.length != 0){
+		diff = diff.concat(selfDiff);
+	}
+
+	return diff;
 }
 
 function parse(inputSrc){
@@ -162,7 +311,7 @@ function parse(inputSrc){
 };
 
 function tagNumFromIndex(index, elem){
-	for(i = 0; i < elem.children.length; i++){
+	for(var i = 0; i < elem.children.length; i++){
 		var child = elem.children[i];
 		if(child.type == 'tag'
 				&& index >= child.startIndex

@@ -63,7 +63,8 @@ var httpServer = http.createServer(function(request, response){
 							}
 							break;
 						case 'b':
-							currentFile.setContent(content);
+							currentFile.setContent(content, function(diff){
+							});
 							break;
 					}
 				}
