@@ -1,4 +1,4 @@
-@keyframes temp-highlight{
+@keyframes blink-background{
 	0% {
 		background: none;
 	}
@@ -18,7 +18,6 @@
 	border-style: solid !important;
 	border-color: rgba(30, 182, 255, 0.69) !important;
 	border-width: 1px !important;
-	border-radius: 0px !important;
 	pointer-events: none !important;
 	overflow-x: hidden !important;
 	overflow-y: hidden !important;
@@ -26,6 +25,6 @@
 	padding: 0 !important;
 	background: none !important;
 
-	animation-name: temp-highlight !important;
+	animation-name: blink-background !important;
 	animation-duration: 0.75s !important;
 }
