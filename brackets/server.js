@@ -64,6 +64,11 @@ var httpServer = http.createServer(function(request, response){
 							break;
 						case 'b':
 							currentFile.setContent(content, function(diff){
+								console.log(diff);
+								broadcast({
+									'command': 'edit',
+									'diff': diff
+								});
 							});
 							break;
 					}

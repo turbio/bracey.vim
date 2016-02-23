@@ -24,8 +24,8 @@
 				window.location.href = message['location'];
 				break;
 			case 'edit':
-				change = document.querySelector('[meta-brackets-element-index="' + message['element'] + '"]');
-				change.innerHTML = message['content'];
+				//change = document.querySelector('[meta-brackets-element-index="' + message['element'] + '"]');
+				//change.innerHTML = message['content'];
 				break;
 			case 'eval':
 				eval(message['js']);
