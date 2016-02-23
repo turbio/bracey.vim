@@ -17,8 +17,8 @@
 	box-sizing: border-box !important;
 	border-style: solid !important;
 	border-color: rgba(30, 182, 255, 0.69) !important;
-	border-width: 2px !important;
-	border-radius: 4px !important;
+	border-width: 1px !important;
+	border-radius: 0px !important;
 	pointer-events: none !important;
 	overflow-x: hidden !important;
 	overflow-y: hidden !important;
