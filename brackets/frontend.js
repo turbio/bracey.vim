@@ -24,13 +24,31 @@
 				window.location.href = message['location'];
 				break;
 			case 'edit':
-				//change = document.querySelector('[meta-brackets-element-index="' + message['element'] + '"]');
-				//change.innerHTML = message['content'];
+				message['changes'].forEach(function(changeGroup){
+					var elem = document.querySelector('[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]')
+					changeGroup['changes'].forEach(function(change){
+						makeChange(
+								elem,
+								change);
+					});
+				});
 				break;
 			case 'eval':
 				eval(message['js']);
 				break;
 		}
+	};
+
+	var makeChange = function(element, change){
+		switch(change.action){
+			case 'change':
+				switch(change.what){
+					case 'text':
+						element.childNodes[change.index].nodeValue = change.value;
+
+						break;
+				}
+		};
 	};
 
 	var lastSelection = '';
@@ -74,7 +92,7 @@
 
 			document.body.appendChild(newHighlight);
 		}
-	}
+	};
 
 	var reloadCSS = function(){
 		var elements = document.getElementsByTagName("link");
@@ -104,5 +122,5 @@
 			}
 			c++;
 		}
-	}
+	};
 })();

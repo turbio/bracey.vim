@@ -66,7 +66,7 @@ var httpServer = http.createServer(function(request, response){
 							currentFile.setContent(content, function(diff){
 								broadcast({
 									'command': 'edit',
-									'diff': diff
+									'changes': diff
 								});
 							});
 							break;
