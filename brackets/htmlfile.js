@@ -119,7 +119,7 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 HtmlFile.prototype.setContent = function(newHtml, callback){
 	var newParsedHtml = parse(newHtml);
 	callback(diffParsedHtml(this.parsedHtml, newParsedHtml, true));
-	//this.parsedHtml = newParsedHtml;
+	this.parsedHtml = newParsedHtml;
 };
 
 //takes an html element and returns a string represtenting it's hash, if two
