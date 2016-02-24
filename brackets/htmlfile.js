@@ -199,25 +199,28 @@ function arrayDiff(left, right, hashFunc, edit_left){
 }
 
 //takes an element created by htmlparser2 and strips the meta information
-function stripElement(elem){
+function stripElement(elem, include_index){
 	var newElem = {
 		type: elem.type
 	};
 
-	if(elem.type == "text"){
-		newElem.data = elem.data;
-	}else{
+	if(elem.name)
 		newElem.name = elem.name;
+
+	if(include_index && elem.index)
 		newElem.index = elem.index;
+
+	if(elem.attribs)
 		newElem.attribs = elem.attribs;
+
+	if(elem.data)
 		newElem.data = elem.data;
 
-		if(elem.children != undefined){
-			newElem.children = elem.children.slice();
-			newElem.children.forEach(function(value, index, array){
-				array[index] = stripElement(value);
-			});
-		}
+	if(elem.children != undefined){
+		newElem.children = elem.children.slice();
+		newElem.children.forEach(function(value, index, array){
+			array[index] = stripElement(value, include_index);
+		});
 	}
 
 	return newElem;
@@ -242,7 +245,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 	var changes = arrayDiff(left, right, hashElem, true);
 	changes.forEach(function(change, index){
 		if(change.action == 'add'){
-			change.value = stripElement(change.value);
+			change.value = stripElement(change.value, true);
 			selfDiff.changes.push(change);
 		}else{
 			selfDiff.changes.push(change);
