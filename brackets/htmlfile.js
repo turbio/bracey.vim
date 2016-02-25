@@ -295,7 +295,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 		var sameChidlren = false;
 
 		//first just see if they're the same type of element
-		if(leftElem.type != right.elem.type){
+		if(leftElem.type != rightElem.type){
 			//if not, these elements are completely incompatible
 			transitionability = -1;
 		}else{
