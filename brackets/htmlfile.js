@@ -30,11 +30,7 @@ function HtmlFile(path, callback){
 HtmlFile.prototype.webSrc = function(){
 	//transform the internal html sturcture into websource only when it's requested
 
-	var webSourceHtml = [];
-
-	this.parsedHtml.forEach(function(elem){
-		webSourceHtml.push(stripElement(elem));
-	});
+	var webSourceHtml = stripElements(this.parsedHtml, true);
 
 	//and for now... just assume this is a full html document
 	//this basically just adds the required css and js to the head
