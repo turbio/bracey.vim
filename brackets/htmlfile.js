@@ -226,6 +226,16 @@ function stripElement(elem, include_index){
 	return newElem;
 }
 
+function stripElements(elems, include_index){
+	var newElems = [];
+
+	elems.forEach(function(elem){
+		newElems.push(stripElement(elem, include_index));
+	});
+
+	return newElems;
+}
+
 //takes two arrays of json dom elements and returns the difference
 function diffParsedHtml(left, right, edit_left, parent){
 	if(parent == undefined){
@@ -242,40 +252,120 @@ function diffParsedHtml(left, right, edit_left, parent){
 		'changes': []
 	};
 
-	var changes = arrayDiff(left, right, hashElem, true);
-	changes.forEach(function(change, index){
-		if(change.action == 'add'){
-			change.value = stripElement(change.value, true);
-			selfDiff.changes.push(change);
-		}else{
-			selfDiff.changes.push(change);
-		}
-	});
+	var longestSide = (left.length > right.length) ? left.length : right.length;
+	for(var elem = 0; elem < longestSide; elem++){
+		var leftElem = left[elem];
+		var rightElem = right[elem];
 
-	left.forEach(function(leftElem, i){
-		var rightElem = right[i];
-		if(leftElem.type == 'text'){
-			if(leftElem.data != rightElem.data){
-				selfDiff.changes.push({
-					'index': i,
-					'action': 'change',
-					'what': 'text',
-					'value': rightElem.data
-				});
-			}
+		if(leftElem == undefined){
+			console.log('adding element to end');
+			continue;
+		}
+
+		if(rightElem == undefined){
+			console.log('removing element from end');
+			continue;
+		}
+
+		//get a "hash" of both he right and left elements
+		var leftHash = JSON.stringify(stripElement(leftElem, false));
+		var rightHash = JSON.stringify(stripElement(rightElem, false));
+
+		//this can then be used to determine if both the right and left
+		//are EXACTLY THE SAME
+		if(leftHash == rightHash){
+			//then just continue on to the next elements
+			continue;
+		}
+
+		//okay so we can conclude that something is different about these two
+		//elements, we just need to find out what that is
+
+		//this says weather changes can be made to make the element in left
+		//in order to make it equivalent to right (true), otherwise it will try
+		//and search for it or just add/remove this element
+		//= 0 : not really conclusive...
+		//> 0 : transition-able
+		//< 0 : not transition-able
+		var transitionability = 0;
+
+		//this only really applies to tags, dictates whether or not there is
+		//a difference between their children. This saves a lot of time
+		//if only minor parts of an element aren't changed
+		var sameChidlren = false;
+
+		//first just see if they're the same type of element
+		if(leftElem.type != right.elem.type){
+			//if not, these elements are completely incompatible
+			transitionability = -1;
 		}else{
-			if(leftElem.children != undefined && rightElem.children != undefined){
-				var subDiff = diffParsedHtml(
-						leftElem.children,
-						rightElem.children,
-						true,
-						leftElem.index);
-				if(subDiff.length > 0){
-					diff = diff.concat(subDiff);
+			//if they are, there's a pretty good chance that a transition
+			//can be made from left to right
+			if(leftElem.type == 'text'){
+				//text objects can definitely be transitioned, all they have
+				//is text data
+				transitionability = 1;
+			}else{
+				//the element's name could be all the changed, so this doesn't
+				//necessarily mean it's an entirely new element
+				if(leftElem.name == rightElem.name){
+					transitionability++;
+				}else{
+					transitionability--;
+				}
+
+				var leftChildHash = JSON.stringify(
+						stripElements(leftElem.children, false));
+				var rightChildHash = JSON.stringify(
+						stripElements(rightElem.children, false));
+				if(leftChildHash == rightChildHash){
+					//they both have exactly the same children, so it's pretty
+					//likely a smooth transition can be made with only minor
+					//tweaks to this element
+					sameChidlren = true;
+
+					transitionability += 2;  //extra points, because
+					//transitioning children can be really easy
+				}else{
+					//not the same children, but that doesn't
+					//mean the children can't be modified in order to make
+					//these elements the same
+
+					//(this is here just for clarity)
 				}
 			}
 		}
-	});
+
+		console.log('from:');
+		console.log(leftElem);
+		console.log('to:');
+		console.log(rightElem);
+	}
+
+	//left.forEach(function(leftElem, i){
+		//var rightElem = right[i];
+		//if(leftElem.type == 'text'){
+			//if(leftElem.data != rightElem.data){
+				//selfDiff.changes.push({
+					//'index': i,
+					//'action': 'change',
+					//'what': 'text',
+					//'value': rightElem.data
+				//});
+			//}
+		//}else{
+			//if(leftElem.children != undefined && rightElem.children != undefined){
+				//var subDiff = diffParsedHtml(
+						//leftElem.children,
+						//rightElem.children,
+						//true,
+						//leftElem.index);
+				//if(subDiff.length > 0){
+					//diff = diff.concat(subDiff);
+				//}
+			//}
+		//}
+	//});
 
 	if(selfDiff.changes.length != 0){
 		diff = diff.concat(selfDiff);
