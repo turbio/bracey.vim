@@ -310,7 +310,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'what': key,
 			'value': right[toIndex][key]
 		});
-		//TODO change selfdiff
+		left[fromIndex][key] = right[toIndex][key]
 	}
 
 	function pushAdd(fromIndex, toIndex){
@@ -319,7 +319,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'action': 'add',
 			'value': right[toIndex]
 		});
-		//TODO change selfdiff
+		left.splice(toIndex, 0, right[fromIndex]);
 	}
 
 	function pushRemove(index){
@@ -327,7 +327,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'index': index,
 			'action': 'remove',
 		});
-		//TODO change selfdiff
+		left.splice(index, 1);
 	}
 
 	function pushMove(fromIndex, toIndex){
@@ -336,7 +336,9 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'action': 'move',
 			'to': toIndex
 		});
-		//TODO change selfdiff
+		var temp = left[fromIndex];
+		left.splice(fromIndex, 1)
+		left.splice(toIndex, 0, temp)
 	}
 
 	var longestSide = (left.length > right.length) ? left.length : right.length;
