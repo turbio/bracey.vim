@@ -122,78 +122,6 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 	this.rawSource = newHtml;
 };
 
-//takes an html element and returns a string representing it's hash, if two
-//elements have the same hash, they are likely the same element
-function hashElem(elem){
-	if(elem.type == 'text'){
-		return elem.type;
-	}else{
-		return elem.type + elem.name;
-	}
-}
-
-function arrayDiff(left, right, hashFunc, edit_left){
-	if(edit_left != true){
-		left = left.slice();
-	}
-	var diff = [];
-
-	function addDiff(action, index, arg){
-		newAction = {
-			'action': action,
-			'index': index,
-		}
-		switch(action){
-			case 'add':
-				newAction['value'] = arg;
-				left.splice(index, 0, arg)
-				break;
-			case 'remove':
-				left.splice(index, 1)
-				break;
-			case 'move':
-				newAction['to'] = arg;
-				var temp = left[index];
-				left.splice(index, 1)
-				left.splice(arg, 0, temp)
-				break;
-		}
-
-		diff.push(newAction);
-	}
-
-	for(var i = 0; i < Math.max(left.length, right.length); i++){
-		if(left[i] == undefined){
-			addDiff('add', i, right[i]);
-			continue;
-		}
-		if(right[i] == undefined){
-			addDiff('remove', i);
-			continue;
-		}
-
-		if(hashFunc(left[i]) == hashFunc(right[i])){
-			continue;
-		}
-
-		//try to find left value in right
-		for(var j = i; j < left.length; j++){
-			if(hashFunc(left[j]) == hashFunc(right[i])){
-				addDiff('move', j, i);
-				break;
-			}else if(j == left.length - 1){
-				addDiff('remove', i);
-				if(left[i] == undefined || hashFunc(left[i]) != hashFunc(right[i])){
-					addDiff('add', i, right[i]);
-				}
-				break;
-			}
-		}
-	}
-
-	return diff;
-}
-
 //takes an element created by htmlparser2 and strips the meta information
 function stripElement(elem, include_index){
 	var newElem = {
@@ -237,8 +165,8 @@ function stripElements(elems, include_index){
 //-1 means they are not at all compatible
 //greater than zero means less and less compatible
 function compareElements(left, right){
-	var leftHash = JSON.stringify(stripElement(leftElem, false));
-	var rightHash = JSON.stringify(stripElement(rightElem, false));
+	var leftHash = JSON.stringify(stripElement(left, false));
+	var rightHash = JSON.stringify(stripElement(right, false));
 
 	if(leftHash == rightHash){
 		return 0;
@@ -266,9 +194,9 @@ function compareElements(left, right){
 		}
 
 		var leftChildHash = JSON.stringify(
-				stripElements(leftElem.children, false));
+				stripElements(left.children, false));
 		var rightChildHash = JSON.stringify(
-				stripElements(rightElem.children, false));
+				stripElements(right.children, false));
 
 		if(leftChildHash == rightChildHash){
 			score = 1;
@@ -295,7 +223,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 	};
 
 	function pushReplace(index){
-		selfDiff.push({
+		selfDiff.changes.push({
 			'action': 'replace',
 			'index': index,
 			'value': stripElement(right[index])
@@ -341,25 +269,31 @@ function diffParsedHtml(left, right, edit_left, parent){
 		left.splice(toIndex, 0, temp)
 	}
 
-	var longestSide = (left.length > right.length) ? left.length : right.length;
-	for(var elem = 0; elem < longestSide; elem++){
+	for(var elem = 0; elem < left.length || elem < right.length; elem++){
 		var leftElem = left[elem];
 		var rightElem = right[elem];
 
-		if(leftElem == undefined){
-			console.log('adding element to end');
+		if(leftElem == undefined && rightElem != undefined){
+			pushAdd(elem, left.length);
 			continue;
 		}
 
-		if(rightElem == undefined){
+		if(rightElem == undefined && leftElem != undefined){
 			console.log('removing element from end');
+			pushRemove(elem);
 			continue;
 		}
 
 		var transitionability = compareElements(leftElem, rightElem);
 
-		if(transitionability = -1){
-			pushReplace(elem);
+		if(transitionability == 0){
+			continue
+		}
+
+		if(transitionability == 1){
+			if(leftElem.type == 'text'){
+				pushChange(elem, elem, 'data');
+			}
 		}
 	}
 
