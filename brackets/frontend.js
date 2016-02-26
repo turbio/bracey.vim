@@ -9,7 +9,7 @@
 
 	webSocket.onmessage = function(event){
 		message = JSON.parse(event.data);
-		console.log("recieved: " + event.data);
+		console.log(message);
 		switch(message['command']){
 			case 'select':
 				setHighlighted(message['selector']);
@@ -43,7 +43,7 @@
 		switch(change.action){
 			case 'change':
 				switch(change.what){
-					case 'text':
+					case 'data':
 						element.childNodes[change.index].nodeValue = change.value;
 
 						break;

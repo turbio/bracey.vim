@@ -118,6 +118,7 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 	if(diff.length > 0){
 		callback(diff);
 	}
+
 	this.parsedHtml = newParsedHtml;
 	this.rawSource = newHtml;
 };
@@ -160,35 +161,41 @@ function stripElements(elems, include_index){
 	return newElems;
 }
 
-//returns how close two elements are as a number
-//0 means they are exactly the same
-//-1 means they are not at all compatible
-//greater than zero means less and less compatible
+//returns how close two elements
 function compareElements(left, right){
 	var leftHash = JSON.stringify(stripElement(left, false));
 	var rightHash = JSON.stringify(stripElement(right, false));
 
 	if(leftHash == rightHash){
-		return 0;
+		return {same: true};
 	}
 
+	var diff = {
+		same: false,
+		reasons: []
+	};
+
 	if(left.type != right.type){
-		return -1;
+		diff.compatible = false;
+		diff.reasons.push('type');
+		return diff;
 	}
 
 	if(left.type == 'text'){
 		//the only difference there could be is probably the text's data
-		return 1;
+		diff.compatible = true;
+		diff.reasons.push('data');
+		return diff;
 	}else{
-		var score = 1;
+		diff.compatible = true;
 
 		if(left.name != right.name){
-			score++;
+			diff.reasons.push('name');
 		}
 
 		for(key in left.attribs){
 			if(left.attribs[key] != right.attribs[key]){
-				score++;
+				diff.reasons.push('attrib');
 				break;
 			}
 		}
@@ -199,10 +206,13 @@ function compareElements(left, right){
 				stripElements(right.children, false));
 
 		if(leftChildHash == rightChildHash){
-			score = 1;
+			diff.children = true;
+		}else{
+			diff.children = false;
+			diff.reasons.push('children');;
 		}
 
-		return score;
+		return diff;
 	}
 }
 
@@ -279,19 +289,18 @@ function diffParsedHtml(left, right, edit_left, parent){
 		}
 
 		if(rightElem == undefined && leftElem != undefined){
-			console.log('removing element from end');
 			pushRemove(elem);
 			continue;
 		}
 
-		var transitionability = compareElements(leftElem, rightElem);
+		var elemDiff = compareElements(leftElem, rightElem);
 
-		if(transitionability == 0){
+		if(elemDiff.same){
 			continue
 		}
 
-		if(transitionability == 1){
-			if(leftElem.type == 'text'){
+		if(elemDiff.compatible){
+			if(elemDiff.reasons.indexOf('data') != -1){
 				pushChange(elem, elem, 'data');
 			}
 		}
