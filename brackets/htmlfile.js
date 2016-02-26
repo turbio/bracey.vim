@@ -122,7 +122,7 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 	this.rawSource = newHtml;
 };
 
-//takes an html element and returns a string represtenting it's hash, if two
+//takes an html element and returns a string representing it's hash, if two
 //elements have the same hash, they are likely the same element
 function hashElem(elem){
 	if(elem.type == 'text'){
@@ -232,6 +232,52 @@ function stripElements(elems, include_index){
 	return newElems;
 }
 
+//returns how close two elements are as a number
+//0 means they are exactly the same
+//-1 means they are not at all compatible
+//greater than zero means less and less compatible
+function compareElements(left, right){
+	var leftHash = JSON.stringify(stripElement(leftElem, false));
+	var rightHash = JSON.stringify(stripElement(rightElem, false));
+
+	if(leftHash == rightHash){
+		return 0;
+	}
+
+	if(left.type != right.type){
+		return -1;
+	}
+
+	if(left.type == 'text'){
+		//the only difference there could be is probably the text's data
+		return 1;
+	}else{
+		var score = 1;
+
+		if(left.name != right.name){
+			score++;
+		}
+
+		for(key in left.attribs){
+			if(left.attribs[key] != right.attribs[key]){
+				score++;
+				break;
+			}
+		}
+
+		var leftChildHash = JSON.stringify(
+				stripElements(leftElem.children, false));
+		var rightChildHash = JSON.stringify(
+				stripElements(rightElem.children, false));
+
+		if(leftChildHash == rightChildHash){
+			score = 1;
+		}
+
+		return score;
+	}
+}
+
 //takes two arrays of json dom elements and returns the difference
 function diffParsedHtml(left, right, edit_left, parent){
 	if(parent == undefined){
@@ -248,6 +294,15 @@ function diffParsedHtml(left, right, edit_left, parent){
 		'changes': []
 	};
 
+	function pushReplace(index){
+		selfDiff.push({
+			'action': 'replace',
+			'index': index,
+			'value': stripElement(right[index])
+		});
+		left[index] = right[index];
+	}
+
 	var longestSide = (left.length > right.length) ? left.length : right.length;
 	for(var elem = 0; elem < longestSide; elem++){
 		var leftElem = left[elem];
@@ -263,79 +318,11 @@ function diffParsedHtml(left, right, edit_left, parent){
 			continue;
 		}
 
-		//get a "hash" of both he right and left elements
-		var leftHash = JSON.stringify(stripElement(leftElem, false));
-		var rightHash = JSON.stringify(stripElement(rightElem, false));
+		var transitionability = compareElements(leftElem, rightElem);
 
-		//this can then be used to determine if both the right and left
-		//are EXACTLY THE SAME
-		if(leftHash == rightHash){
-			//then just continue on to the next elements
-			continue;
+		if(transitionability = -1){
+			pushReplace(elem);
 		}
-
-		//okay so we can conclude that something is different about these two
-		//elements, we just need to find out what that is
-
-		//this says weather changes can be made to make the element in left
-		//in order to make it equivalent to right (true), otherwise it will try
-		//and search for it or just add/remove this element
-		//= 0 : not really conclusive...
-		//> 0 : transition-able
-		//< 0 : not transition-able
-		var transitionability = 0;
-
-		//this only really applies to tags, dictates whether or not there is
-		//a difference between their children. This saves a lot of time
-		//if only minor parts of an element aren't changed
-		var sameChidlren = false;
-
-		//first just see if they're the same type of element
-		if(leftElem.type != rightElem.type){
-			//if not, these elements are completely incompatible
-			transitionability = -1;
-		}else{
-			//if they are, there's a pretty good chance that a transition
-			//can be made from left to right
-			if(leftElem.type == 'text'){
-				//text objects can definitely be transitioned, all they have
-				//is text data
-				transitionability = 1;
-			}else{
-				//the element's name could be all the changed, so this doesn't
-				//necessarily mean it's an entirely new element
-				if(leftElem.name == rightElem.name){
-					transitionability++;
-				}else{
-					transitionability--;
-				}
-
-				var leftChildHash = JSON.stringify(
-						stripElements(leftElem.children, false));
-				var rightChildHash = JSON.stringify(
-						stripElements(rightElem.children, false));
-				if(leftChildHash == rightChildHash){
-					//they both have exactly the same children, so it's pretty
-					//likely a smooth transition can be made with only minor
-					//tweaks to this element
-					sameChidlren = true;
-
-					transitionability += 2;  //extra points, because
-					//transitioning children can be really easy
-				}else{
-					//not the same children, but that doesn't
-					//mean the children can't be modified in order to make
-					//these elements the same
-
-					//(this is here just for clarity)
-				}
-			}
-		}
-
-		console.log('from:');
-		console.log(leftElem);
-		console.log('to:');
-		console.log(rightElem);
 	}
 
 	//left.forEach(function(leftElem, i){
