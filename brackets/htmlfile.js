@@ -303,6 +303,15 @@ function diffParsedHtml(left, right, edit_left, parent){
 		left[index] = right[index];
 	}
 
+	function pushChange(fromIndex, toIndex, key){
+		selfDiff.changes.push({
+			'index': fromIndex,
+			'action': 'change',
+			'what': key,
+			'value': right[toIndex][key]
+		});
+	}
+
 	var longestSide = (left.length > right.length) ? left.length : right.length;
 	for(var elem = 0; elem < longestSide; elem++){
 		var leftElem = left[elem];
@@ -324,31 +333,6 @@ function diffParsedHtml(left, right, edit_left, parent){
 			pushReplace(elem);
 		}
 	}
-
-	//left.forEach(function(leftElem, i){
-		//var rightElem = right[i];
-		//if(leftElem.type == 'text'){
-			//if(leftElem.data != rightElem.data){
-				//selfDiff.changes.push({
-					//'index': i,
-					//'action': 'change',
-					//'what': 'text',
-					//'value': rightElem.data
-				//});
-			//}
-		//}else{
-			//if(leftElem.children != undefined && rightElem.children != undefined){
-				//var subDiff = diffParsedHtml(
-						//leftElem.children,
-						//rightElem.children,
-						//true,
-						//leftElem.index);
-				//if(subDiff.length > 0){
-					//diff = diff.concat(subDiff);
-				//}
-			//}
-		//}
-	//});
 
 	if(selfDiff.changes.length != 0){
 		diff = diff.concat(selfDiff);
