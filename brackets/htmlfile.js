@@ -310,6 +310,33 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'what': key,
 			'value': right[toIndex][key]
 		});
+		//TODO change selfdiff
+	}
+
+	function pushAdd(fromIndex, toIndex){
+		selfDiff.changes.push({
+			'index': fromIndex,
+			'action': 'add',
+			'value': right[toIndex]
+		});
+		//TODO change selfdiff
+	}
+
+	function pushRemove(index){
+		selfDiff.changes.push({
+			'index': index,
+			'action': 'remove',
+		});
+		//TODO change selfdiff
+	}
+
+	function pushMove(fromIndex, toIndex){
+		selfDiff.changes.push({
+			'index': fromIndex,
+			'action': 'move',
+			'to': toIndex
+		});
+		//TODO change selfdiff
 	}
 
 	var longestSide = (left.length > right.length) ? left.length : right.length;
