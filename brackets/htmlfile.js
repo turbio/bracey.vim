@@ -172,7 +172,15 @@ function compareElements(left, right){
 
 	var diff = {
 		same: false,
-		reasons: []
+		compatible: false,
+		reasons: [],
+		only_reason: function(){
+			if(this.reasons.length == 1){
+				return this.reasons[0];
+			}else{
+				return false;
+			}
+		}
 	};
 
 	if(left.type != right.type){
@@ -205,10 +213,7 @@ function compareElements(left, right){
 		var rightChildHash = JSON.stringify(
 				stripElements(right.children, false));
 
-		if(leftChildHash == rightChildHash){
-			diff.children = true;
-		}else{
-			diff.children = false;
+		if(leftChildHash != rightChildHash){
 			diff.reasons.push('children');;
 		}
 
@@ -255,7 +260,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 		selfDiff.changes.push({
 			'index': fromIndex,
 			'action': 'add',
-			'value': right[toIndex]
+			'value': stripElement(right[toIndex])
 		});
 		left.splice(toIndex, 0, right[fromIndex]);
 	}
@@ -299,11 +304,58 @@ function diffParsedHtml(left, right, edit_left, parent){
 			continue
 		}
 
-		if(elemDiff.compatible){
-			if(elemDiff.reasons.indexOf('data') != -1){
-				pushChange(elem, elem, 'data');
-			}
+		//if there's only once difference, then an easy transition can probably
+		//be made
+		if(elemDiff.only_reason() == 'data'){
+			pushChange(elem, elem, 'data');
+			continue;
 		}
+
+		if(elemDiff.only_reason() == 'name'){
+			pushChange(elem, elem, 'name');
+			continue;
+		}
+
+		if(elemDiff.only_reason() == 'attrib'){
+			pushChange(elem, elem, 'attribs');
+			continue
+		}
+
+		//TODO: smarter diffing, determine if another element is similar and
+		//moving can take place
+
+		//for now, if the children are the only difference,
+		//just fix the children
+		if(elemDiff.only_reason() == 'children'){
+			diff = diff.concat(diffParsedHtml(
+				left[elem].children,
+				right[elem].children,
+				true,
+				left[elem].index));
+			continue;
+		}
+
+		//...later on a move detection should be implemented
+		//for now, this will have to work
+		bestMatch = null;
+		for(var sub = elem; sub < left.length; sub++){
+			var subDiff = compareElements(left[sub], right[elem]);
+			//var corDiff = compareElements(left[sub], right[sub]);
+			if(subDiff.same){
+				bestMatch = left[sub];
+			}
+			//if(subDiff.compatible &&
+					//subDiff.reasons.length < corDiff.reasons.length){
+				//bestMatch = left[sub]
+			//}
+		}
+
+		if(bestMatch == null){
+			pushAdd(elem, elem);
+		}else{
+			pushMove(bestMatch.index, elem);
+		}
+
 	}
 
 	if(selfDiff.changes.length != 0){
@@ -349,6 +401,13 @@ function parse(inputSrc){
 			elementIndex++;
 		}
 	}, parsedHtml);
+
+	//remove all text objects from the root element
+	parsedHtml.forEach(function(value, index, array){
+		if(value.type == 'text'){
+			array.splice(index, 1);
+		}
+	});
 
 	return parsedHtml;
 };

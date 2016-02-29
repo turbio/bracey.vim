@@ -9,7 +9,7 @@
 
 	webSocket.onmessage = function(event){
 		message = JSON.parse(event.data);
-		console.log(message);
+		//console.log(event.data);
 		switch(message['command']){
 			case 'select':
 				setHighlighted(message['selector']);
@@ -25,11 +25,15 @@
 				break;
 			case 'edit':
 				message['changes'].forEach(function(changeGroup){
-					var elem = document.querySelector('[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]')
+					var elem = null;
+					if(changeGroup['element'] == 0){
+						elem = document;
+					}else{
+						elem = document.querySelector(
+							'[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]');
+					}
 					changeGroup['changes'].forEach(function(change){
-						makeChange(
-								elem,
-								change);
+						makeChange(elem, change);
 					});
 				});
 				break;
@@ -40,15 +44,47 @@
 	};
 
 	var makeChange = function(element, change){
+		console.log(element);
+		console.log(change);
 		switch(change.action){
 			case 'change':
 				switch(change.what){
 					case 'data':
 						element.childNodes[change.index].nodeValue = change.value;
-
 						break;
 				}
+				break;
+			case 'remove':
+				element.removeChild(element.childNodes[change.index]);
+				break;
+			case 'add':
+				var newElem = constructElem(change.value);
+				if(element.childNodes.length == 0){
+					element.appendChild(newElem);
+				}else{
+					element.insertBefore(newElem, element.childNodes[change.index]);
+				}
+				break;
 		};
+	};
+
+	var constructElem = function(data){
+		var newElem = null;
+		if(data.type == 'text'){
+			newElem = document.createTextNode(data.data);
+		}else{
+			newElem = document.createElement(data.name);
+
+			for(attrib in data.attribs){
+				newElem.setAttribute(attrib, data.attribs[attrib]);
+			}
+
+			data.children.forEach(function(val, index){
+				newElem.appendChild(constructElem(val));
+			});
+		}
+
+		return newElem;
 	};
 
 	var lastSelection = '';
