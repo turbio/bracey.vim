@@ -284,6 +284,10 @@ function diffParsedHtml(left, right, edit_left, parent){
 		left.splice(toIndex, 0, temp)
 	}
 
+	function findElementMatch(elem, searchList){
+
+	}
+
 	for(var elem = 0; elem < left.length || elem < right.length; elem++){
 		var leftElem = left[elem];
 		var rightElem = right[elem];
