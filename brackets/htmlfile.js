@@ -136,7 +136,10 @@ function stripElement(elem, include_index){
 		newElem.index = elem.index;
 
 	if(elem.attribs)
-		newElem.attribs = elem.attribs;
+		newElem.attribs = {}
+		for(var attr in elem.attribs){
+			newElem.attribs[attr] = elem.attribs[attr];
+		}
 
 	if(elem.data)
 		newElem.data = elem.data;
