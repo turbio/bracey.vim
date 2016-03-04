@@ -132,14 +132,22 @@ function stripElement(elem, include_index){
 	if(elem.name)
 		newElem.name = elem.name;
 
-	if(include_index && elem.index)
-		newElem.index = elem.index;
-
-	if(elem.attribs)
+	if(elem.attribs){
 		newElem.attribs = {}
 		for(var attr in elem.attribs){
 			newElem.attribs[attr] = elem.attribs[attr];
 		}
+	}
+
+	if(include_index && elem.index){
+		newElem.index = elem.index;
+
+		if(!elem.attribs){
+			newElem.attribs = {};
+		}
+
+		newElems.attribs['meta-brackets-element-index'] = elem.index;
+	}
 
 	if(elem.data)
 		newElem.data = elem.data;
