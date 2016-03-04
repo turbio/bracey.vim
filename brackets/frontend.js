@@ -2,14 +2,35 @@
  * this is what will be injected into whatever page is being viewed
  */
 (function(){
-	var webSocket = new WebSocket('ws://' + window.location.host);
-	webSocket.onopen = function(event){};
-	webSocket.onclose = function(event){};
-	webSocket.onerror = function(event){};
+	var endSession = false;
+	var webSocket = null;
 
-	webSocket.onmessage = function(event){
+	var connectSocket = function(){
+		webSocket = new WebSocket('ws://' + window.location.host);
+		webSocket.onopen = ws_handle_open;
+		webSocket.onclose = ws_handle_close;
+		webSocket.onerror = ws_handle_error;
+		webSocket.onmessage = we_handle_message;
+	}
+
+	var ws_handle_open = function(event){
+	};
+
+	var ws_handle_close = function(event){
+		if(!endSession){
+			setTimeout(function(){
+				connectSocket();
+			}, 10000);	//wait ten seconds
+		}
+	};
+
+	var ws_handle_error = function(event){
+		console.log('error...');
+		console.log(event);
+	};
+
+	var we_handle_message = function(event){
 		message = JSON.parse(event.data);
-		//console.log(event.data);
 		switch(message['command']){
 			case 'select':
 				setHighlighted(message['selector']);
@@ -159,4 +180,6 @@
 			c++;
 		}
 	};
+
+	connectSocket();
 })();
