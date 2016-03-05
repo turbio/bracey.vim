@@ -30,7 +30,9 @@
 	};
 
 	var we_handle_message = function(event){
+		console.log(event.data);
 		message = JSON.parse(event.data);
+		console.log(message);
 		switch(message['command']){
 			case 'select':
 				setHighlighted(message['selector']);
@@ -65,8 +67,6 @@
 	};
 
 	var makeChange = function(element, change){
-		console.log(element);
-		console.log(change);
 		switch(change.action){
 			case 'change':
 				switch(change.what){

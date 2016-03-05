@@ -5,11 +5,22 @@ var util = require('util');
 var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
 var injectedJS = fs.readFileSync("frontend.js", 'utf8');
 
+function newElemIndex(){
+	return this.currentElemIndex++;
+}
+
+function freeElemIndex(index){
+	//TODO: this function
+}
+
 //takes an optinal path and an opional callback
 //if there is a path, read and parse said file
 //if reading it or parsing it causes a problem, call the callback
 //stating the problem
 function HtmlFile(path, callback){
+	//starts at 1 because 0 is the document root
+	this.currentElemIndex = 1;
+
 	if(path != undefined){
 		this.path = path;
 		var self = this;
@@ -19,7 +30,7 @@ function HtmlFile(path, callback){
 				return;
 			}
 			self.rawSource = data;
-			self.parsedHtml = parse(data);
+			self.parsedHtml = parse.call(self, data, true);
 			if(callback){
 				callback(null);
 			}
@@ -36,9 +47,6 @@ HtmlFile.prototype.webSrc = function(){
 	//this basically just adds the required css and js to the head
 	//also set the index attribute
 	var head = htmlparser.DomUtils.filter(function(elem){
-		if(elem.index != undefined){
-			elem.attribs['meta-brackets-element-index'] = elem.index;
-		}
 		return htmlparser.DomUtils.getName(elem) == 'head';
 	}, webSourceHtml)[0];
 
@@ -113,13 +121,15 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
-	var newParsedHtml = parse(newHtml);
-	var diff = diffParsedHtml(this.parsedHtml, newParsedHtml, true);
+	//this new element shouldn't have indexes, it will only be compared to the
+	//currently existing html and won't be used on it's own
+	var newParsedHtml = parse(newHtml, false);
+
+	var diff = diffParsedHtml.call(this, this.parsedHtml, newParsedHtml, true);
 	if(diff.length > 0){
 		callback(diff);
 	}
 
-	this.parsedHtml = newParsedHtml;
 	this.rawSource = newHtml;
 };
 
@@ -146,7 +156,7 @@ function stripElement(elem, include_index){
 			newElem.attribs = {};
 		}
 
-		newElems.attribs['meta-brackets-element-index'] = elem.index;
+		newElem.attribs['meta-brackets-element-index'] = elem.index;
 	}
 
 	if(elem.data)
@@ -267,13 +277,19 @@ function diffParsedHtml(left, right, edit_left, parent){
 		left[fromIndex][key] = right[toIndex][key]
 	}
 
-	function pushAdd(fromIndex, toIndex){
+	function pushAdd(fromRightIndex, toIndex){
+		if(right[fromRightIndex].type == 'tag'
+				|| right[fromRightIndex].type == 'style'
+				|| right[fromRightIndex].type == 'script'){
+			right[fromRightIndex].index = newElemIndex.call(this);
+		}
+
 		selfDiff.changes.push({
-			'index': fromIndex,
+			'index': toIndex,
 			'action': 'add',
-			'value': stripElement(right[toIndex])
+			'value': stripElement(right[fromRightIndex], true)
 		});
-		left.splice(toIndex, 0, right[fromIndex]);
+		left.splice(toIndex, 0, right[fromRightIndex]);
 	}
 
 	function pushRemove(index){
@@ -304,12 +320,12 @@ function diffParsedHtml(left, right, edit_left, parent){
 		var rightElem = right[elem];
 
 		if(leftElem == undefined && rightElem != undefined){
-			pushAdd(elem, left.length);
+			pushAdd.call(this, elem, left.length);
 			continue;
 		}
 
 		if(rightElem == undefined && leftElem != undefined){
-			pushRemove(elem);
+			pushRemove.call(this, elem);
 			continue;
 		}
 
@@ -322,17 +338,17 @@ function diffParsedHtml(left, right, edit_left, parent){
 		//if there's only once difference, then an easy transition can probably
 		//be made
 		if(elemDiff.only_reason() == 'data'){
-			pushChange(elem, elem, 'data');
+			pushChange.call(this, elem, elem, 'data');
 			continue;
 		}
 
 		if(elemDiff.only_reason() == 'name'){
-			pushChange(elem, elem, 'name');
+			pushChange.call(this, elem, elem, 'name');
 			continue;
 		}
 
 		if(elemDiff.only_reason() == 'attrib'){
-			pushChange(elem, elem, 'attribs');
+			pushChange.call(this, elem, elem, 'attribs');
 			continue
 		}
 
@@ -342,7 +358,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 		//for now, if the children are the only difference,
 		//just fix the children
 		if(elemDiff.only_reason() == 'children'){
-			diff = diff.concat(diffParsedHtml(
+			diff = diff.concat(diffParsedHtml.call(this,
 				left[elem].children,
 				right[elem].children,
 				true,
@@ -366,9 +382,9 @@ function diffParsedHtml(left, right, edit_left, parent){
 		}
 
 		if(bestMatch == null){
-			pushAdd(elem, elem);
+			pushAdd.call(this, elem, elem);
 		}else{
-			pushMove(bestMatch.index, elem);
+			pushMove.call(this, bestMatch.index, elem);
 		}
 
 	}
@@ -380,7 +396,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 	return diff;
 }
 
-function parse(inputSrc){
+function parse(inputSrc, include_index){
 	var handler = new htmlparser.DomHandler({withStartIndices: true});
 
 	//for whatever reason, the domhandler doesn't have an option to add the
@@ -409,13 +425,14 @@ function parse(inputSrc){
 	var parsedHtml = handler.dom;
 
 	//give each element an index
-	var elementIndex = 1;	//0 is for root
-	htmlparser.DomUtils.filter(function(elem){
-		if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
-			elem.index = elementIndex;
-			elementIndex++;
-		}
-	}, parsedHtml);
+	if(include_index){
+		var self = this;
+		htmlparser.DomUtils.filter(function(elem){
+			if(elem.type == 'tag' || elem.type == 'style' || elem.type == 'script'){
+				elem.index = newElemIndex.call(self);
+			}
+		}, parsedHtml);
+	}
 
 	//remove all text objects from the root element
 	parsedHtml.forEach(function(value, index, array){
