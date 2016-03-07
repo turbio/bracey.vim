@@ -341,7 +341,9 @@ function diffParsedHtml(left, right, edit_left, parent){
 		}
 
 		if(rightElem == undefined && leftElem != undefined){
-			pushRemove.call(this, elem);
+			while(left.length > right.length){
+				pushRemove.call(this, elem);
+			}
 			continue;
 		}
 
