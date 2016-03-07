@@ -127,11 +127,26 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 
 	var diff = diffParsedHtml.call(this, this.parsedHtml, newParsedHtml, true);
 	if(diff.length > 0){
+		//update the position information
+		updateCharIndex(newParsedHtml, this.parsedHtml);
+
 		callback(diff);
 	}
 
 	this.rawSource = newHtml;
 };
+
+//insert the character index posotions in "from" and put them into "to"
+function updateCharIndex(from, to){
+	to.forEach(function(toElem, index){
+		toElem.startIndex = from[index].startIndex;
+		toElem.endIndex = from[index].endIndex;
+
+		if(toElem.children && toElem.children.length > 0){
+			updateCharIndex(from[index].children, toElem.children);
+		}
+	});
+}
 
 //takes an element created by htmlparser2 and strips the meta information
 function stripElement(elem, include_index){
@@ -289,6 +304,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'action': 'add',
 			'value': stripElement(right[fromRightIndex], true)
 		});
+
 		left.splice(toIndex, 0, right[fromRightIndex]);
 	}
 
