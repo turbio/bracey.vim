@@ -1,0 +1,303 @@
+<!DOCTYPE html><html meta-brackets-element-index="1">
+<head meta-brackets-element-index="2">
+	<title meta-brackets-element-index="3">this is a test</title>
+	<link rel="stylesheet" type="text/css" href="style.css" meta-brackets-element-index="4">
+	<style type="text/css" meta-brackets-element-index="5">
+		body::after{
+			content: "looks like internal css is working just fine";
+		}
+		.internal{
+			background: #888;
+			color: white;
+		}
+		.internal+.first{
+			text-align: left;
+		}
+		.internal+.second{
+			text-align: right;
+		}
+	</style>
+<script language="javascript">/*
+ * this is what will be injected into whatever page is being viewed
+ */
+(function(){
+	var endSession = false;
+	var webSocket = null;
+
+	var connectSocket = function(){
+		webSocket = new WebSocket('ws://' + window.location.host);
+		webSocket.onopen = ws_handle_open;
+		webSocket.onclose = ws_handle_close;
+		webSocket.onerror = ws_handle_error;
+		webSocket.onmessage = we_handle_message;
+	}
+
+	var ws_handle_open = function(event){
+	};
+
+	var ws_handle_close = function(event){
+		if(!endSession){
+			setTimeout(function(){
+				connectSocket();
+			}, 10000);	//wait ten seconds
+		}
+	};
+
+	var ws_handle_error = function(event){
+		console.log('error...');
+		console.log(event);
+	};
+
+	var we_handle_message = function(event){
+		console.log(event.data);
+		message = JSON.parse(event.data);
+		console.log(message);
+		switch(message['command']){
+			case 'select':
+				setHighlighted(message['selector']);
+				break;
+			case 'reload_page':
+				location.reload();
+				break;
+			case 'reload_css':
+				reloadCSS();
+				break;
+			case 'goto':
+				window.location.href = message['location'];
+				break;
+			case 'edit':
+				message['changes'].forEach(function(changeGroup){
+					var elem = null;
+					if(changeGroup['element'] == 0){
+						elem = document;
+					}else{
+						elem = document.querySelector(
+							'[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]');
+					}
+					changeGroup['changes'].forEach(function(change){
+						makeChange(elem, change);
+					});
+				});
+				break;
+			case 'eval':
+				eval(message['js']);
+				break;
+		}
+	};
+
+	var makeChange = function(element, change){
+		switch(change.action){
+			case 'change':
+				switch(change.what){
+					case 'data':
+						element.childNodes[change.index].nodeValue = change.value;
+						break;
+				}
+				break;
+			case 'remove':
+				element.removeChild(element.childNodes[change.index]);
+				break;
+			case 'add':
+				var newElem = constructElem(change.value);
+				if(element.childNodes.length == 0){
+					element.appendChild(newElem);
+				}else{
+					element.insertBefore(newElem, element.childNodes[change.index]);
+				}
+				break;
+		};
+	};
+
+	var constructElem = function(data){
+		var newElem = null;
+		if(data.type == 'text'){
+			newElem = document.createTextNode(data.data);
+		}else{
+			newElem = document.createElement(data.name);
+
+			for(attrib in data.attribs){
+				newElem.setAttribute(attrib, data.attribs[attrib]);
+			}
+
+			data.children.forEach(function(val, index){
+				newElem.appendChild(constructElem(val));
+			});
+		}
+
+		return newElem;
+	};
+
+	var lastSelection = '';
+
+	var  setHighlighted = function(selector){
+		//if the same selection is sent multiple times, no need to repeat it
+		if(lastSelection == selector){
+			return;
+		}else{
+			lastSelection = selector;
+		}
+
+		existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		for(var i = 0, len = existingSelectors.length; i < len; i++){
+			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
+		}
+
+		toHighlight = document.querySelectorAll(message['selector']);
+		for(var i = 0, len = toHighlight.length; i < len; i++){
+			var newHighlight = document.createElement('div');
+			newHighlight.className = 'brackets-currently-selected-highlight';
+
+			var box = toHighlight[i].getBoundingClientRect();
+
+			var body = document.body;
+			var docEl = document.documentElement;
+
+			var scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
+			var scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
+
+			var clientTop = docEl.clientTop || body.clientTop || 0;
+			var clientLeft = docEl.clientLeft || body.clientLeft || 0;
+
+			var top  = box.top +  scrollTop - clientTop;
+			var left = box.left + scrollLeft - clientLeft;
+
+			newHighlight.style.top = top + 'px';
+			newHighlight.style.left = left + 'px';
+			newHighlight.style.width = (box.right - box.left) + 'px';
+			newHighlight.style.height = (box.bottom - box.top) + 'px';
+
+			document.body.appendChild(newHighlight);
+		}
+	};
+
+	var reloadCSS = function(){
+		var elements = document.getElementsByTagName("link");
+
+		var c = 0;
+
+		for (var i = 0; i < elements.length; i++) {
+			if (elements[c].rel == "stylesheet") {
+				var href = elements[i].getAttribute("data-href");
+
+				if (href == null) {
+					href = elements[c].href;
+					elements[c].setAttribute("data-href", href);
+				}
+
+				if (window.__BL_OVERRIDE_CACHE) {
+					var link = document.createElement("link");
+					link.href = href;
+					link.rel = "stylesheet";
+					document.head.appendChild(link);
+
+					document.head.removeChild(elements[c]);
+
+					continue;
+				}
+				elements[i].href = href + ((href.indexOf("?") == -1) ? "?" : "&") + "c=" + (new Date).getTime();
+			}
+			c++;
+		}
+	};
+
+	connectSocket();
+})();
+</script><style>@keyframes blink-background{
+	0% {
+		background: none;
+	}
+	50% {
+		background: rgba(30, 182, 255, 0.45);
+	}
+	100% {
+		background: none;
+	}
+}
+
+.brackets-currently-selected-highlight{
+	position: absolute !important;
+	-moz-box-sizing: border-box !important;
+	-webkit-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+	border-style: solid !important;
+	border-color: rgba(30, 182, 255, 0.69) !important;
+	border-width: 1px !important;
+	pointer-events: none !important;
+	overflow-x: hidden !important;
+	overflow-y: hidden !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: none !important;
+
+	animation-name: blink-background !important;
+	animation-duration: 0.75s !important;
+}
+</style></head>
+<body meta-brackets-element-index="6">
+	<h1 meta-brackets-element-index="7">this is a test</h1>
+	<p meta-brackets-element-index="8">it should contain some tricky html to test the parser</p>
+	<p meta-brackets-element-index="9">here's a paragraph</p>
+	<p meta-brackets-element-index="10">and another</p>
+	<h2 meta-brackets-element-index="11">how about some lists</h2>
+	<hr meta-brackets-element-index="12">
+	<ol meta-brackets-element-index="13">
+		<li meta-brackets-element-index="14">a</li>
+		<li meta-brackets-element-index="15">b</li>
+		<li meta-brackets-element-index="16">c</li>
+	</ol>
+	<ul meta-brackets-element-index="17">
+		<li meta-brackets-element-index="18">a</li>
+		<li meta-brackets-element-index="19">b</li>
+		<li meta-brackets-element-index="20">c</li>
+	</ul>
+	<h2 meta-brackets-element-index="21">and a table</h2>
+	<hr meta-brackets-element-index="22">
+	<table meta-brackets-element-index="23">
+		<tr meta-brackets-element-index="24">
+			<td meta-brackets-element-index="25">a</td>
+			<td meta-brackets-element-index="26">b</td>
+			<td meta-brackets-element-index="27">c</td>
+			<td meta-brackets-element-index="28">d</td>
+		</tr>
+		<tr meta-brackets-element-index="29">
+			<td meta-brackets-element-index="30">e</td>
+			<td meta-brackets-element-index="31">f</td>
+			<td meta-brackets-element-index="32">g</td>
+			<td meta-brackets-element-index="33">h</td>
+		</tr>
+		<tr meta-brackets-element-index="34">
+			<td meta-brackets-element-index="35">i</td>
+			<td meta-brackets-element-index="36">j</td>
+			<td meta-brackets-element-index="37">k</td>
+			<td meta-brackets-element-index="38">l</td>
+		</tr>
+		<tr meta-brackets-element-index="39">
+			<td meta-brackets-element-index="40">m</td>
+			<td meta-brackets-element-index="41">n</td>
+			<td meta-brackets-element-index="42">o</td>
+			<td meta-brackets-element-index="43">p</td>
+		</tr>
+	</table>
+	<h2 meta-brackets-element-index="44">now for the divs</h2>
+	<hr meta-brackets-element-index="45">
+	<div meta-brackets-element-index="46">just a normal div</div>
+	<div class="classy" meta-brackets-element-index="47">a div with class</div>
+	<div id="identifiable" meta-brackets-element-index="48">an div with id</div>
+	<div id="relative" meta-brackets-element-index="49">relative positioned div</div>
+	<div id="fixed" meta-brackets-element-index="50">fixed positioned div</div>
+	<div id="absolute" meta-brackets-element-index="51">absolute positioned div</div>
+	<div style="overflow: hidden" meta-brackets-element-index="52">
+		<p meta-brackets-element-index="53">some floating divs:</p>
+		<div class="floaty" meta-brackets-element-index="54">first</div>
+		<div class="floaty" meta-brackets-element-index="55">second</div>
+		<div class="floaty" meta-brackets-element-index="56">third</div>
+		<div class="floaty" meta-brackets-element-index="57">fourth</div>
+		<div class="floaty" meta-brackets-element-index="58">fifth</div>
+		<div class="floaty" meta-brackets-element-index="59">sixth</div>
+	</div>
+	<h2 meta-brackets-element-index="60">and last but not least internal css</h2>
+	<hr meta-brackets-element-index="61">
+	<div class="internal first" meta-brackets-element-index="62">this is styled by internal css</div>
+	<div class="internal second" meta-brackets-element-index="63">and so is this</div>
+</body>
+</html>

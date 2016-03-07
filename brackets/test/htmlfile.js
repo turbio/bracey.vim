@@ -1,43 +1,44 @@
 var expect = require('chai').expect;
+var fs = require("fs");
 
 describe('htmlfile', function(){
 	before(function(){
 		this.htmlfile = require('../htmlfile');
 	});
 
+	beforeEach(function(done){
+		this.file = new this.htmlfile('test/index.html', function(err){
+			done(err);
+		});
+	});
+
 	describe('constructor', function(){
 		it('should not throw errors under any circumstance', function(){
 			this.htmlfile();
 		});
-
-		describe('callback', function(){
-			it('should have no errors with valid file', function(done){
-				this.htmlfile('test/index.html', function(err){
-					expect(err).to.be.null;
-					done();
-				});
+		it('should have no errors with valid file', function(done){
+			this.htmlfile('test/index.html', function(err){
+				expect(err).to.be.null;
+				done();
 			});
-			it('should have errors with nonexistent file', function(done){
-				this.htmlfile('file which does not exist', function(err){
-					err.should.be.ok;
-					done();
-				});
-			});
-			it('should have errors with invalid html');
 		});
+		it('should have errors with nonexistent file', function(done){
+			this.htmlfile('file which does not exist', function(err){
+				err.should.be.ok;
+				done();
+			});
+		});
+		it('should have errors with invalid html');
 	});
 
 	describe('#tagFromPosition()', function(){
-		before(function(done){
-			this.file = new this.htmlfile('test/index.html', function(err){
-				done(err);
-			});
-		});
 		it('should return null when given a negative line or column', function(){
 			expect(this.file.tagFromPosition(-1, -1)).to.be.null;
 		});
-		it('should return null when given an out of bound line or column', function(){
+		it('should return null when given an out of bound line', function(){
 			expect(this.file.tagFromPosition(10000, 0)).to.be.null;
+		});
+		it('should return null when given an out of bound column', function(){
 			expect(this.file.tagFromPosition(0, 10000)).to.be.null;
 		});
 		[
@@ -55,5 +56,30 @@ describe('htmlfile', function(){
 				elem.should.have.property('index', test.expected.index);
 			});
 		}, this);
+	});
+
+	describe('#webSrc()', function(){
+		before(function(done){
+			var self = this;
+			fs.readFile('test/index_websrc.html', 'utf8', function(err, data){
+				self.indexwebsrc = data;
+				fs.readFile('frontend.js', 'utf8', function(err, data){
+					self.frontendjs = data;
+					fs.readFile('frontend.css', 'utf8', function(err, data){
+						self.frontendcss = data;
+						done(err);
+					});
+				});
+			});
+		});
+		it('should have the contents of frontend.js injected inside', function(){
+			this.file.webSrc().should.include(this.frontendjs);
+		});
+		it('should have the contents of frontend.css injected inside', function(){
+			this.file.webSrc().should.include(this.frontendcss);
+		});
+		it('should return correctly formated html', function(){
+			this.file.webSrc().should.equal(this.indexwebsrc);
+		});
 	});
 });
