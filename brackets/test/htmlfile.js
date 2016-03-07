@@ -82,4 +82,87 @@ describe('htmlfile', function(){
 			this.file.webSrc().should.equal(this.indexwebsrc);
 		});
 	});
+
+	describe('#setContent()', function(){
+		before(function(done){
+			var self = this;
+			fs.readFile('test/index.html', 'utf8', function(err, data){
+				self.indexhtml = data;
+				done(err);
+			});
+		});
+		it('should not call callback when nothing has changed', function(){
+			this.file.setContent(this.indexhtml,function(diff){
+				throw 'reported changes when nothing was changed';
+			});
+		});
+		it('should ignore all whitespace changes to root', function(){
+			this.file.setContent(this.indexhtml + '   \n  ',function(diff){
+				throw 'reported changes when only root whitespace was changed';
+			});
+		});
+		it('should call callback when changes are made', function(done){
+			//make a change...
+			var newhtml = this.indexhtml.slice(0, 46)
+				+ 'still '
+				+ this.indexhtml.slice(46, -1);
+
+			this.file.setContent(newhtml,function(diff){
+				done();
+			});
+		});
+		it('should report a text element change correctly', function(done){
+			var newhtml = this.indexhtml.slice(0, 46)
+				+ 'still '
+				+ this.indexhtml.slice(46, -1);
+			this.file.setContent(newhtml,function(diff){
+				diff.should.deep.equal([{
+							"element":3,
+							"changes": [{
+									"action":"change",
+									"what":"data",
+									"index":0,
+									"value":"this is still a test"
+								}]
+				}]);
+				done();
+			});
+		});
+		it('should report a text element removal correctly', function(done){
+			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
+			this.file.setContent(newhtml,function(diff){
+				diff.should.deep.equal([{
+							"element":3,
+							"changes": [{
+									"action":"remove",
+									"index":0,
+								}]
+				}]);
+				done();
+			});
+		});
+		it('should report a text element addition correctly', function(done){
+			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
+			//first remove the title
+			this.file.setContent(newhtml,function(diff){});
+
+			//and now readd it
+			var newhtml = newhtml.slice(0, 38) + 'a new title' + newhtml.slice(38, -1);
+			this.file.setContent(newhtml,function(diff){
+				diff.should.deep.equal([{
+							"element":3,
+							"changes": [{
+									"action":"add",
+									"index":0,
+									"value": { "data": "a new title", "type": "text" }
+								}]
+				}]);
+				done();
+			});
+		});
+		it('should report html element remove correctly');
+		it('should report html element addition correctly');
+		it('should report html element changes correctly');
+		it('should report errors in html');
+	});
 });
