@@ -6,28 +6,13 @@ describe('htmlfile', function(){
 		this.htmlfile = require('../htmlfile');
 	});
 
-	beforeEach(function(done){
-		this.file = new this.htmlfile('test/index.html', function(err){
-			done(err);
-		});
+	beforeEach(function(){
+		this.htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
+		this.htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
+		this.file = new this.htmlfile(fs.readFileSync('test/index.html', "utf8"));
 	});
 
 	describe('constructor', function(){
-		it('should not throw errors under any circumstance', function(){
-			this.htmlfile();
-		});
-		it('should have no errors with valid file', function(done){
-			this.htmlfile('test/index.html', function(err){
-				expect(err).to.be.null;
-				done();
-			});
-		});
-		it('should have errors with nonexistent file', function(done){
-			this.htmlfile('file which does not exist', function(err){
-				err.should.be.ok;
-				done();
-			});
-		});
 		it('should have errors with invalid html');
 	});
 
@@ -92,12 +77,12 @@ describe('htmlfile', function(){
 			});
 		});
 		it('should not call callback when nothing has changed', function(){
-			this.file.setContent(this.indexhtml,function(diff){
+			this.file.setContent(this.indexhtml,function(err, diff){
 				throw 'reported changes when nothing was changed';
 			});
 		});
 		it('should ignore all whitespace changes to root', function(){
-			this.file.setContent(this.indexhtml + '   \n  ',function(diff){
+			this.file.setContent(this.indexhtml + '   \n  ',function(err, diff){
 				throw 'reported changes when only root whitespace was changed';
 			});
 		});
@@ -107,15 +92,15 @@ describe('htmlfile', function(){
 				+ 'still '
 				+ this.indexhtml.slice(46, -1);
 
-			this.file.setContent(newhtml,function(diff){
-				done();
+			this.file.setContent(newhtml,function(err, diff){
+				done(err);
 			});
 		});
 		it('should report a text element change correctly', function(done){
 			var newhtml = this.indexhtml.slice(0, 46)
 				+ 'still '
 				+ this.indexhtml.slice(46, -1);
-			this.file.setContent(newhtml,function(diff){
+			this.file.setContent(newhtml,function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
 							"changes": [{
@@ -125,12 +110,12 @@ describe('htmlfile', function(){
 									"value":"this is still a test"
 								}]
 				}]);
-				done();
+				done(err);
 			});
 		});
 		it('should report a text element removal correctly', function(done){
 			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
-			this.file.setContent(newhtml,function(diff){
+			this.file.setContent(newhtml,function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
 							"changes": [{
@@ -138,17 +123,17 @@ describe('htmlfile', function(){
 									"index":0,
 								}]
 				}]);
-				done();
+				done(err);
 			});
 		});
 		it('should report a text element addition correctly', function(done){
 			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
 			//first remove the title
-			this.file.setContent(newhtml,function(diff){});
+			this.file.setContent(newhtml, function(err, diff){});
 
 			//and now readd it
 			var newhtml = newhtml.slice(0, 38) + 'a new title' + newhtml.slice(38, -1);
-			this.file.setContent(newhtml,function(diff){
+			this.file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
 							"changes": [{
@@ -157,25 +142,25 @@ describe('htmlfile', function(){
 									"value": { "data": "a new title", "type": "text" }
 								}]
 				}]);
-				done();
+				done(err);
 			});
 		});
 		it('should report html element remove correctly', function(done){
 			//remove line
 			var newhtml = this.indexhtml.slice(0, 597) + this.indexhtml.slice(610, -1);
 
-			this.file.setContent(newhtml, function(diff){
+			this.file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{"element":13,"changes":[{"index":4,"action":"change","what":"data","value":"\n\t"},{"index":5,"action":"remove"},{"index":5,"action":"remove"}]}]);
-				done();
+				done(err);
 			});
 		});
 		it('should report html element addition correctly', function(done){
 			//remove line
 			var newhtml = this.indexhtml.slice(0, 610) + '<li>d</li>' + this.indexhtml.slice(610, -1);
 
-			this.file.setContent(newhtml, function(diff){
+			this.file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-brackets-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
-				done();
+				done(err);
 			});
 		});
 		it('should report html element changes correctly');

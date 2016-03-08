@@ -1,10 +1,17 @@
-var fs = require("fs");
 var htmlparser = require("htmlparser2");
 var util = require('util');
-var htmlhint  = require("htmlhint").htmlhint;
+var htmlhint  = require("htmlhint").HTMLHint;
 
-var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
-var injectedJS = fs.readFileSync("frontend.js", 'utf8');
+var injectedCSS;
+var injectedJS;
+
+HtmlFile.setCSS = function(source){
+	injectedCSS = source;
+}
+
+HtmlFile.setJS = function(source){
+	injectedJS = source;
+}
 
 function newElemIndex(){
 	return this.currentElemIndex++;
@@ -18,26 +25,16 @@ function freeElemIndex(index){
 //if there is a path, read and parse said file
 //if reading it or parsing it causes a problem, call the callback
 //stating the problem
-function HtmlFile(path, callback){
+function HtmlFile(source, path, callback){
+	if(injectedCSS == undefined || injectedJS == undefined){
+		throw 'must set injected js and css of htmlfile';
+	}
+
+	this.path = path;
+
 	//starts at 1 because 0 is the document root
 	this.currentElemIndex = 1;
-
-	if(path != undefined){
-		this.path = path;
-		var self = this;
-		fs.readFile(path, 'utf8', function(err, data){
-			if(callback !== undefined && err){
-				callback(err);
-				return;
-			}
-
-			self.rawSource = data;
-			self.parsedHtml = parse.call(self, data, true);
-			if(callback){
-				callback(null);
-			}
-		});
-	}
+	this.setContent(source, callback);
 }
 
 HtmlFile.prototype.webSrc = function(){
@@ -123,8 +120,28 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
-	//this new element shouldn't have indexes, it will only be compared to the
-	//currently existing html and won't be used on it's own
+	//before even begining, check to make sure there are no errors
+	errors = htmlhint.verify(newHtml, {'tag-pair': true});
+	if(errors && errors.length > 0){
+		this.errorState = true;
+		callback(errors, null);
+		return;
+	}else{
+		this.errorState = false;
+	}
+
+	this.rawSource = newHtml;
+
+	//if this is the first time this file gets any source, treat it as the starting
+	//point, thus no diffing required
+	if(this.parsedHtml == undefined){
+		this.parsedHtml = parse.call(this, newHtml, true);
+		return;
+	}
+
+	//now that we know we recieved valid html, and this a modification from the base
+	//it will only be compared to the currently existing html and won't be used on it's own
+	///thus we don't need indexes
 	var newParsedHtml = parse(newHtml, false);
 
 	var diff = diffParsedHtml.call(this, this.parsedHtml, newParsedHtml, true);
@@ -132,10 +149,8 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 		//update the position information
 		updateCharIndex(newParsedHtml, this.parsedHtml);
 
-		callback(diff);
+		callback(null, diff);
 	}
-
-	this.rawSource = newHtml;
 };
 
 //insert the character index posotions in "from" and put them into "to"

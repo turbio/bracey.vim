@@ -23,7 +23,9 @@ function Server(){
 }
 
 Server.prototype.start = function(port){
-	currentFile = new htmlfile(webRoot + '/index.html')
+	htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
+	htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
+	currentFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
 	httpServer.listen(port);
 };
 
@@ -63,7 +65,7 @@ var httpServer = http.createServer(function(request, response){
 							}
 							break;
 						case 'b':
-							currentFile.setContent(content, function(diff){
+							currentFile.setContent(content, function(err, diff){
 								broadcast({
 									'command': 'edit',
 									'changes': diff
