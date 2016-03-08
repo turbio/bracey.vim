@@ -1,6 +1,7 @@
 var fs = require("fs");
 var htmlparser = require("htmlparser2");
 var util = require('util');
+var htmlhint  = require("htmlhint").htmlhint;
 
 var injectedCSS = fs.readFileSync("frontend.css", 'utf8');
 var injectedJS = fs.readFileSync("frontend.js", 'utf8');
@@ -29,6 +30,7 @@ function HtmlFile(path, callback){
 				callback(err);
 				return;
 			}
+
 			self.rawSource = data;
 			self.parsedHtml = parse.call(self, data, true);
 			if(callback){
