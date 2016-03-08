@@ -257,7 +257,25 @@ function compareElements(left, right){
 	}
 }
 
+function assignNewIndexes(elem){
+	if(elem.type == 'tag'
+			|| elem.type == 'style'
+			|| elem.type == 'script'){
+		elem.index = newElemIndex.call(this);
+
+		if(elem.children != undefined && elem.children.length > 0){
+			elem.children.forEach(function(e){
+				assignNewIndexes.call(this, e);
+			}, this);
+		}
+	}
+
+	return elem;
+};
+
 //takes two arrays of json dom elements and returns the difference
+//TODO: this function could be a lot smarter about diffs, and implement
+//moves
 function diffParsedHtml(left, right, edit_left, parent){
 	if(parent == undefined){
 		parent = 0;
@@ -273,15 +291,6 @@ function diffParsedHtml(left, right, edit_left, parent){
 		'changes': []
 	};
 
-	function pushReplace(index){
-		selfDiff.changes.push({
-			'action': 'replace',
-			'index': index,
-			'value': stripElement(right[index])
-		});
-		left[index] = right[index];
-	}
-
 	function pushChange(fromIndex, toIndex, key){
 		selfDiff.changes.push({
 			'index': fromIndex,
@@ -293,18 +302,12 @@ function diffParsedHtml(left, right, edit_left, parent){
 	}
 
 	function pushAdd(fromRightIndex, toIndex){
-		if(right[fromRightIndex].type == 'tag'
-				|| right[fromRightIndex].type == 'style'
-				|| right[fromRightIndex].type == 'script'){
-			right[fromRightIndex].index = newElemIndex.call(this);
-		}
-
+		assignNewIndexes.call(this, right[fromRightIndex]);
 		selfDiff.changes.push({
 			'index': toIndex,
 			'action': 'add',
 			'value': stripElement(right[fromRightIndex], true)
 		});
-
 		left.splice(toIndex, 0, right[fromRightIndex]);
 	}
 
@@ -314,21 +317,6 @@ function diffParsedHtml(left, right, edit_left, parent){
 			'action': 'remove',
 		});
 		left.splice(index, 1);
-	}
-
-	function pushMove(fromIndex, toIndex){
-		selfDiff.changes.push({
-			'index': fromIndex,
-			'action': 'move',
-			'to': toIndex
-		});
-		var temp = left[fromIndex];
-		left.splice(fromIndex, 1)
-		left.splice(toIndex, 0, temp)
-	}
-
-	function findElementMatch(elem, searchList){
-
 	}
 
 	for(var elem = 0; elem < left.length || elem < right.length; elem++){
@@ -370,9 +358,6 @@ function diffParsedHtml(left, right, edit_left, parent){
 			continue
 		}
 
-		//TODO: smarter diffing, determine if another element is similar and
-		//moving can take place
-
 		//for now, if the children are the only difference,
 		//just fix the children
 		if(elemDiff.only_reason() == 'children'){
@@ -384,27 +369,7 @@ function diffParsedHtml(left, right, edit_left, parent){
 			continue;
 		}
 
-		//...later on a move detection should be implemented
-		//for now, this will have to work
-		bestMatch = null;
-		for(var sub = elem; sub < left.length; sub++){
-			var subDiff = compareElements(left[sub], right[elem]);
-			//var corDiff = compareElements(left[sub], right[sub]);
-			if(subDiff.same){
-				bestMatch = left[sub];
-			}
-			//if(subDiff.compatible &&
-					//subDiff.reasons.length < corDiff.reasons.length){
-				//bestMatch = left[sub]
-			//}
-		}
-
-		if(bestMatch == null){
-			pushAdd.call(this, elem, elem);
-		}else{
-			pushMove.call(this, bestMatch.index, elem);
-		}
-
+		pushAdd.call(this, elem, elem);
 	}
 
 	if(selfDiff.changes.length != 0){
