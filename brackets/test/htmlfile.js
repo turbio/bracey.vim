@@ -160,8 +160,24 @@ describe('htmlfile', function(){
 				done();
 			});
 		});
-		it('should report html element remove correctly');
-		it('should report html element addition correctly');
+		it('should report html element remove correctly', function(done){
+			//remove line
+			var newhtml = this.indexhtml.slice(0, 597) + this.indexhtml.slice(610, -1);
+
+			this.file.setContent(newhtml, function(diff){
+				diff.should.deep.equal([{"element":13,"changes":[{"index":4,"action":"change","what":"data","value":"\n\t"},{"index":5,"action":"remove"},{"index":5,"action":"remove"}]}]);
+				done();
+			});
+		});
+		it('should report html element addition correctly', function(done){
+			//remove line
+			var newhtml = this.indexhtml.slice(0, 610) + '<li>d</li>' + this.indexhtml.slice(610, -1);
+
+			this.file.setContent(newhtml, function(diff){
+				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-brackets-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
+				done();
+			});
+		});
 		it('should report html element changes correctly');
 		it('should report errors in html');
 	});
