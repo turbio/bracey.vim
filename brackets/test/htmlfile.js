@@ -129,10 +129,12 @@ describe('htmlfile', function(){
 		it('should report a text element addition correctly', function(done){
 			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
 			//first remove the title
-			this.file.setContent(newhtml, function(err, diff){});
+			this.file.setContent(newhtml, function(err, diff){
+				expect(err).to.be.null;
+			});
 
-			//and now readd it
-			var newhtml = newhtml.slice(0, 38) + 'a new title' + newhtml.slice(38, -1);
+			//and now read it
+			var newhtml = this.indexhtml.slice(0, 38) + 'a new title' + this.indexhtml.slice(52, -1);
 			this.file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
