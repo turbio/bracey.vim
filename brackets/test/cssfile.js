@@ -4,10 +4,11 @@ var cssfile = require('../cssfile');
 
 describe('cssfile', function(){
 	beforeEach(function(){
-		this.cssfielsrc = fs.readFileSync('test/style.css', 'utf8');
+		this.cssfilesrc = fs.readFileSync('test/style.css', 'utf8');
 		this.file = new cssfile(this.cssfilesrc,
 				'saladman',
 				function(err){
+					console.log(err);
 			expect(err).to.be.null;
 		});
 	});
@@ -55,7 +56,7 @@ describe('cssfile', function(){
 				done(err);
 			});
 		});
-		it('calls callback if thtere were any errors', function(done){
+		it('calls callback if there were any errors', function(done){
 			var newInvalidCss = 'body{background red more invalid stuff:::}'
 			this.file.setContent(newInvalidCss, function(err){
 				expect(err).to.not.be.null;
