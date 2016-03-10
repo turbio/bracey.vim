@@ -4,6 +4,7 @@
   "description": "",
   "main": "brackets.js",
   "dependencies": {
+    "css": "^2.2.1",
     "domhandler": "^2.3.0",
     "domutils": "^1.5.1",
     "fs": "^0.0.2",
