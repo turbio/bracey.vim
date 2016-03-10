@@ -18,10 +18,49 @@ var defaultFile = "index.html";
 var currentFileX = 0;
 var currentFileY = 0;
 
+var files = [];
+
 var currentHtmlFile;
 var currentFile;
 
+function getSource(callback){
+	if(!this.source_data){
+		this.source_data = fs.readFileSync(this.file_path, "utf8");
+	}
+
+	return this.source_data;
+}
+
+var errorPages = {
+	404: {
+		file_path: 'err_pages/404.html',
+		source_data: undefined,
+		source: getSource
+	},
+	'no_file': {
+		file_path: 'err_pages/no_file.html',
+		source_data: undefined,
+		source: getSource
+	},
+	'broken_file': {
+		file_path: 'err_pages/broken_file.html',
+		source_data: undefined,
+		source: getSource
+	},
+};
+
 function Server(){
+}
+
+function newFile(source, path, type){
+	switch(type){
+		case 'html':
+			break;
+		case 'css':
+			break;
+		case 'js':
+			break;
+	}
 }
 
 Server.prototype.start = function(port){
@@ -36,57 +75,46 @@ Server.prototype.stop = function(){
 	httpServer.close();
 };
 
-var httpServer = http.createServer(function(request, response){
-	if(request.url == "/"){
-		if(request.method == "POST"){
-			var postData = '';
-
-			request.on('data', function(data){
-				postData += data;
-			});
-
-			request.on('end', function(){
-				if(postData.length > 2){
-					if(postData == 'ping'){
-						broadcast({'command': 'pong'});
-						return;
-					}
-					command = postData[0];
-					content = postData.substring(2);
-					switch(command){
-						//cursor position command
-						case 'p':
-							cords = content.split(':');
-							currentFileX = cords[1] - 1;
-							currentFileY = cords[0] - 1;
-							elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
-							if(elem != null){
-								broadcast({
-									'command': 'select',
-									'selector': elem
-								});
-							}
-							break;
-						case 'b':
-							currentHtmlFile.setContent(content, function(err, diff){
-								broadcast({
-									'command': 'edit',
-									'changes': diff
-								});
-							});
-							break;
-					}
-				}
-			});
-
-			response.writeHead(200);
-			response.end();
-		}else{
-			response.writeHead(302, {
-				'Location': defaultFile
-			});
-			response.end();
+function handleEditorRequest(data){
+	if(postData.length > 2){
+		if(postData == 'ping'){
+			broadcast({'command': 'pong'});
+			return;
 		}
+		command = postData[0];
+		content = postData.substring(2);
+		switch(command){
+			//cursor position command
+			case 'p':
+				cords = content.split(':');
+				currentFileX = cords[1] - 1;
+				currentFileY = cords[0] - 1;
+				elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
+				if(elem != null){
+					broadcast({
+						'command': 'select',
+						'selector': elem
+					});
+				}
+				break;
+			case 'b':
+				currentHtmlFile.setContent(content, function(err, diff){
+					broadcast({
+						'command': 'edit',
+						'changes': diff
+					});
+				});
+				break;
+		}
+	}
+}
+
+function handleFileRequest(request, response){
+	if(request.url == '/'){
+		response.writeHead(302, {
+			'Location': defaultFile
+		});
+		response.end();
 	}else if(webRoot + request.url == currentHtmlFile.path){
 		response.writeHead(200);
 		response.end(currentHtmlFile.webSrc());
@@ -102,6 +130,25 @@ var httpServer = http.createServer(function(request, response){
 				response.end(data, "binary");
 			}
 		});
+	}
+}
+
+var httpServer = http.createServer(function(request, response){
+	if(request.method == 'GET'){
+		handleFileRequest(request, response);
+	}else{
+		var postData = '';
+
+		request.on('data', function(data){
+			postData += data;
+		});
+
+		request.on('end', function(){
+			handleEditorRequest(postData);
+		});
+
+		response.writeHead(200);
+		response.end();
 	}
 });
 
