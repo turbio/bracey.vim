@@ -18,8 +18,8 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 				|| (position.start.line == line
 					&& position.end.line != line
 					&& position.start.column <= line)
-				|| (position.end.line == line
-					&& position.start.line != line
+				|| (position.start.line != line
+					&& position.end.line == line
 					&& position.start.column >= line)
 				|| (position.start.line == line
 					&& position.end.line == line
@@ -50,6 +50,12 @@ CssFile.prototype.setContent = function(source, callback){
 
 	this.source = source;
 	this.parsed = cssparser.parse(source);
+
+	this.parsed.stylesheet.rules.forEach(function(rule){
+		var position = rule.position;
+		position.start.line--;
+		position.start.column--;
+	});
 
 	if(changed){
 		callback(null);

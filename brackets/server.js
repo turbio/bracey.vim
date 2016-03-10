@@ -8,6 +8,7 @@ var http = require("http");
 var fs = require("fs");
 var mime = require("mime");
 var htmlfile = require("./htmlfile.js");
+var cssfile = require("./cssfile.js");
 
 var connections = [];
 
@@ -17,6 +18,7 @@ var defaultFile = "index.html";
 var currentFileX = 0;
 var currentFileY = 0;
 
+var currentHtmlFile;
 var currentFile;
 
 function Server(){
@@ -25,7 +27,8 @@ function Server(){
 Server.prototype.start = function(port){
 	htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
 	htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
-	currentFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
+	currentHtmlFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
+	currentFile = new cssfile(fs.readFileSync(webRoot + '/style.css', "utf8"), webRoot + '/index.html');
 	httpServer.listen(port);
 };
 
@@ -56,16 +59,16 @@ var httpServer = http.createServer(function(request, response){
 							cords = content.split(':');
 							currentFileX = cords[1] - 1;
 							currentFileY = cords[0] - 1;
-							elem = currentFile.tagFromPosition(currentFileY, currentFileX);
+							elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
 							if(elem != null){
 								broadcast({
 									'command': 'select',
-									'selector': '[meta-brackets-element-index=\"' + elem.index + '\"]'
+									'selector': elem
 								});
 							}
 							break;
 						case 'b':
-							currentFile.setContent(content, function(err, diff){
+							currentHtmlFile.setContent(content, function(err, diff){
 								broadcast({
 									'command': 'edit',
 									'changes': diff
@@ -84,9 +87,9 @@ var httpServer = http.createServer(function(request, response){
 			});
 			response.end();
 		}
-	}else if(webRoot + request.url == currentFile.path){
+	}else if(webRoot + request.url == currentHtmlFile.path){
 		response.writeHead(200);
-		response.end(currentFile.webSrc());
+		response.end(currentHtmlFile.webSrc());
 	}else{
 		fs.readFile(webRoot + request.url, function(err, data){
 			if(err){
