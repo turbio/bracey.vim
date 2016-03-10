@@ -101,4 +101,10 @@ describe('server', function(){
 			});
 		}, this);
 	});
+
+	describe('changes', function(){
+		it('responds to changes in the document');
+		it('makes no changes when given invalid html');
+		it('reports invalid html erorrs to vim');
+	});
 });
