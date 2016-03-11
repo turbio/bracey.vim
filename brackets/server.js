@@ -12,9 +12,11 @@ var cssfile = require("./cssfile.js");
 
 var connections = [];
 
+htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
+htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
+
 //TODO: this is all temporary
 var webRoot = "./test";
-var defaultFile = "index.html";
 var currentFileX = 0;
 var currentFileY = 0;
 
@@ -31,21 +33,35 @@ function getSource(callback){
 	return this.source_data;
 }
 
+function getFile(path){
+}
+
+function getCurrentFile(){
+}
+
+function getCurrentHtmlFile(){
+	if(currentHtmlFile == undefined || files[currentHtmlFile] == undefined){
+		return null;
+	}
+
+	return files[currentHtmlFile];
+}
+
 var errorPages = {
 	404: {
 		file_path: 'err_pages/404.html',
 		source_data: undefined,
-		source: getSource
+		webSrc: getSource
 	},
-	'no_file': {
+	no_file: {
 		file_path: 'err_pages/no_file.html',
 		source_data: undefined,
-		source: getSource
+		webSrc: getSource
 	},
-	'broken_file': {
+	broken_file: {
 		file_path: 'err_pages/broken_file.html',
 		source_data: undefined,
-		source: getSource
+		webSrc: getSource
 	},
 };
 
@@ -64,10 +80,8 @@ function newFile(source, path, type){
 }
 
 Server.prototype.start = function(port){
-	htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
-	htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
-	currentHtmlFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
-	currentFile = new cssfile(fs.readFileSync(webRoot + '/style.css', "utf8"), webRoot + '/index.html');
+	//currentHtmlFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
+	//currentFile = new cssfile(fs.readFileSync(webRoot + '/style.css', "utf8"), webRoot + '/index.html');
 	httpServer.listen(port);
 };
 
@@ -111,11 +125,21 @@ function handleEditorRequest(data){
 
 function handleFileRequest(request, response){
 	if(request.url == '/'){
-		response.writeHead(302, {
-			'Location': defaultFile
-		});
-		response.end();
-	}else if(webRoot + request.url == currentHtmlFile.path){
+		var file = getCurrentHtmlFile();
+		if(file == null){
+			response.writeHead(200);
+			response.end(errorPages.no_file.webSrc());
+		}else{
+			response.writeHead(302, {
+				'Location': file.path
+			});
+			response.end();
+		}
+		return;
+
+	}
+
+	if(webRoot + request.url == currentHtmlFile.path){
 		response.writeHead(200);
 		response.end(currentHtmlFile.webSrc());
 	}else{
