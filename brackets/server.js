@@ -25,14 +25,6 @@ var files = [];
 var currentHtmlFile;
 var currentFile;
 
-function getSource(callback){
-	if(!this.source_data){
-		this.source_data = fs.readFileSync(this.file_path, "utf8");
-	}
-
-	return this.source_data;
-}
-
 function getFile(path){
 }
 
@@ -47,22 +39,16 @@ function getCurrentHtmlFile(){
 	return files[currentHtmlFile];
 }
 
-var errorPages = {
-	404: {
-		file_path: 'err_pages/404.html',
-		source_data: undefined,
-		webSrc: getSource
+var errorPage = {
+	webSrc: function(title, details){
+		if(!this.template_source){
+			this.template_source = fs.readFileSync(this.template_path, "utf8");
+		}
+
+		return this.template_source.replace(/%TITLE%/g, title).replace(/%DETAILS%/g, details);
 	},
-	no_file: {
-		file_path: 'err_pages/no_file.html',
-		source_data: undefined,
-		webSrc: getSource
-	},
-	broken_file: {
-		file_path: 'err_pages/broken_file.html',
-		source_data: undefined,
-		webSrc: getSource
-	},
+	template_source: undefined,
+	template_path: 'error_template.html'
 };
 
 function Server(){
@@ -128,7 +114,9 @@ function handleFileRequest(request, response){
 		var file = getCurrentHtmlFile();
 		if(file == null){
 			response.writeHead(200);
-			response.end(errorPages.no_file.webSrc());
+			response.end(errorPage.webSrc(
+				'wait for file...',
+				"vim hasn't opened an html file yet, or at least brackets isn't aware of any"));
 		}else{
 			response.writeHead(302, {
 				'Location': file.path
