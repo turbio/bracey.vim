@@ -12,32 +12,36 @@ var cssfile = require("./cssfile.js");
 
 var connections = [];
 
-htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
-htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
+var files = {
+	newFile: function(source, path, type){
+		switch(type){
+			case 'html':
+				break;
+			case 'css':
+				break;
+			case 'js':
+				break;
+		}
+	},
+	getFile: function(path){
 
-//TODO: this is all temporary
-var webRoot = "./test";
-var currentFileX = 0;
-var currentFileY = 0;
+	},
+	getCurrentFile: function(){
 
-var files = [];
+	},
+	getCurrentHtmlFile: function(){
+		if(this.currentHtmlFile == undefined || this.files[this.currentHtmlFile] == undefined){
+			return null;
+		}
 
-var currentHtmlFile;
-var currentFile;
-
-function getFile(path){
-}
-
-function getCurrentFile(){
-}
-
-function getCurrentHtmlFile(){
-	if(currentHtmlFile == undefined || files[currentHtmlFile] == undefined){
-		return null;
-	}
-
-	return files[currentHtmlFile];
-}
+		return files[currentHtmlFile];
+	},
+	currentFile: undefined,
+	currentHtmlFile: undefined,
+	root: undefined,
+	webRoot: undefined,
+	files: []
+};
 
 var errorPage = {
 	webSrc: function(title, details){
@@ -52,22 +56,11 @@ var errorPage = {
 };
 
 function Server(){
-}
-
-function newFile(source, path, type){
-	switch(type){
-		case 'html':
-			break;
-		case 'css':
-			break;
-		case 'js':
-			break;
-	}
+	htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
+	htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
 }
 
 Server.prototype.start = function(port){
-	//currentHtmlFile = new htmlfile(fs.readFileSync(webRoot + '/index.html', "utf8"), webRoot + '/index.html');
-	//currentFile = new cssfile(fs.readFileSync(webRoot + '/style.css', "utf8"), webRoot + '/index.html');
 	httpServer.listen(port);
 };
 
@@ -76,42 +69,63 @@ Server.prototype.stop = function(){
 };
 
 function handleEditorRequest(data){
-	if(postData.length > 2){
-		if(postData == 'ping'){
-			broadcast({'command': 'pong'});
-			return;
-		}
-		command = postData[0];
-		content = postData.substring(2);
-		switch(command){
-			//cursor position command
-			case 'p':
-				cords = content.split(':');
-				currentFileX = cords[1] - 1;
-				currentFileY = cords[0] - 1;
-				elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
-				if(elem != null){
-					broadcast({
-						'command': 'select',
-						'selector': elem
-					});
-				}
-				break;
-			case 'b':
-				currentHtmlFile.setContent(content, function(err, diff){
-					broadcast({
-						'command': 'edit',
-						'changes': diff
-					});
+	if(data == 'ping'){
+		broadcast({'command': 'pong'});
+		return;
+	}
+
+	console.log(data);
+
+	command = data[0];
+	length = data.substr(2, data.indexOf(':', 2) - 2);
+	content = data.substr(data.indexOf(':', 2) + 1, length);
+	handleEditorCommand(command, content);
+}
+
+function handleEditorCommand(command, data){
+	console.log(command);
+	console.log(data);
+	switch(command){
+		//full buffer update
+		case 'b':
+			files.getCurrentHtmlFile().setContent(content, function(err, diff){
+				broadcast({
+					'command': 'edit',
+					'changes': diff
 				});
-				break;
-		}
+			});
+			break;
+		//eval js
+		case 'e':
+			break;
+		//reload page
+		case 'r':
+			break;
+		//set the current file
+		case 'f':
+			break;
+		//set variables
+		case 'v':
+			break;
+		//cursor position
+		case 'p':
+			cords = content.split(':');
+			currentFileX = cords[1] - 1;
+			currentFileY = cords[0] - 1;
+			elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
+			if(elem != null){
+				broadcast({
+					'command': 'select',
+					'selector': elem
+				});
+			}
+			break;
 	}
 }
 
 function handleFileRequest(request, response){
 	if(request.url == '/'){
-		var file = getCurrentHtmlFile();
+		var file = files.getCurrentHtmlFile();
 		if(file == null){
 			response.writeHead(200);
 			response.end(errorPage.webSrc(
@@ -119,7 +133,7 @@ function handleFileRequest(request, response){
 				"vim hasn't opened an html file yet, or at least brackets isn't aware of any"));
 		}else{
 			response.writeHead(302, {
-				'Location': file.path
+				'Location': file.path.web
 			});
 			response.end();
 		}
@@ -127,14 +141,18 @@ function handleFileRequest(request, response){
 
 	}
 
-	if(webRoot + request.url == currentHtmlFile.path){
+	var file = files.getFile(request.url);
+
+	if(file){
 		response.writeHead(200);
-		response.end(currentHtmlFile.webSrc());
+		response.end(file.webSrc());
 	}else{
-		fs.readFile(webRoot + request.url, function(err, data){
+		fs.readFile(files.webRoot + request.url, function(err, data){
 			if(err){
 				response.writeHead(404);
-				response.end(err.toString());
+				response.end(errorPage.webSrc(
+					'file could not be read',
+					err.toString()));
 			}else{
 				response.writeHead(200, {
 					"Content-Type": mime.lookup(request.url)

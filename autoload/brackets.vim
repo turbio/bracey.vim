@@ -4,12 +4,8 @@ function! brackets#start()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
 	call system("node brackets.js > " . g:brackets_serverlog . " &")
 	execute 'cd -'
-	try
-		write
-		call brackets#setFile()
-	catch
-		call brackets#sendCurrentBuffer()
-	endtry
+	call brackets#setVars()
+	call brackets#setFile()
 	call brackets#setupHandlers()
 endfunction
 
@@ -26,20 +22,29 @@ function! brackets#stop()
 endfunction
 
 function! brackets#sendCurrentBuffer()
-	call brackets#sendCommand('b:'.join(getline(1, '$'), "\n"))
+	let contents = join(getline(1, '$'), "\n")
+	call brackets#sendCommand('b:'.len(contents).':'.contents)
 endfunction
 
 function! brackets#evalFile()
-	call brackets#sendCommand('e:'.expand('%'))
+	let path = expand('%')
+	call brackets#sendCommand('e:'.len(path).':'.path)
 endfunction
 
 function! brackets#reload()
-	write
-	call brackets#sendCommand('r:'.expand('%'))
+	let path = expand('%')
+	call brackets#sendCommand('r:'.len(path).':'.path)
 endfunction
 
 function! brackets#setFile()
-	call brackets#sendCommand('f:'.expand('%'))
+	let path = expand('%')
+	let contents = join(getline(1, '$'), "\n")
+	call brackets#sendCommand('f:'.len(path).':'.path.'b:'.len(contents).':'.contents)
+endfunction
+
+function! brackets#setVars()
+	let cwd = getcwd()
+	call brackets#sendCommand('v:'.len(cwd).':'.cwd)
 endfunction
 
 function! brackets#bufferChange()
