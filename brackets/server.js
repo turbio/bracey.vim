@@ -38,8 +38,7 @@ var files = {
 	},
 	currentFile: undefined,
 	currentHtmlFile: undefined,
-	root: undefined,
-	webRoot: undefined,
+	editorRoot: undefined,
 	files: []
 };
 
@@ -68,23 +67,28 @@ Server.prototype.stop = function(){
 	httpServer.close();
 };
 
-function handleEditorRequest(data){
+function parseEditorRequest(data){
 	if(data == 'ping'){
 		broadcast({'command': 'pong'});
 		return;
 	}
 
-	console.log(data);
 
-	command = data[0];
-	length = data.substr(2, data.indexOf(':', 2) - 2);
-	content = data.substr(data.indexOf(':', 2) + 1, length);
-	handleEditorCommand(command, content);
+	var command = data[0];
+	var headerLength = data.indexOf(':', 2);
+	var dataLength = parseInt(data.substr(2, headerLength - 2));
+	var commandData = data.substr(headerLength + 1, dataLength);
+	handleEditorCommand(command, commandData);
+
+	var remaining = data.substr(headerLength + dataLength + 1, data.dataLength);
+	if(remaining.length > 0){
+		parseEditorRequest(remaining);
+	}
 }
 
 function handleEditorCommand(command, data){
-	console.log(command);
-	console.log(data);
+	console.log(command + ' -> "' + data + '"');
+	return;
 	switch(command){
 		//full buffer update
 		case 'b':
@@ -106,6 +110,7 @@ function handleEditorCommand(command, data){
 			break;
 		//set variables
 		case 'v':
+			files.editorRoot = data;
 			break;
 		//cursor position
 		case 'p':
@@ -174,7 +179,7 @@ var httpServer = http.createServer(function(request, response){
 		});
 
 		request.on('end', function(){
-			handleEditorRequest(postData);
+			parseEditorRequest(postData);
 		});
 
 		response.writeHead(200);
