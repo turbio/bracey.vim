@@ -25,12 +25,10 @@ function freeElemIndex(index){
 //if there is a path, read and parse said file
 //if reading it or parsing it causes a problem, call the callback
 //stating the problem
-function HtmlFile(source, path, callback){
+function HtmlFile(source, callback){
 	if(injectedCSS == undefined || injectedJS == undefined){
 		throw 'must set injected js and css of htmlfile';
 	}
-
-	this.path = path;
 
 	//starts at 1 because 0 is the document root
 	this.currentElemIndex = 1;

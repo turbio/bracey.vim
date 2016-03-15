@@ -13,7 +13,7 @@ var cssfile = require("./cssfile.js");
 var connections = [];
 
 var files = {
-	newFile: function(source, path, type){
+	newFile: function(source, type){
 		switch(type){
 			case 'html':
 				break;
@@ -23,11 +23,23 @@ var files = {
 				break;
 		}
 	},
-	getFile: function(path){
+	getById: function(id){
+		return this.files[id] || null;
+	},
+	getByPath: function(path){
+
+	},
+	getByName: function(name){
 
 	},
 	getCurrentFile: function(){
 
+	},
+	setCurrentFile: function(id){
+		this.currentFile = id;
+		if(this.files[id].type == 'html'){
+			this.currentHtmlFile = id;
+		}
 	},
 	getCurrentHtmlFile: function(){
 		if(this.currentHtmlFile == undefined || this.files[this.currentHtmlFile] == undefined){
@@ -39,7 +51,7 @@ var files = {
 	currentFile: undefined,
 	currentHtmlFile: undefined,
 	editorRoot: undefined,
-	files: []
+	files: {}
 };
 
 var errorPage = {
@@ -118,6 +130,10 @@ function handleEditorCommand(command, data){
 		//set the current file
 		//buffer number, name, path, type
 		case 'f':
+			var file = files.getById(data[0]);
+			if(file){
+				files.set
+			}
 			break;
 		//set variables
 		case 'v':
