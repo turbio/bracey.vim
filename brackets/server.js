@@ -102,12 +102,12 @@ function handleEditorCommand(command, data){
 	switch(command){
 		//full buffer update
 		case 'b':
-			files.getCurrentHtmlFile().setContent(content, function(err, diff){
-				broadcast({
-					'command': 'edit',
-					'changes': diff
-				});
-			});
+			//files.getCurrentHtmlFile().setContent(content, function(err, diff){
+				//broadcast({
+					//'command': 'edit',
+					//'changes': diff
+				//});
+			//});
 			break;
 		//eval js
 		case 'e':
@@ -116,6 +116,7 @@ function handleEditorCommand(command, data){
 		case 'r':
 			break;
 		//set the current file
+		//buffer number, name, path, type
 		case 'f':
 			break;
 		//set variables
@@ -124,16 +125,16 @@ function handleEditorCommand(command, data){
 			break;
 		//cursor position
 		case 'p':
-			cords = content.split(':');
-			currentFileX = cords[1] - 1;
-			currentFileY = cords[0] - 1;
-			elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
-			if(elem != null){
-				broadcast({
-					'command': 'select',
-					'selector': elem
-				});
-			}
+			//cords = content.split(':');
+			//currentFileX = cords[1] - 1;
+			//currentFileY = cords[0] - 1;
+			//elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
+			//if(elem != null){
+				//broadcast({
+					//'command': 'select',
+					//'selector': elem
+				//});
+			//}
 			break;
 	}
 }

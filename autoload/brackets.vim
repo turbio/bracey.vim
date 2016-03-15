@@ -37,9 +37,11 @@ function! brackets#reload()
 endfunction
 
 function! brackets#setFile()
-	let path = expand('%')
+	let path = expand('%:p')
+	let bufname = bufname('%')
+	let bufnum = bufnr('%')
 	let contents = join(getline(1, '$'), "\n")
-	call brackets#sendCommand('f:'.len(path).':'.path.'b:'.len(contents).':'.contents)
+	call brackets#sendCommand('f:'.len(bufnum).':'.bufnum.':'.len(bufname).':'.bufname.':'.len(path).':'.path.':'.len(&filetype).':'.&filetype.'b:'.len(contents).':'.contents)
 endfunction
 
 function! brackets#setVars()
