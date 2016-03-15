@@ -78,9 +78,20 @@ function parseEditorRequest(data){
 	var headerLength = data.indexOf(':', 2);
 	var dataLength = parseInt(data.substr(2, headerLength - 2));
 	var commandData = data.substr(headerLength + 1, dataLength);
-	handleEditorCommand(command, commandData);
 
-	var remaining = data.substr(headerLength + dataLength + 1, data.dataLength);
+	commandArgs = [commandData];
+
+	while(data[headerLength + dataLength + 1] == ':'){
+		data = data.substr(headerLength + dataLength + 2);
+		headerLength = data.indexOf(':');
+		dataLength = parseInt(data.substr(0, headerLength));
+		commandData = data.substr(headerLength + 1, dataLength);
+		commandArgs.push(commandData);
+	}
+
+	handleEditorCommand(command, commandArgs);
+
+	var remaining = data.substr(headerLength + dataLength + 1);
 	if(remaining.length > 0){
 		parseEditorRequest(remaining);
 	}
@@ -88,7 +99,6 @@ function parseEditorRequest(data){
 
 function handleEditorCommand(command, data){
 	console.log(command + ' -> "' + data + '"');
-	return;
 	switch(command){
 		//full buffer update
 		case 'b':
