@@ -13,20 +13,37 @@ var cssfile = require("./cssfile.js");
 var connections = [];
 
 var files = {
-	newFile: function(source, type){
+	newFile: function(id, name, path, type, source){
+		if(source == undefined){
+			source = '';
+		}
+
+		var createdFile = {};
 		switch(type){
 			case 'html':
+				createdFile = new htmlfile(source);
 				break;
 			case 'css':
-				break;
-			case 'js':
+				createdFile = new cssfile(source);
 				break;
 		}
+
+		createdFile.name = name;
+		createdFile.path = {
+			system: path,
+			web: name
+		};
+		createdFile.type = type;
+
+		this.files[id] = createdFile;
 	},
 	getById: function(id){
 		return this.files[id] || null;
 	},
 	getByPath: function(path){
+
+	},
+	getByWebPath: function(path){
 
 	},
 	getByName: function(name){
@@ -37,6 +54,7 @@ var files = {
 	},
 	setCurrentFile: function(id){
 		this.currentFile = id;
+
 		if(this.files[id].type == 'html'){
 			this.currentHtmlFile = id;
 		}
@@ -46,7 +64,7 @@ var files = {
 			return null;
 		}
 
-		return files[currentHtmlFile];
+		return this.files[this.currentHtmlFile];
 	},
 	currentFile: undefined,
 	currentHtmlFile: undefined,
@@ -110,7 +128,6 @@ function parseEditorRequest(data){
 }
 
 function handleEditorCommand(command, data){
-	console.log(command + ' -> "' + data + '"');
 	switch(command){
 		//full buffer update
 		case 'b':
@@ -131,9 +148,10 @@ function handleEditorCommand(command, data){
 		//buffer number, name, path, type
 		case 'f':
 			var file = files.getById(data[0]);
-			if(file){
-				files.set
+			if(!file){
+				files.newFile(data[0], data[1], data[2], data[3]);
 			}
+			files.setCurrentFile(data[0]);
 			break;
 		//set variables
 		case 'v':
@@ -157,15 +175,15 @@ function handleEditorCommand(command, data){
 
 function handleFileRequest(request, response){
 	if(request.url == '/'){
-		var file = files.getCurrentHtmlFile();
-		if(file == null){
+		var currentFile = files.getCurrentHtmlFile();
+		if(currentFile == null){
 			response.writeHead(200);
 			response.end(errorPage.webSrc(
 				'wait for file...',
 				"vim hasn't opened an html file yet, or at least brackets isn't aware of any"));
 		}else{
 			response.writeHead(302, {
-				'Location': file.path.web
+				'Location': currentFile.path.web
 			});
 			response.end();
 		}
@@ -173,13 +191,13 @@ function handleFileRequest(request, response){
 
 	}
 
-	var file = files.getFile(request.url);
+	var file = files.getByWebPath(request.url);
 
 	if(file){
 		response.writeHead(200);
 		response.end(file.webSrc());
 	}else{
-		fs.readFile(files.webRoot + request.url, function(err, data){
+		fs.readFile(files.editorRoot + request.url, function(err, data){
 			if(err){
 				response.writeHead(404);
 				response.end(errorPage.webSrc(
