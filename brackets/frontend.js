@@ -30,9 +30,7 @@
 	};
 
 	var we_handle_message = function(event){
-		console.log(event.data);
 		message = JSON.parse(event.data);
-		console.log(message);
 		switch(message['command']){
 			case 'select':
 				if('index' in message){
@@ -65,6 +63,7 @@
 						makeChange(elem, change);
 					});
 				});
+				reHighlight();
 				break;
 			case 'eval':
 				eval(message['js']);
@@ -116,6 +115,40 @@
 
 	var lastSelection = '';
 
+	var removeHighlights = function(){
+		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		for(var i = 0, len = existingSelectors.length; i < len; i++){
+			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
+		}
+	};
+
+	var elementBox = function(element){
+		var box = element.getBoundingClientRect();
+
+		var body = document.body;
+		var docElem = document.documentElement;
+
+		var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
+		var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
+
+		var clientTop = docElem.clientTop || body.clientTop || 0;
+		var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+
+		var top  = box.top +  scrollTop - clientTop;
+		var left = box.left + scrollLeft - clientLeft;
+
+		return {
+			top: top + 'px',
+			left: left + 'px',
+			width: (box.right - box.left) + 'px',
+			height: (box.bottom - box.top) + 'px'
+		};
+	};
+
+	var rehighlight = function(){
+		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+	};
+
 	var  setHighlighted = function(selector){
 		//if the same selection is sent multiple times, no need to repeat it
 		if(lastSelection == selector){
@@ -124,37 +157,23 @@
 			lastSelection = selector;
 		}
 
-		existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
-		for(var i = 0, len = existingSelectors.length; i < len; i++){
-			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
-		}
+		removeHighlights();
 
-		toHighlight = document.querySelectorAll(selector);
-		for(var i = 0, len = toHighlight.length; i < len; i++){
+		var toHighlight = document.querySelectorAll(selector);
+		for(var i = 0; i < toHighlight.length; i++){
 			var newHighlight = document.createElement('div');
 			newHighlight.className = 'brackets-currently-selected-highlight';
 
-			var box = toHighlight[i].getBoundingClientRect();
+			var box = elementBox(toHighlight[i]);
 
-			var body = document.body;
-			var docEl = document.documentElement;
-
-			var scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
-			var scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
-
-			var clientTop = docEl.clientTop || body.clientTop || 0;
-			var clientLeft = docEl.clientLeft || body.clientLeft || 0;
-
-			var top  = box.top +  scrollTop - clientTop;
-			var left = box.left + scrollLeft - clientLeft;
-
-			newHighlight.style.top = top + 'px';
-			newHighlight.style.left = left + 'px';
-			newHighlight.style.width = (box.right - box.left) + 'px';
-			newHighlight.style.height = (box.bottom - box.top) + 'px';
+			newHighlight.style.top = box.top;
+			newHighlight.style.left = box.left;
+			newHighlight.style.width = box.width;
+			newHighlight.style.height = box.height;
+			newHighlight.style.position = window.getComputedStyle(toHighlight[i]).position;
 
 			document.body.appendChild(newHighlight);
-		}
+		};
 	};
 
 	var reloadCSS = function(){
