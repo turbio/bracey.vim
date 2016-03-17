@@ -70,10 +70,7 @@ var files = {
 
 		if(this.files[id].type == 'html'){
 			this.currentHtmlFile = id;
-			broadcast({
-				'command': 'goto',
-				'location': this.files[id].name
-			});
+			sendGoto(this.files[id].name);
 		}
 	},
 	getCurrentHtmlFile: function(){
@@ -120,7 +117,7 @@ Server.prototype.stop = function(){
 
 function parseEditorRequest(data){
 	if(data == 'ping'){
-		broadcast({'command': 'pong'});
+		sendPong();
 		return;
 	}
 
@@ -156,12 +153,10 @@ function handleEditorCommand(command, data){
 			if(currentHtmlFile){
 				currentHtmlFile.setContent(data[0], function(err, diff){
 					if(!err){
-						broadcast({
-							'command': 'edit',
-							'changes': diff
-						});
+						sendEdit(diff);
 					}
 				});
+				sendSelect(null, currentHtmlFile.errorState);
 			}
 			break;
 		//eval js
@@ -192,10 +187,7 @@ function handleEditorCommand(command, data){
 
 				var selector = currentHtml.tagFromPosition(currentHtml.cursorX, currentHtml.cursorY);
 				if(selector != null){
-					broadcast({
-						'command': 'select',
-						'index': selector.index
-					});
+					sendSelect(selector.index);
 				}
 			}
 
@@ -282,6 +274,60 @@ function webSocketRequest(request){
 		var content = JSON.parse(message.utf8Data);
 		//TODO: handle client messages
 	});
+}
+
+var lastGoto = '';
+function sendGoto(location){
+	if(lastGoto != location){
+		broadcast({
+			'command': 'goto',
+			'location': location
+		});
+		lastGoto = location;
+	}
+}
+
+function sendPong(){
+	broadcast({'command': 'pong'});
+}
+
+function sendEdit(diff){
+	broadcast({
+		'command': 'edit',
+		'changes': diff
+	});
+}
+
+var lastSelector = undefined;
+var lastError = undefined;
+function sendSelect(selector, error){
+	var cmd = {
+		'command': 'select'
+	};
+
+	var hasChange = false;
+
+	if(selector != lastSelector){
+		if(typeof selector == 'number'){
+			cmd['index'] = selector;
+			hasChange = true;
+		}else if(typeof selector == 'string'){
+			cmd['selector'] = selector;
+			hasChange = true;
+		}
+		lastSelector = selector;
+	}
+
+	error = (error == true);
+	if(error !== lastError){
+		cmd['error'] = error;
+		lastError = error;
+		hasChange = true;
+	}
+
+	if(hasChange){
+		broadcast(cmd);
+	}
 }
 
 function broadcast(command){

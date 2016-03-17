@@ -33,6 +33,10 @@
 		message = JSON.parse(event.data);
 		switch(message['command']){
 			case 'select':
+				if('error' in message){
+					setError(message['error']);
+				}
+
 				if('index' in message){
 					setHighlighted(
 							'[meta-brackets-element-index=\"' + message['index'] + '\"]'
@@ -68,6 +72,17 @@
 			case 'eval':
 				eval(message['js']);
 				break;
+		}
+	};
+
+	var setError = function(state){
+		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		for(var i = 0; i < existingSelectors.length; i++){
+			if(state){
+				existingSelectors[i].classList.add('brackets-highlight-error');
+			}else{
+				existingSelectors[i].classList.remove('brackets-highlight-error');
+			}
 		}
 	};
 

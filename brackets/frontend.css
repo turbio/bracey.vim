@@ -16,7 +16,7 @@
 	-webkit-box-sizing: border-box !important;
 	box-sizing: border-box !important;
 	border-style: solid !important;
-	border-color: rgba(30, 182, 255, 0.69) !important;
+	border-color: rgba(30, 182, 255, 0.69);
 	border-width: 1px !important;
 	pointer-events: none !important;
 	overflow-x: hidden !important;
@@ -27,4 +27,9 @@
 
 	animation-name: blink-background !important;
 	animation-duration: 0.75s !important;
+}
+
+.brackets-highlight-error{
+	border-color: rgba(255, 182, 255, 0.69) !important;
+	background: rgba(255, 182, 255, 0.45) !important;
 }
