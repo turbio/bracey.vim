@@ -186,7 +186,7 @@ function handleEditorCommand(command, data){
 		//cursor position
 		case 'p':
 			var currentHtml = files.getCurrentHtmlFile();
-			if(currentHtml){
+			if(currentHtml && !currentHtml.errorState){
 				currentHtml.cursorX = data[0] - 1;
 				currentHtml.cursorY = data[1] - 1;
 
