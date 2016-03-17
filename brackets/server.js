@@ -74,7 +74,8 @@ var files = {
 		}
 	},
 	getCurrentHtmlFile: function(){
-		if(this.currentHtmlFile == undefined || this.files[this.currentHtmlFile] == undefined){
+		if(this.currentHtmlFile == undefined
+				|| this.files[this.currentHtmlFile] == undefined){
 			return null;
 		}
 
@@ -90,10 +91,14 @@ var errorPage = {
 	webSrc: function(title, details){
 		if(!this.template_source){
 			this.template_source = fs.readFileSync(this.template_path, "utf8");
-			this.template_source = this.template_source.replace(/%JAVASCRIPT%/g, injectedJs);
+			this.template_source = this.template_source.replace(
+					/%JAVASCRIPT%/g,
+					injectedJs);
 		}
 
-		return this.template_source.replace(/%TITLE%/g, title).replace(/%DETAILS%/g, details);
+		return this.template_source
+			.replace(/%TITLE%/g, title)
+			.replace(/%DETAILS%/g, details);
 	},
 	template_source: undefined,
 	template_path: 'error_template.html'
@@ -185,7 +190,9 @@ function handleEditorCommand(command, data){
 				currentHtml.cursorX = data[0] - 1;
 				currentHtml.cursorY = data[1] - 1;
 
-				var selector = currentHtml.tagFromPosition(currentHtml.cursorX, currentHtml.cursorY);
+				var selector = currentHtml.tagFromPosition(
+						currentHtml.cursorX,
+						currentHtml.cursorY);
 				if(selector != null){
 					sendSelect(selector.index);
 				}
