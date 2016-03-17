@@ -2,15 +2,12 @@ var htmlparser = require("htmlparser2");
 var util = require('util');
 var htmlhint  = require("htmlhint").HTMLHint;
 
-var injectedCSS;
-var injectedJS;
-
 HtmlFile.setCSS = function(source){
-	injectedCSS = source;
+	HtmlFile.injectedCSS = source;
 }
 
 HtmlFile.setJS = function(source){
-	injectedJS = source;
+	HtmlFile.injectedJS = source;
 }
 
 function newElemIndex(){
@@ -26,7 +23,7 @@ function freeElemIndex(index){
 //if reading it or parsing it causes a problem, call the callback
 //stating the problem
 function HtmlFile(source, callback){
-	if(injectedCSS == undefined || injectedJS == undefined){
+	if(HtmlFile.injectedCSS == undefined || HtmlFile.injectedJS == undefined){
 		throw 'must set injected js and css of htmlfile';
 	}
 
@@ -53,7 +50,7 @@ HtmlFile.prototype.webSrc = function(){
 			name: 'script',
 			attribs: {language: 'javascript'},
 			children: [{
-				data: injectedJS,
+				data: HtmlFile.injectedJS,
 				type: 'text'
 			}]
 		});
@@ -61,7 +58,7 @@ HtmlFile.prototype.webSrc = function(){
 			type: 'style',
 			name: 'style',
 			children: [{
-				data: injectedCSS,
+				data: HtmlFile.injectedCSS,
 				type: 'text'
 			}]
 		});

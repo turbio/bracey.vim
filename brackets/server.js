@@ -12,6 +12,9 @@ var cssfile = require("./cssfile.js");
 
 var connections = [];
 
+var injectedJs = undefined;
+var injectedCss = undefined;
+
 var files = {
 	newFile: function(id, name, path, type, source){
 		if(source == undefined){
@@ -57,6 +60,10 @@ var files = {
 
 		if(this.files[id].type == 'html'){
 			this.currentHtmlFile = id;
+			broadcast({
+				'command': 'goto',
+				'location': this.files[id].name
+			});
 		}
 	},
 	getCurrentHtmlFile: function(){
@@ -76,6 +83,7 @@ var errorPage = {
 	webSrc: function(title, details){
 		if(!this.template_source){
 			this.template_source = fs.readFileSync(this.template_path, "utf8");
+			this.template_source = this.template_source.replace(/%JAVASCRIPT%/g, injectedJs);
 		}
 
 		return this.template_source.replace(/%TITLE%/g, title).replace(/%DETAILS%/g, details);
@@ -85,8 +93,11 @@ var errorPage = {
 };
 
 function Server(){
-	htmlfile.setCSS(fs.readFileSync('frontend.css', "utf8"));
-	htmlfile.setJS(fs.readFileSync('frontend.js', "utf8"));
+	injectedCss = fs.readFileSync('frontend.css', "utf8");
+	injectedJs = fs.readFileSync('frontend.js', "utf8");
+
+	htmlfile.setCSS(injectedCss);
+	htmlfile.setJS(injectedJs);
 }
 
 Server.prototype.start = function(port){
@@ -131,12 +142,17 @@ function handleEditorCommand(command, data){
 	switch(command){
 		//full buffer update
 		case 'b':
-			//files.getCurrentHtmlFile().setContent(content, function(err, diff){
-				//broadcast({
-					//'command': 'edit',
-					//'changes': diff
-				//});
-			//});
+			var currentHtmlFile = files.getCurrentHtmlFile();
+			if(currentHtmlFile){
+				currentHtmlFile.setContent(data[0], function(err, diff){
+					if(!err){
+						broadcast({
+							'command': 'edit',
+							'changes': diff
+						});
+					}
+				});
+			}
 			break;
 		//eval js
 		case 'e':
@@ -159,16 +175,20 @@ function handleEditorCommand(command, data){
 			break;
 		//cursor position
 		case 'p':
-			//cords = content.split(':');
-			//currentFileX = cords[1] - 1;
-			//currentFileY = cords[0] - 1;
-			//elem = currentFile.selectorFromPosition(currentFileY, currentFileX);
-			//if(elem != null){
-				//broadcast({
-					//'command': 'select',
-					//'selector': elem
-				//});
-			//}
+			var currentHtml = files.getCurrentHtmlFile();
+			if(currentHtml){
+				currentHtml.cursorX = data[0] - 1;
+				currentHtml.cursorY = data[1] - 1;
+
+				var selector = currentHtml.tagFromPosition(currentHtml.cursorX, currentHtml.cursorY);
+				if(selector != null){
+					broadcast({
+						'command': 'select',
+						'index': selector.index
+					});
+				}
+			}
+
 			break;
 	}
 }

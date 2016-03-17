@@ -35,7 +35,13 @@
 		console.log(message);
 		switch(message['command']){
 			case 'select':
-				setHighlighted(message['selector']);
+				if('index' in message){
+					setHighlighted(
+							'[meta-brackets-element-index=\"' + message['index'] + '\"]'
+							);
+				}else if('selector' in message){
+					setHighlighted(message['selector']);
+				}
 				break;
 			case 'reload_page':
 				location.reload();

@@ -58,7 +58,9 @@ function! brackets#bufferChange()
 endfunction
 
 function! brackets#setCursor()
-	call brackets#sendCommand('p:'.line('.').':'.col('.'))
+	let line = line('.')
+	let column = col('.')
+	call brackets#sendCommand('p:'.len(line).':'.line.':'.len(column).':'.column)
 endfunction
 
 python3 <<EOF
