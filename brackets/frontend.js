@@ -129,7 +129,7 @@
 			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
 		}
 
-		toHighlight = document.querySelectorAll(message['selector']);
+		toHighlight = document.querySelectorAll(selector);
 		for(var i = 0, len = toHighlight.length; i < len; i++){
 			var newHighlight = document.createElement('div');
 			newHighlight.className = 'brackets-currently-selected-highlight';

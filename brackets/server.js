@@ -34,7 +34,7 @@ var files = {
 		createdFile.name = name;
 		createdFile.path = {
 			system: path,
-			web: name
+			relative: name
 		};
 		createdFile.type = type;
 
@@ -47,7 +47,17 @@ var files = {
 
 	},
 	getByWebPath: function(path){
+		if(path[0] == '/'){
+			path = path.substr(1);
+		}
 
+		for(var file in this.files){
+			if(this.files[file].path.relative == path){
+				return this.files[file];
+			}
+		}
+
+		return null;
 	},
 	getByName: function(name){
 
@@ -203,7 +213,7 @@ function handleFileRequest(request, response){
 				"vim hasn't opened an html file yet, or at least brackets isn't aware of any"));
 		}else{
 			response.writeHead(302, {
-				'Location': currentFile.path.web
+				'Location': currentFile.path.relative
 			});
 			response.end();
 		}
