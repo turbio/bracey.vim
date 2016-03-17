@@ -153,12 +153,16 @@
 					'[meta-brackets-element-index=\"' +
 					highlight.getAttribute('highlighting') +
 					'\"]')[0];
-			var box = elementBox(toHighlight);
-			highlight.style.top = box.top;
-			highlight.style.left = box.left;
-			highlight.style.width = box.width;
-			highlight.style.height = box.height;
-			highlight.style.position = window.getComputedStyle(toHighlight).position;
+			if(!toHighlight){
+				highlight.parentElement.removeChild(highlight);
+			}else{
+				var box = elementBox(toHighlight);
+				highlight.style.top = box.top;
+				highlight.style.left = box.left;
+				highlight.style.width = box.width;
+				highlight.style.height = box.height;
+				highlight.style.position = window.getComputedStyle(toHighlight).position;
+			}
 		}
 	};
 
