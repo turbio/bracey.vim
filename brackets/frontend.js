@@ -145,8 +145,21 @@
 		};
 	};
 
-	var rehighlight = function(){
+	var reHighlight = function(){
 		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		for(var i = 0; i < existingSelectors.length; i++){
+			var highlight = existingSelectors[i];
+			var toHighlight = document.querySelectorAll(
+					'[meta-brackets-element-index=\"' +
+					highlight.getAttribute('highlighting') +
+					'\"]')[0];
+			var box = elementBox(toHighlight);
+			highlight.style.top = box.top;
+			highlight.style.left = box.left;
+			highlight.style.width = box.width;
+			highlight.style.height = box.height;
+			highlight.style.position = window.getComputedStyle(toHighlight).position;
+		}
 	};
 
 	var  setHighlighted = function(selector){
@@ -171,6 +184,7 @@
 			newHighlight.style.width = box.width;
 			newHighlight.style.height = box.height;
 			newHighlight.style.position = window.getComputedStyle(toHighlight[i]).position;
+			newHighlight.setAttribute('highlighting', toHighlight[i].getAttribute('meta-brackets-element-index'));
 
 			document.body.appendChild(newHighlight);
 		};
