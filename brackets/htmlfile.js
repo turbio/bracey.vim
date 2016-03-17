@@ -116,7 +116,7 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
 	//before even begining, check to make sure there are no errors
-	errors = htmlhint.verify(newHtml, {'tag-pair': true});
+	errors = htmlhint.verify(newHtml, {'tag-pair': true, 'spec-char-escape': true});
 	if(errors && errors.length > 0){
 		this.errorState = true;
 		callback(errors, null);
