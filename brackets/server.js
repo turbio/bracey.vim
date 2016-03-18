@@ -168,12 +168,12 @@ function handleEditorCommand(command, data){
 			}
 
 			if(currentFile.type == 'html'){
-				sendSelect(null, currentFile.errorState);
 				currentFile.setContent(data[0], function(err, diff){
 					if(!err){
 						sendEdit(diff);
 					}
 				});
+				sendSelect(null, currentFile.errorState);
 			}else if(currentFile.type == 'css'){
 				currentFile.setContent(data[0], function(err){
 					if(!err){
