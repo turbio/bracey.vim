@@ -41,7 +41,7 @@ CssFile.prototype.setContent = function(source, callback){
 		}
 	});
 
-	if(errors.length > 0){
+	if(errors.length > 0 && callback){
 		callback(errors);
 		return;
 	}

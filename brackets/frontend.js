@@ -214,8 +214,8 @@
 
 		var c = 0;
 
-		for (var i = 0; i < elements.length; i++) {
-			if (elements[c].rel == "stylesheet") {
+		for(var i = 0; i < elements.length; i++){
+			if(elements[c].rel == "stylesheet"){
 				var href = elements[i].getAttribute("data-href");
 
 				if (href == null) {
@@ -233,7 +233,7 @@
 
 					continue;
 				}
-				elements[i].href = href + ((href.indexOf("?") == -1) ? "?" : "&") + "c=" + (new Date).getTime();
+				elements[i].href = href;
 			}
 			c++;
 		}

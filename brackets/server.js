@@ -29,6 +29,10 @@ var files = {
 			case 'css':
 				createdFile = new cssfile(source);
 				break;
+			default:
+				//TODO: for now...
+				return;
+				break;
 		}
 
 		createdFile.name = name;
@@ -63,7 +67,11 @@ var files = {
 
 	},
 	getCurrentFile: function(){
-
+		if(this.currentFile){
+			return this.files[this.currentFile] || null;
+		}else{
+			return null;
+		}
 	},
 	setCurrentFile: function(id){
 		this.currentFile = id;
@@ -154,14 +162,24 @@ function handleEditorCommand(command, data){
 	switch(command){
 		//full buffer update
 		case 'b':
-			var currentHtmlFile = files.getCurrentHtmlFile();
-			if(currentHtmlFile){
-				currentHtmlFile.setContent(data[0], function(err, diff){
+			var currentFile = files.getCurrentFile();
+			if(!currentFile){
+				break;
+			}
+
+			if(currentFile.type == 'html'){
+				sendSelect(null, currentFile.errorState);
+				currentFile.setContent(data[0], function(err, diff){
 					if(!err){
 						sendEdit(diff);
 					}
 				});
-				sendSelect(null, currentHtmlFile.errorState);
+			}else if(currentFile.type == 'css'){
+				currentFile.setContent(data[0], function(err){
+					if(!err){
+						broadcast({'command': 'reload_css'});
+					}
+				});
 			}
 			break;
 		//eval js
@@ -181,20 +199,34 @@ function handleEditorCommand(command, data){
 			break;
 		//set variables
 		case 'v':
-			files.editorRoot = data;
+			files.editorRoot = data[0];
 			break;
 		//cursor position
 		case 'p':
-			var currentHtml = files.getCurrentHtmlFile();
-			if(currentHtml && !currentHtml.errorState){
-				currentHtml.cursorX = data[0] - 1;
-				currentHtml.cursorY = data[1] - 1;
+			var currentFile = files.getCurrentFile();
+			if(!currentFile){
+				break;
+			}
 
-				var selector = currentHtml.tagFromPosition(
-						currentHtml.cursorX,
-						currentHtml.cursorY);
+			if(!currentFile.errorState){
+				currentFile.cursorX = data[0] - 1;
+				currentFile.cursorY = data[1] - 1;
+
+				var selector = null;
+				if(currentFile.type == 'html'){
+					selector = currentFile.tagFromPosition(
+							currentFile.cursorX,
+							currentFile.cursorY);
+					if(selector != null){
+						selector = selector.index;
+					}
+				}else if(currentFile.type == 'css'){
+					selector = currentFile.selectorFromPosition(
+							currentFile.cursorX,
+							currentFile.cursorY);
+				}
 				if(selector != null){
-					sendSelect(selector.index);
+					sendSelect(selector);
 				}
 			}
 
@@ -223,7 +255,9 @@ function handleFileRequest(request, response){
 	var file = files.getByWebPath(request.url);
 
 	if(file){
-		response.writeHead(200);
+		response.writeHead(200, {
+			"Content-Type": mime.lookup(request.url)
+		});
 		response.end(file.webSrc());
 	}else{
 		fs.readFile(files.editorRoot + request.url, function(err, data){
