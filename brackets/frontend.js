@@ -228,14 +228,18 @@
 					link.href = href;
 					link.rel = "stylesheet";
 					document.head.appendChild(link);
-
 					document.head.removeChild(elements[c]);
-
 					continue;
 				}
 				elements[i].href = href;
 			}
 			c++;
+		}
+
+		reHighlight();
+		//it's hacky, but it works for now...
+		for(var trys = 0; trys < 5; trys++){
+			setTimeout(reHighlight, 5 * Math.pow(4, trys));
 		}
 	};
 
