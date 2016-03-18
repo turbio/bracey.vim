@@ -98,10 +98,7 @@
 					case 'data':
 						element.childNodes[change.index].nodeValue = change.value;
 						break;
-					case 'name':
-						break;
 					case 'attribs':
-						console.log(change);
 						while(element.attributes.length > 1){
 							if(element.attributes[0].name != 'meta-brackets-element-index'){
 								element.removeAttribute(element.attributes[0].name);

@@ -367,7 +367,8 @@ function diffParsedHtml(left, right, edit_left, parent){
 		}
 
 		if(elemDiff.only_reason() == 'name'){
-			pushChange.call(this, elem, elem, 'name');
+			pushRemove.call(this, elem);
+			pushAdd.call(this, elem, elem);
 			continue;
 		}
 
