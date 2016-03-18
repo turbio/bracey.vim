@@ -39,7 +39,9 @@
 
 				if('index' in message){
 					setHighlighted(
-							'[meta-brackets-element-index=\"' + message['index'] + '\"]'
+							'[meta-brackets-element-index=\"' +
+							message['index'] +
+							'\"]'
 							);
 				}else if('selector' in message){
 					setHighlighted(message['selector']);
@@ -61,7 +63,9 @@
 						elem = document;
 					}else{
 						elem = document.querySelector(
-							'[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]');
+							'[meta-brackets-element-index=\"' +
+							changeGroup['element'] +
+							'\"]');
 					}
 					changeGroup['changes'].forEach(function(change){
 						makeChange(elem, change);
@@ -89,9 +93,26 @@
 	var makeChange = function(element, change){
 		switch(change.action){
 			case 'change':
+				element = element.childNodes[change.index];
 				switch(change.what){
 					case 'data':
 						element.childNodes[change.index].nodeValue = change.value;
+						break;
+					case 'name':
+						break;
+					case 'attribs':
+						console.log(change);
+						while(element.attributes.length > 1){
+							if(element.attributes[0].name != 'meta-brackets-element-index'){
+								element.removeAttribute(element.attributes[0].name);
+							}else{
+								element.removeAttribute(element.attributes[1].name);
+							}
+						}
+						for(attrib in change.value){
+							element.setAttribute(attrib, change.value[attrib]);
+							console.log(element);
+						}
 						break;
 				}
 				break;

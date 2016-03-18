@@ -249,8 +249,14 @@ function compareElements(left, right){
 			diff.reasons.push('name');
 		}
 
-		for(key in left.attribs){
-			if(left.attribs[key] != right.attribs[key]){
+		var keys = Object.keys(left.attribs).concat(Object.keys(right.attribs));
+		for(var i = 0; i < keys.length; i++){
+			var k = keys[i];
+			var l = left.attribs[k];
+			var r = right.attribs[k];
+			if(l === undefined
+					|| r === undefined
+					|| l != r){
 				diff.reasons.push('attrib');
 				break;
 			}
