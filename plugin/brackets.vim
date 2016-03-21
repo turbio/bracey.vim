@@ -3,24 +3,52 @@
 "Repository:  https://github.com/turbio/vim-brackets
 "License:     Released under the GPL V2 license
 
-if !exists("g:brackets_serverlog")
-	let g:brackets_serverlog = "/tmp/brackets_server_logfile"
+if !exists("g:brackets_server_log")
+	let g:brackets_server_log = "/tmp/brackets_server_logfile"
 endif
 
-if !exists("g:brackets_serverport")
-	let g:brackets_serverport = 1337
+if !exists("g:brackets_server_path")
+	let g:brackets_server_path = "http://127.0.0.1:1337"
 endif
 
-if !exists("g:brackets_serverpath")
-	let g:brackets_serverpath = "http://127.0.0.1:1337"
+if !exists("g:brackets_page_file_types")
+	let g:brackets_page_file_types = ["html", "css", "javascript"]
 endif
 
-if !exists("g:brackets_pagefiletypes")
-	let g:brackets_pagefiletypes = ["html", "css", "javascript"]
+if !exists("g:brackets_file_search_method")
+	"auto/dir/cwd
+	let g:brackets_file_search_method = 'cwd'
 endif
 
-let g:brackets_state = 0
+if !exists("g:brackets_file_search_path")
+	let g:brackets_file_search_path = ''
+endif
 
-command! -nargs=0 BracketsStart call brackets#start()
+if !exists("g:brackets_remote_connections")
+	let g:brackets_remote_connections = 0
+endif
+
+if !exists("g:brackets_auto_start_server")
+	let g:brackets_auto_start_server = 1
+endif
+
+if !exists("g:brackets_eval_on_save")
+	let g:brackets_eval_on_save = 1
+endif
+
+if !exists("g:brackets_refresh_on_save")
+	let g:brackets_refresh_on_save = 0
+endif
+
+if !exists("g:brackets_highligh_cursor")
+	let g:brackets_highligh_cursor = 1
+endif
+
+if !exists("g:brackets_live_update")
+	let g:brackets_live_update = 1
+endif
+
+command! -nargs=0 Brackets call brackets#start()
 command! -nargs=0 BracketsStop  call brackets#stop()
 command! -nargs=0 BracketsReload call brackets#reload()
+command! -nargs=0 BracketsEval call brackets#eval()
