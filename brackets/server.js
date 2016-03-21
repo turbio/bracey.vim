@@ -9,6 +9,7 @@ var fs = require("fs");
 var mime = require("mime");
 var htmlfile = require("./htmlfile.js");
 var cssfile = require("./cssfile.js");
+var settings;
 
 var connections = [];
 
@@ -120,8 +121,9 @@ function Server(){
 	htmlfile.setJS(injectedJs);
 }
 
-Server.prototype.start = function(port){
-	httpServer.listen(port);
+Server.prototype.start = function(set){
+	settings = set;
+	httpServer.listen(settings.port);
 };
 
 Server.prototype.stop = function(){

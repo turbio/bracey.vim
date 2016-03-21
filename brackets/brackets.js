@@ -42,6 +42,9 @@ for(var i = 2; i < process.argv.length; i++){
 	}
 };
 
+settings.port = settings.port || 13378;
+settings.address = settings.address || '127.0.0.1';
+
 var server = require("./server.js");
 server = new server();
-server.start(settings.port || 13378, settings.address || '127.0.0.1');
+server.start(settings);
