@@ -93,12 +93,12 @@
 	var makeChange = function(element, change){
 		switch(change.action){
 			case 'change':
-				element = element.childNodes[change.index];
 				switch(change.what){
 					case 'data':
 						element.childNodes[change.index].nodeValue = change.value;
 						break;
 					case 'attribs':
+						element = element.childNodes[change.index];
 						while(element.attributes.length > 1){
 							if(element.attributes[0].name != 'meta-brackets-element-index'){
 								element.removeAttribute(element.attributes[0].name);
