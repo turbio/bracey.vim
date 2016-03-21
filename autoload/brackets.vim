@@ -2,7 +2,7 @@ let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! brackets#start()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
-	call system("node brackets.js > " . g:brackets_serverlog . " &")
+	call system("node brackets.js > " . g:brackets_server_log . " &")
 	execute 'cd -'
 	call brackets#setVars()
 	call brackets#setFile()
@@ -68,7 +68,7 @@ import sys
 import requests
 import vim
 
-url = vim.eval("g:brackets_serverpath")
+url = vim.eval("g:brackets_server_path")
 
 def send(msg):
 	try:
