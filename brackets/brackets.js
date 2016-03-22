@@ -25,20 +25,31 @@ var settings = {};
 
 for(var i = 2; i < process.argv.length; i++){
 	var arg = process.argv[i];
-	if(!arg.startsWith('-')){
+	if(arg[0] != '-'){
 		continue;
 	}
 
-	if(arg.startsWith('--')){
+	var foundArg = null;
+	if(arg[1] == '-'){
 		arg = arg.substr(2);
-		arg = args.find(function(f){ return f.long == arg; });
+		for(var f = 0; f < args.length; f++){
+			if(args[f].long == arg){
+				foundArg = args[f];
+				break;
+			}
+		}
 	}else{
 		arg = arg.substr(1);
-		arg = args.find(function(f){ return f.short == arg; });
+		for(var f = 0; f < args.length; f++){
+			if(args[f].short == arg){
+				foundArg = args[f];
+				break;
+			}
+		}
 	}
 
-	if(arg){
-		settings[arg.long] = (arg.value) ? process.argv[i + 1] : true
+	if(foundArg){
+		settings[foundArg.long] = (foundArg.value) ? process.argv[i + 1] : true
 	}
 };
 

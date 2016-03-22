@@ -5,6 +5,7 @@
   "main": "brackets.js",
   "dependencies": {
     "css": "^2.2.1",
+    "csslint": "^0.10.0",
     "domhandler": "^2.3.0",
     "domutils": "^1.5.1",
     "fs": "^0.0.2",
