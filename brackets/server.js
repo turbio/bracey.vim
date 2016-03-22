@@ -75,6 +75,10 @@ var files = {
 		}
 	},
 	setCurrentFile: function(id){
+		if(!this.files[id]){
+			return;
+		}
+
 		this.currentFile = id;
 
 		if(this.files[id].type == 'html'){
