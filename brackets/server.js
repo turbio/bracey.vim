@@ -123,7 +123,11 @@ function Server(){
 
 Server.prototype.start = function(set){
 	settings = set;
-	httpServer.listen(settings.port);
+	if(settings['allow-remote-web']){
+		httpServer.listen(settings['port']);
+	}else{
+		httpServer.listen(settings['port'], settings['web-address']);
+	}
 };
 
 Server.prototype.stop = function(){
@@ -281,7 +285,9 @@ function handleFileRequest(request, response){
 var httpServer = http.createServer(function(request, response){
 	if(request.method == 'GET'){
 		handleFileRequest(request, response);
-	}else{
+	}else if(request.method == 'POST'
+			&& (settings['allow-remote-editor']
+				|| request.connection.remoteAddress == settings['editor-address'])){
 		var postData = '';
 
 		request.on('data', function(data){

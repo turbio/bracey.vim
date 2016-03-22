@@ -5,18 +5,23 @@ var args = [
 		value: true
 	},
 	{
+		short: 'w',
+		long: 'web-address',
+		value: true
+	},
+	{
 		short: 'a',
-		long: 'address',
+		long: 'allow-remote-web',
+		value: false
+	},
+	{
+		short: 'e',
+		long: 'editor-address',
 		value: true
 	},
 	{
 		short: 'r',
-		long: 'remote-connect',
-		value: false
-	},
-	{
-		short: 'v',
-		long: 'remote-vim',
+		long: 'allow-remote-editor',
 		value: false
 	},
 ];
@@ -53,8 +58,9 @@ for(var i = 2; i < process.argv.length; i++){
 	}
 };
 
-settings.port = settings.port || 13378;
-settings.address = settings.address || '127.0.0.1';
+settings['port'] = settings.port || 13378;
+settings['web-address'] = settings.address || '127.0.0.1';
+settings['editor-address'] = settings.address || '127.0.0.1';
 
 var server = require("./server.js");
 server = new server();
