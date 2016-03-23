@@ -19,7 +19,7 @@ endfunction
 function! brackets#startServer()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
 	if g:brackets_server_allow_remote_connetions
-		call system("node brackets.js -p -a ".g:brackets_server_port."> " . g:brackets_server_log . " &")
+		call system("node brackets.js -a -p ".g:brackets_server_port."> " . g:brackets_server_log . " &")
 	else
 		call system("node brackets.js -p ".g:brackets_server_port."> " . g:brackets_server_log . " &")
 	endif
