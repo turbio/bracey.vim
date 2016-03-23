@@ -2,7 +2,11 @@ let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! brackets#start()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
-	call system("node brackets.js -p ".g:brackets_server_port."> " . g:brackets_server_log . " &")
+	if g:brackets_server_allow_remote_connetions
+		call system("node brackets.js -p -a ".g:brackets_server_port."> " . g:brackets_server_log . " &")
+	else
+		call system("node brackets.js -p ".g:brackets_server_port."> " . g:brackets_server_log . " &")
+	endif
 	execute 'cd -'
 	call brackets#setVars()
 	call brackets#setFile()
