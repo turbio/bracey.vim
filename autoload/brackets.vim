@@ -1,6 +1,22 @@
 let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! brackets#start()
+	if g:brackets_auto_start_server
+		call brackets#startServer()
+	endif
+
+	call brackets#setupHandlers()
+
+	if g:brackets_auto_start_browser
+		call brackets#startBrowser(g:brackets_server_path.':'.g:brackets_server_port)
+	endif
+endfunction
+
+function! brackets#startBrowser(url)
+	call system('chromium '.a:url)
+endfunction
+
+function! brackets#startServer()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
 	if g:brackets_server_allow_remote_connetions
 		call system("node brackets.js -p -a ".g:brackets_server_port."> " . g:brackets_server_log . " &")
@@ -10,14 +26,18 @@ function! brackets#start()
 	execute 'cd -'
 	call brackets#setVars()
 	call brackets#setFile()
-	call brackets#setupHandlers()
 endfunction
 
 function! brackets#setupHandlers()
 	autocmd CursorMoved,CursorMovedI *.html,*.css call brackets#setCursor()
 	autocmd TextChanged,TextChangedI *.html,*.css call brackets#bufferChange()
 	autocmd BufEnter * call brackets#setFile()
-	autocmd BufWritePost *.js call brackets#evalFile()
+	if g:brackets_eval_on_save
+		autocmd BufWritePost *.js call brackets#evalFile()
+	endif
+	if g:brackets_refresh_on_save
+		autocmd BufWritePost *.html call brackets#reload()
+	endif
 endfunction
 
 function! brackets#stop()

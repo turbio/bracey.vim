@@ -48,13 +48,13 @@ if !exists("g:brackets_refresh_on_save")
 	let g:brackets_refresh_on_save = 0
 endif
 
-if !exists("g:brackets_highligh_cursor")
-	let g:brackets_highligh_cursor = 1
-endif
+"if !exists("g:brackets_highligh_cursor")
+	"let g:brackets_highligh_cursor = 1
+"endif
 
-if !exists("g:brackets_live_update")
-	let g:brackets_live_update = 1
-endif
+"if !exists("g:brackets_live_update")
+	"let g:brackets_live_update = 1
+"endif
 
 if !exists("g:brackets_auto_start_browser")
 	let g:brackets_auto_start_browser = 1
