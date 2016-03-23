@@ -8,11 +8,15 @@ if !exists("g:brackets_server_log")
 endif
 
 if !exists("g:brackets_server_path")
-	let g:brackets_server_path = "http://127.0.0.1:13378"
+	let g:brackets_server_path = "http://127.0.0.1"
 endif
 
-if !exists("g:brackets_page_file_types")
-	let g:brackets_page_file_types = ["html", "css", "javascript"]
+if !exists("g:brackets_server_port")
+	let g:brackets_server_port = 0
+endif
+
+if g:brackets_server_port == 0
+	g:brackets_server_port = 13378
 endif
 
 if !exists("g:brackets_file_search_method")

@@ -2,7 +2,7 @@ let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! brackets#start()
 	execute 'cd' fnameescape(s:plugin_path . "/brackets")
-	call system("node brackets.js > " . g:brackets_server_log . " &")
+	call system("node brackets.js -p ".g:brackets_server_port."> " . g:brackets_server_log . " &")
 	execute 'cd -'
 	call brackets#setVars()
 	call brackets#setFile()
@@ -17,8 +17,6 @@ function! brackets#setupHandlers()
 endfunction
 
 function! brackets#stop()
-	"echom s:server_pid
-	"call system("node brackets.js > " . g:brackets_serverlog . " &")
 endfunction
 
 function! brackets#sendCurrentBuffer()
