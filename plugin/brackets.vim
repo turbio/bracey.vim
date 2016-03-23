@@ -8,7 +8,7 @@ if !exists("g:brackets_server_log")
 endif
 
 if !exists("g:brackets_server_path")
-	let g:brackets_server_path = "http://127.0.0.1:1337"
+	let g:brackets_server_path = "http://127.0.0.1:13378"
 endif
 
 if !exists("g:brackets_page_file_types")

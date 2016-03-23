@@ -194,6 +194,10 @@ function handleEditorCommand(command, data){
 			break;
 		//eval js
 		case 'e':
+			broadcast({
+				'command': 'eval',
+				'js': data[0]
+			});
 			break;
 		//reload page
 		case 'r':
@@ -262,7 +266,9 @@ function handleFileRequest(request, response){
 
 	}
 
+	console.log('requesting: ' + request.url);
 	var file = files.getByWebPath(request.url);
+	console.log('result: ' + (file != undefined));
 
 	if(file){
 		response.writeHead(200, {

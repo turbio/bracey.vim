@@ -31,6 +31,7 @@
 
 	var we_handle_message = function(event){
 		message = JSON.parse(event.data);
+		//console.log(message);
 		switch(message['command']){
 			case 'select':
 				if('error' in message){

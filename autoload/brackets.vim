@@ -10,9 +10,9 @@ function! brackets#start()
 endfunction
 
 function! brackets#setupHandlers()
-	autocmd CursorMoved,CursorMovedI *.html,*.js,*.css call brackets#setCursor()
-	autocmd TextChanged,TextChangedI * call brackets#bufferChange()
-	autocmd BufEnter *.html,*.js,*.css call brackets#setFile()
+	autocmd CursorMoved,CursorMovedI *.html,*.css call brackets#setCursor()
+	autocmd TextChanged,TextChangedI *.html,*.css call brackets#bufferChange()
+	autocmd BufEnter * call brackets#setFile()
 	autocmd BufWritePost *.js call brackets#evalFile()
 endfunction
 
@@ -27,8 +27,8 @@ function! brackets#sendCurrentBuffer()
 endfunction
 
 function! brackets#evalFile()
-	let path = expand('%')
-	call brackets#sendCommand('e:'.len(path).':'.path)
+	let contents = join(getline(1, '$'), "\n")
+	call brackets#sendCommand('e:'.len(contents).':'.contents)
 endfunction
 
 function! brackets#reload()
