@@ -48,6 +48,16 @@ if !exists("g:brackets_live_update")
 	let g:brackets_live_update = 1
 endif
 
+if !exists("g:brackets_auto_start_browser")
+	let g:brackets_auto_start_browser = 1
+endif
+
+if !exists("g:brackets_browser_command")
+	"0 = auto
+	"'...' = command to run
+	let g:brackets_browser_command = 0
+endif
+
 command! -nargs=0 Brackets call brackets#start()
 command! -nargs=0 BracketsStop  call brackets#stop()
 command! -nargs=0 BracketsReload call brackets#reload()
