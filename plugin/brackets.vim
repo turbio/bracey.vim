@@ -12,11 +12,7 @@ if !exists("g:brackets_server_path")
 endif
 
 if !exists("g:brackets_server_port")
-	let g:brackets_server_port = 0
-endif
-
-if g:brackets_server_port == 0
-	g:brackets_server_port = 13378
+	let g:brackets_server_port = 13378
 endif
 
 if !exists("g:brackets_server_allow_remote_connetions")
