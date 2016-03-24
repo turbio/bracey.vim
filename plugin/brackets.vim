@@ -19,14 +19,14 @@ if !exists("g:brackets_server_allow_remote_connetions")
 	let g:brackets_server_allow_remote_connetions = 0
 endif
 
-if !exists("g:brackets_file_search_method")
-	"auto/dir/cwd
-	let g:brackets_file_search_method = 'cwd'
-endif
+"if !exists("g:brackets_file_search_method")
+	""auto/dir/cwd
+	"let g:brackets_file_search_method = 'cwd'
+"endif
 
-if !exists("g:brackets_file_search_path")
-	let g:brackets_file_search_path = ''
-endif
+"if !exists("g:brackets_file_search_path")
+	"let g:brackets_file_search_path = ''
+"endif
 
 if !exists("g:brackets_remote_connections")
 	let g:brackets_remote_connections = 0
