@@ -13,7 +13,11 @@ function! brackets#start()
 endfunction
 
 function! brackets#startBrowser(url)
-	call system('chromium '.a:url)
+	if g:brackets_browser_command == 0
+		call system('xdg-open '.a:url.'&')
+	else
+		call system(g:brackets_browser_command.' '.a:url.'&')
+	endif
 endfunction
 
 function! brackets#startServer()
