@@ -94,7 +94,7 @@ import sys
 import requests
 import vim
 
-url = vim.eval("g:brackets_server_path")
+url = vim.eval("g:brackets_server_path.':'.g:brackets_server_port")
 
 def send(msg):
 	try:
