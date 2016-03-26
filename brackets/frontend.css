@@ -11,6 +11,7 @@
 }
 
 .brackets-currently-selected-highlight{
+	z-index: 2147483647 !important;
 	position: absolute !important;
 	-moz-box-sizing: border-box !important;
 	-webkit-box-sizing: border-box !important;
