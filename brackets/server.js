@@ -37,10 +37,16 @@ var files = {
 		}
 
 		createdFile.name = name;
+
 		createdFile.path = {
 			system: path,
-			relative: name
+			relative: ((path.startsWith(this.editorRoot)) ?
+					path.substring(this.editorRoot.length) : name)
+				|| name
 		};
+		console.log('system: ' + path.system);
+		console.log('relative: ' + path.relative);
+		console.log('name: ' + name);
 		createdFile.type = type;
 
 		this.files[id] = createdFile;
@@ -49,7 +55,7 @@ var files = {
 		return this.files[id] || null;
 	},
 	getByPath: function(path){
-
+		throw 'not implemented';
 	},
 	getByWebPath: function(path){
 		if(path[0] == '/'){
@@ -57,7 +63,7 @@ var files = {
 		}
 
 		for(var file in this.files){
-			if(this.files[file].path.relative == path){
+			if(this.files[file].path.relative == path || this.files[file].name == path){
 				return this.files[file];
 			}
 		}
@@ -266,9 +272,7 @@ function handleFileRequest(request, response){
 
 	}
 
-	console.log('requesting: ' + request.url);
 	var file = files.getByWebPath(request.url);
-	console.log('result: ' + (file != undefined));
 
 	if(file){
 		response.writeHead(200, {
