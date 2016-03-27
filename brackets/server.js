@@ -38,15 +38,20 @@ var files = {
 
 		createdFile.name = name;
 
+		var relativePath = null;
+		if(path.startsWith(this.editorRoot)){
+			console.log(path);
+			console.log(this.editorRoot);
+			relativePath = path.substring(this.editorRoot.length);
+		}else{
+			relativePath = name;
+		}
+
 		createdFile.path = {
 			system: path,
-			relative: ((path.startsWith(this.editorRoot)) ?
-					path.substring(this.editorRoot.length) : name)
-				|| name
+			relative: relativePath
 		};
-		console.log('system: ' + path.system);
-		console.log('relative: ' + path.relative);
-		console.log('name: ' + name);
+
 		createdFile.type = type;
 
 		this.files[id] = createdFile;
