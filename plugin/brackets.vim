@@ -65,4 +65,4 @@ endif
 command! -nargs=0 Brackets call brackets#start()
 command! -nargs=0 BracketsStop  call brackets#stop()
 command! -nargs=0 BracketsReload call brackets#reload()
-command! -nargs=0 BracketsEval call brackets#eval()
+command! -nargs=* BracketsEval call brackets#evalFile(<f-args>)

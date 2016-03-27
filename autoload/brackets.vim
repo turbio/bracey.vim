@@ -52,9 +52,13 @@ function! brackets#sendCurrentBuffer()
 	call brackets#sendCommand('b:'.len(contents).':'.contents)
 endfunction
 
-function! brackets#evalFile()
-	let contents = join(getline(1, '$'), "\n")
-	call brackets#sendCommand('e:'.len(contents).':'.contents)
+function! brackets#evalFile(...)
+	if a:0
+		call brackets#sendCommand('e:'.len(a:0).':'.a:0)
+	else
+		let contents = join(getline(1, '$'), "\n")
+		call brackets#sendCommand('e:'.len(contents).':'.contents)
+	endif
 endfunction
 
 function! brackets#reload()
@@ -89,8 +93,9 @@ function! brackets#setCursor()
 	call brackets#sendCommand('p:'.len(line).':'.line.':'.len(column).':'.column)
 endfunction
 
+if has('python3')
+
 python3 <<EOF
-import sys
 import requests
 import vim
 
@@ -105,8 +110,12 @@ def send(msg):
 		pass #for now
 EOF
 
+endif
+
 function! brackets#sendCommand(msg)
+if has('python3')
 python3 <<EOF
 send(vim.eval("a:msg"))
 EOF
+endif
 endfunction
