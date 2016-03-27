@@ -25,7 +25,9 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 					&& position.end.line == line
 					&& position.start.column <= line
 					&& position.end.column >= line)){
-			return rules[i].selectors.join(' ');
+			if(rules[i].selectors){
+				return rules[i].selectors.join(' ');
+			}
 		}
 	}
 
@@ -49,7 +51,13 @@ CssFile.prototype.setContent = function(source, callback){
 	var changed = (this.source != undefined && this.source != source);
 
 	this.source = source;
-	this.parsed = cssparser.parse(source);
+
+	try{
+		this.parsed = cssparser.parse(source);
+	}catch(err){
+		callback(err);
+		return;
+	}
 
 	this.parsed.stylesheet.rules.forEach(function(rule){
 		var position = rule.position;

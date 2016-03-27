@@ -40,9 +40,10 @@ var files = {
 
 		var relativePath = null;
 		if(path.startsWith(this.editorRoot)){
-			console.log(path);
-			console.log(this.editorRoot);
 			relativePath = path.substring(this.editorRoot.length);
+			if(relativePath[0] == '/'){
+				relativePath = relativePath.substr(1);
+			}
 		}else{
 			relativePath = name;
 		}
@@ -68,7 +69,8 @@ var files = {
 		}
 
 		for(var file in this.files){
-			if(this.files[file].path.relative == path || this.files[file].name == path){
+			if(this.files[file].path.relative == path
+					|| this.files[file].name == path){
 				return this.files[file];
 			}
 		}
