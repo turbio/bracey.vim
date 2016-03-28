@@ -89,6 +89,7 @@ var files = {
 	},
 	setCurrentFile: function(id){
 		if(!this.files[id]){
+			this.currentFile = null;
 			return;
 		}
 

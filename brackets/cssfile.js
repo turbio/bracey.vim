@@ -27,6 +27,8 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 					&& position.end.column >= line)){
 			if(rules[i].selectors){
 				return rules[i].selectors.join(' ');
+			}else{
+				return null;
 			}
 		}
 	}
