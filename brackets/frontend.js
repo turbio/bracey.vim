@@ -75,7 +75,7 @@
 				reHighlight();
 				break;
 			case 'eval':
-				eval(message['js']);
+				eval.call(window, message['js']);
 				break;
 		}
 	};
