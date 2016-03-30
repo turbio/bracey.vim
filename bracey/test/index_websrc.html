@@ -1,8 +1,8 @@
-<!DOCTYPE html><html meta-brackets-element-index="1">
-<head meta-brackets-element-index="2">
-	<title meta-brackets-element-index="3">this is a test</title>
-	<link rel="stylesheet" type="text/css" href="style.css" meta-brackets-element-index="4">
-	<style type="text/css" meta-brackets-element-index="5">
+<!DOCTYPE html><html meta-bracey-element-index="1">
+<head meta-bracey-element-index="2">
+	<title meta-bracey-element-index="3">this is a test</title>
+	<link rel="stylesheet" type="text/css" href="style.css" meta-bracey-element-index="4">
+	<style type="text/css" meta-bracey-element-index="5">
 		body::after{
 			content: "looks like internal css is working just fine";
 		}
@@ -72,7 +72,7 @@
 						elem = document;
 					}else{
 						elem = document.querySelector(
-							'[meta-brackets-element-index=\"' + changeGroup['element'] + '\"]');
+							'[meta-bracey-element-index=\"' + changeGroup['element'] + '\"]');
 					}
 					changeGroup['changes'].forEach(function(change){
 						makeChange(elem, change);
@@ -137,7 +137,7 @@
 			lastSelection = selector;
 		}
 
-		existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		existingSelectors = document.querySelectorAll('.bracey-currently-selected-highlight');
 		for(var i = 0, len = existingSelectors.length; i < len; i++){
 			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
 		}
@@ -145,7 +145,7 @@
 		toHighlight = document.querySelectorAll(message['selector']);
 		for(var i = 0, len = toHighlight.length; i < len; i++){
 			var newHighlight = document.createElement('div');
-			newHighlight.className = 'brackets-currently-selected-highlight';
+			newHighlight.className = 'bracey-currently-selected-highlight';
 
 			var box = toHighlight[i].getBoundingClientRect();
 
@@ -214,7 +214,7 @@
 	}
 }
 
-.brackets-currently-selected-highlight{
+.bracey-currently-selected-highlight{
 	position: absolute !important;
 	-moz-box-sizing: border-box !important;
 	-webkit-box-sizing: border-box !important;
@@ -233,71 +233,71 @@
 	animation-duration: 0.75s !important;
 }
 </style></head>
-<body meta-brackets-element-index="6">
-	<h1 meta-brackets-element-index="7">this is a test</h1>
-	<p meta-brackets-element-index="8">it should contain some tricky html to test the parser</p>
-	<p meta-brackets-element-index="9">here's a paragraph</p>
-	<p meta-brackets-element-index="10">and another</p>
-	<h2 meta-brackets-element-index="11">how about some lists</h2>
-	<hr meta-brackets-element-index="12">
-	<ol meta-brackets-element-index="13">
-		<li meta-brackets-element-index="14">a</li>
-		<li meta-brackets-element-index="15">b</li>
-		<li meta-brackets-element-index="16">c</li>
+<body meta-bracey-element-index="6">
+	<h1 meta-bracey-element-index="7">this is a test</h1>
+	<p meta-bracey-element-index="8">it should contain some tricky html to test the parser</p>
+	<p meta-bracey-element-index="9">here's a paragraph</p>
+	<p meta-bracey-element-index="10">and another</p>
+	<h2 meta-bracey-element-index="11">how about some lists</h2>
+	<hr meta-bracey-element-index="12">
+	<ol meta-bracey-element-index="13">
+		<li meta-bracey-element-index="14">a</li>
+		<li meta-bracey-element-index="15">b</li>
+		<li meta-bracey-element-index="16">c</li>
 	</ol>
-	<ul meta-brackets-element-index="17">
-		<li meta-brackets-element-index="18">a</li>
-		<li meta-brackets-element-index="19">b</li>
-		<li meta-brackets-element-index="20">c</li>
+	<ul meta-bracey-element-index="17">
+		<li meta-bracey-element-index="18">a</li>
+		<li meta-bracey-element-index="19">b</li>
+		<li meta-bracey-element-index="20">c</li>
 	</ul>
-	<h2 meta-brackets-element-index="21">and a table</h2>
-	<hr meta-brackets-element-index="22">
-	<table meta-brackets-element-index="23">
-		<tr meta-brackets-element-index="24">
-			<td meta-brackets-element-index="25">a</td>
-			<td meta-brackets-element-index="26">b</td>
-			<td meta-brackets-element-index="27">c</td>
-			<td meta-brackets-element-index="28">d</td>
+	<h2 meta-bracey-element-index="21">and a table</h2>
+	<hr meta-bracey-element-index="22">
+	<table meta-bracey-element-index="23">
+		<tr meta-bracey-element-index="24">
+			<td meta-bracey-element-index="25">a</td>
+			<td meta-bracey-element-index="26">b</td>
+			<td meta-bracey-element-index="27">c</td>
+			<td meta-bracey-element-index="28">d</td>
 		</tr>
-		<tr meta-brackets-element-index="29">
-			<td meta-brackets-element-index="30">e</td>
-			<td meta-brackets-element-index="31">f</td>
-			<td meta-brackets-element-index="32">g</td>
-			<td meta-brackets-element-index="33">h</td>
+		<tr meta-bracey-element-index="29">
+			<td meta-bracey-element-index="30">e</td>
+			<td meta-bracey-element-index="31">f</td>
+			<td meta-bracey-element-index="32">g</td>
+			<td meta-bracey-element-index="33">h</td>
 		</tr>
-		<tr meta-brackets-element-index="34">
-			<td meta-brackets-element-index="35">i</td>
-			<td meta-brackets-element-index="36">j</td>
-			<td meta-brackets-element-index="37">k</td>
-			<td meta-brackets-element-index="38">l</td>
+		<tr meta-bracey-element-index="34">
+			<td meta-bracey-element-index="35">i</td>
+			<td meta-bracey-element-index="36">j</td>
+			<td meta-bracey-element-index="37">k</td>
+			<td meta-bracey-element-index="38">l</td>
 		</tr>
-		<tr meta-brackets-element-index="39">
-			<td meta-brackets-element-index="40">m</td>
-			<td meta-brackets-element-index="41">n</td>
-			<td meta-brackets-element-index="42">o</td>
-			<td meta-brackets-element-index="43">p</td>
+		<tr meta-bracey-element-index="39">
+			<td meta-bracey-element-index="40">m</td>
+			<td meta-bracey-element-index="41">n</td>
+			<td meta-bracey-element-index="42">o</td>
+			<td meta-bracey-element-index="43">p</td>
 		</tr>
 	</table>
-	<h2 meta-brackets-element-index="44">now for the divs</h2>
-	<hr meta-brackets-element-index="45">
-	<div meta-brackets-element-index="46">just a normal div</div>
-	<div class="classy" meta-brackets-element-index="47">a div with class</div>
-	<div id="identifiable" meta-brackets-element-index="48">an div with id</div>
-	<div id="relative" meta-brackets-element-index="49">relative positioned div</div>
-	<div id="fixed" meta-brackets-element-index="50">fixed positioned div</div>
-	<div id="absolute" meta-brackets-element-index="51">absolute positioned div</div>
-	<div style="overflow: hidden" meta-brackets-element-index="52">
-		<p meta-brackets-element-index="53">some floating divs:</p>
-		<div class="floaty" meta-brackets-element-index="54">first</div>
-		<div class="floaty" meta-brackets-element-index="55">second</div>
-		<div class="floaty" meta-brackets-element-index="56">third</div>
-		<div class="floaty" meta-brackets-element-index="57">fourth</div>
-		<div class="floaty" meta-brackets-element-index="58">fifth</div>
-		<div class="floaty" meta-brackets-element-index="59">sixth</div>
+	<h2 meta-bracey-element-index="44">now for the divs</h2>
+	<hr meta-bracey-element-index="45">
+	<div meta-bracey-element-index="46">just a normal div</div>
+	<div class="classy" meta-bracey-element-index="47">a div with class</div>
+	<div id="identifiable" meta-bracey-element-index="48">an div with id</div>
+	<div id="relative" meta-bracey-element-index="49">relative positioned div</div>
+	<div id="fixed" meta-bracey-element-index="50">fixed positioned div</div>
+	<div id="absolute" meta-bracey-element-index="51">absolute positioned div</div>
+	<div style="overflow: hidden" meta-bracey-element-index="52">
+		<p meta-bracey-element-index="53">some floating divs:</p>
+		<div class="floaty" meta-bracey-element-index="54">first</div>
+		<div class="floaty" meta-bracey-element-index="55">second</div>
+		<div class="floaty" meta-bracey-element-index="56">third</div>
+		<div class="floaty" meta-bracey-element-index="57">fourth</div>
+		<div class="floaty" meta-bracey-element-index="58">fifth</div>
+		<div class="floaty" meta-bracey-element-index="59">sixth</div>
 	</div>
-	<h2 meta-brackets-element-index="60">and last but not least internal css</h2>
-	<hr meta-brackets-element-index="61">
-	<div class="internal first" meta-brackets-element-index="62">this is styled by internal css</div>
-	<div class="internal second" meta-brackets-element-index="63">and so is this</div>
+	<h2 meta-bracey-element-index="60">and last but not least internal css</h2>
+	<hr meta-bracey-element-index="61">
+	<div class="internal first" meta-bracey-element-index="62">this is styled by internal css</div>
+	<div class="internal second" meta-bracey-element-index="63">and so is this</div>
 </body>
 </html>

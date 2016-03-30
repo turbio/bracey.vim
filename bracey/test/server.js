@@ -40,8 +40,8 @@ function recieve(callback){
 
 describe('server', function(){
 	before(function(done){
-		var brackets = require('../server.js');
-		server = new brackets();
+		var bracey = require('../server.js');
+		server = new bracey();
 		server.start(port);
 
 		var client = new WebSocketClient();
@@ -94,7 +94,7 @@ describe('server', function(){
 				recieve(function(msg){
 					msg.should.deep.equal({
 						"command": "select",
-						"selector": "[meta-brackets-element-index=\"" + test.expected + "\"]"
+						"selector": "[meta-bracey-element-index=\"" + test.expected + "\"]"
 					});
 					done();
 				});

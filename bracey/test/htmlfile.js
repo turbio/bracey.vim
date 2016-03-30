@@ -161,7 +161,7 @@ describe('htmlfile', function(){
 			var newhtml = this.indexhtml.slice(0, 610) + '<li>d</li>' + this.indexhtml.slice(610, -1);
 
 			this.file.setContent(newhtml, function(err, diff){
-				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-brackets-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
+				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-bracey-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
 				done(err);
 			});
 		});

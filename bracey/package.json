@@ -1,8 +1,8 @@
 {
-  "name": "brackets",
+  "name": "bracey",
   "version": "1.0.0",
   "description": "",
-  "main": "brackets.js",
+  "main": "bracey.js",
   "dependencies": {
     "css": "^2.2.1",
     "csslint": "^0.10.0",
@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turbio/vim-brackets.git"
+    "url": "git+https://github.com/turbio/vim-bracey.git"
   },
   "author": "mason clayton",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/turbio/vim-brackets/issues"
+    "url": "https://github.com/turbio/vim-bracey/issues"
   },
-  "homepage": "https://github.com/turbio/vim-brackets#readme"
+  "homepage": "https://github.com/turbio/vim-bracey#readme"
 }

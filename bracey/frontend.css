@@ -10,7 +10,7 @@
 	}
 }
 
-.brackets-currently-selected-highlight{
+.bracey-currently-selected-highlight{
 	z-index: 2147483647 !important;
 	position: absolute !important;
 	-moz-box-sizing: border-box !important;
@@ -30,7 +30,7 @@
 	animation-duration: 0.75s !important;
 }
 
-.brackets-highlight-error{
+.bracey-highlight-error{
 	border-color: rgba(255, 182, 255, 0.69) !important;
 	background: rgba(255, 182, 255, 0.45) !important;
 }

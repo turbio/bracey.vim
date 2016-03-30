@@ -40,7 +40,7 @@
 
 				if('index' in message){
 					setHighlighted(
-							'[meta-brackets-element-index=\"' +
+							'[meta-bracey-element-index=\"' +
 							message['index'] +
 							'\"]'
 							);
@@ -64,7 +64,7 @@
 						elem = document;
 					}else{
 						elem = document.querySelector(
-							'[meta-brackets-element-index=\"' +
+							'[meta-bracey-element-index=\"' +
 							changeGroup['element'] +
 							'\"]');
 					}
@@ -81,12 +81,12 @@
 	};
 
 	var setError = function(state){
-		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		var existingSelectors = document.querySelectorAll('.bracey-currently-selected-highlight');
 		for(var i = 0; i < existingSelectors.length; i++){
 			if(state){
-				existingSelectors[i].classList.add('brackets-highlight-error');
+				existingSelectors[i].classList.add('bracey-highlight-error');
 			}else{
-				existingSelectors[i].classList.remove('brackets-highlight-error');
+				existingSelectors[i].classList.remove('bracey-highlight-error');
 			}
 		}
 	};
@@ -101,7 +101,7 @@
 					case 'attribs':
 						element = element.childNodes[change.index];
 						while(element.attributes.length > 1){
-							if(element.attributes[0].name != 'meta-brackets-element-index'){
+							if(element.attributes[0].name != 'meta-bracey-element-index'){
 								element.removeAttribute(element.attributes[0].name);
 							}else{
 								element.removeAttribute(element.attributes[1].name);
@@ -150,7 +150,7 @@
 	var lastSelection = '';
 
 	var removeHighlights = function(){
-		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		var existingSelectors = document.querySelectorAll('.bracey-currently-selected-highlight');
 		for(var i = 0, len = existingSelectors.length; i < len; i++){
 			existingSelectors[i].parentElement.removeChild(existingSelectors[i]);
 		}
@@ -180,11 +180,11 @@
 	};
 
 	var reHighlight = function(){
-		var existingSelectors = document.querySelectorAll('.brackets-currently-selected-highlight');
+		var existingSelectors = document.querySelectorAll('.bracey-currently-selected-highlight');
 		for(var i = 0; i < existingSelectors.length; i++){
 			var highlight = existingSelectors[i];
 			var toHighlight = document.querySelectorAll(
-					'[meta-brackets-element-index=\"' +
+					'[meta-bracey-element-index=\"' +
 					highlight.getAttribute('highlighting') +
 					'\"]')[0];
 			if(!toHighlight){
@@ -213,7 +213,7 @@
 		var toHighlight = document.querySelectorAll(selector);
 		for(var i = 0; i < toHighlight.length; i++){
 			var newHighlight = document.createElement('div');
-			newHighlight.className = 'brackets-currently-selected-highlight';
+			newHighlight.className = 'bracey-currently-selected-highlight';
 
 			var box = elementBox(toHighlight[i]);
 
@@ -222,7 +222,7 @@
 			newHighlight.style.width = box.width;
 			newHighlight.style.height = box.height;
 			newHighlight.style.position = window.getComputedStyle(toHighlight[i]).position;
-			newHighlight.setAttribute('highlighting', toHighlight[i].getAttribute('meta-brackets-element-index'));
+			newHighlight.setAttribute('highlighting', toHighlight[i].getAttribute('meta-bracey-element-index'));
 
 			document.body.appendChild(newHighlight);
 		};

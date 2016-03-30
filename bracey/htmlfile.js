@@ -183,7 +183,7 @@ function stripElement(elem, include_index){
 			newElem.attribs = {};
 		}
 
-		newElem.attribs['meta-brackets-element-index'] = elem.index;
+		newElem.attribs['meta-bracey-element-index'] = elem.index;
 	}
 
 	if(elem.data)

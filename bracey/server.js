@@ -1,4 +1,4 @@
-//the brackets server
+//the bracey server
 //this sits between vim and the webpage
 
 var VERSION = "0.0.1";
@@ -269,7 +269,7 @@ function handleFileRequest(request, response){
 			response.writeHead(200);
 			response.end(errorPage.webSrc(
 				'wait for file...',
-				"vim hasn't opened an html file yet, or at least brackets isn't aware of any"));
+				"vim hasn't opened an html file yet, or at least bracey isn't aware of any"));
 		}else{
 			response.writeHead(302, {
 				'Location': currentFile.path.relative
