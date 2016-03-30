@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turbio/vim-bracey.git"
+    "url": "git+https://github.com/turbio/bracey.vim.git"
   },
   "author": "mason clayton",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/turbio/vim-bracey/issues"
+    "url": "https://github.com/turbio/bracey.vim/issues"
   },
-  "homepage": "https://github.com/turbio/vim-bracey#readme"
+  "homepage": "https://github.com/turbio/bracey.vim#readme"
 }
