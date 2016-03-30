@@ -55,7 +55,8 @@ endfunction
 
 function! brackets#evalFile(...)
 	if a:0
-		call brackets#sendCommand('e:'.len(a:0).':'.a:0)
+		let content = join(a:000, ' ')
+		call brackets#sendCommand('e:'.len(content).':'.content)
 	else
 		let contents = join(getline(1, '$'), "\n")
 		call brackets#sendCommand('e:'.len(contents).':'.contents)
