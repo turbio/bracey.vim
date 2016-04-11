@@ -28,10 +28,6 @@ endif
 	"let g:bracey_file_search_path = ''
 "endif
 
-if !exists("g:bracey_remote_connections")
-	let g:bracey_remote_connections = 0
-endif
-
 if !exists("g:bracey_auto_start_server")
 	let g:bracey_auto_start_server = 1
 endif
