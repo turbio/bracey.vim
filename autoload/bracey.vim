@@ -28,6 +28,7 @@ function! bracey#startServer()
 		let node_args .= " -a"
 	endif
 
+	echo "launching server with command node bracey.js ".node_args." &"
 	call system("node bracey.js ".node_args." &")
 
 	execute 'cd -'
