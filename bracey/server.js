@@ -118,7 +118,7 @@ var files = {
 			console.log('requested editor root before it was defined');
 		}
 		return this.editorRoot;
-	}
+	},
 	currentFile: undefined,
 	currentHtmlFile: undefined,
 	editorRoot: undefined,
