@@ -18,6 +18,8 @@ var injectedCss = undefined;
 
 var files = {
 	newFile: function(id, name, path, type, source){
+		console.log('created a new file with id: ' + id + ', name: ' + name
+				+ ', path: ' + path + ', type: ' + type);
 		if(source == undefined){
 			source = '';
 		}
@@ -31,6 +33,7 @@ var files = {
 				createdFile = new cssfile(source);
 				break;
 			default:
+				console.log('it\'s not a recognized filetype so we\'ll ignore this');
 				//TODO: for now...
 				return;
 				break;
@@ -64,6 +67,8 @@ var files = {
 		throw 'not implemented';
 	},
 	getByWebPath: function(path){
+		console.log('web file requested ' + path);
+
 		if(path[0] == '/'){
 			path = path.substr(1);
 		}
@@ -78,7 +83,7 @@ var files = {
 		return null;
 	},
 	getByName: function(name){
-
+		throw 'not implemented';
 	},
 	getCurrentFile: function(){
 		if(this.currentFile){
@@ -108,6 +113,12 @@ var files = {
 
 		return this.files[this.currentHtmlFile];
 	},
+	getEditorRoot: function(){
+		if(!this.editorRoot){
+			console.log('requested editor root before it was defined');
+		}
+		return this.editorRoot;
+	}
 	currentFile: undefined,
 	currentHtmlFile: undefined,
 	editorRoot: undefined,
@@ -133,7 +144,9 @@ var errorPage = {
 
 function Server(){
 	injectedCss = fs.readFileSync('frontend.css', "utf8");
+	console.log('loaded injected css');
 	injectedJs = fs.readFileSync('frontend.js', "utf8");
+	console.log('loaded injected js');
 
 	htmlfile.setCSS(injectedCss);
 	htmlfile.setJS(injectedJs);
@@ -142,18 +155,23 @@ function Server(){
 Server.prototype.start = function(set){
 	settings = set;
 	if(settings['allow-remote-web']){
+		console.log('starting http server on port ' + settings['port']);
 		httpServer.listen(settings['port']);
 	}else{
+		console.log('starting http server on port ' + settings['port']
+			+ ' with address restricted to ' + settings['web-address']);
 		httpServer.listen(settings['port'], settings['web-address']);
 	}
 };
 
 Server.prototype.stop = function(){
+	console.log('stopping http server');
 	httpServer.close();
 };
 
 function parseEditorRequest(data){
 	if(data == 'ping'){
+		console.log('recieved ping, sending pong');
 		sendPong();
 		return;
 	}

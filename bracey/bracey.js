@@ -79,7 +79,7 @@ console.log = function(msg) {
 	log_stdout.write(util.format(msg) + '\n');
 };
 
-console.log('starting bracey server with arguments:');
+console.log('starting bracey with arguments:');
 
 for(arg in settings){
 	console.log(arg + ': ' + settings[arg]);
