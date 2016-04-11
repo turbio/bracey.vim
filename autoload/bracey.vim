@@ -14,9 +14,9 @@ endfunction
 
 function! bracey#startBrowser(url)
 	if g:bracey_browser_command == 0
-		call system('xdg-open '.a:url.'&')
+		call system('xdg-open '.a:url.' &')
 	else
-		call system(g:bracey_browser_command.' '.a:url.'&')
+		call system(g:bracey_browser_command.' '.a:url.' &')
 	endif
 endfunction
 

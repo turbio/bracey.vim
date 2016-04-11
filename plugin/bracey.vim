@@ -12,7 +12,7 @@ if !exists("g:bracey_server_path")
 endif
 
 if !exists("g:bracey_server_port")
-	let g:bracey_server_port = 13378
+	let g:bracey_server_port = 13378 + (getpid() % 80000)
 endif
 
 if !exists("g:bracey_server_allow_remote_connetions")

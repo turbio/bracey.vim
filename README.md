@@ -117,7 +117,7 @@ g:bracey_server_allow_remote_connetions
 ```
 g:bracey_server_port
 ```
-**default:** 13378
+**default:** random-ish number derived from vim's pid
 * (int) the port that the node server will serve files at and receive commands at
 
 ```
