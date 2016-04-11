@@ -22,11 +22,14 @@ endfunction
 
 function! bracey#startServer()
 	execute 'cd' fnameescape(s:plugin_path . "/bracey")
+
+	let node_args = "-p ".g:bracey_server_port
 	if g:bracey_server_allow_remote_connetions
-		call system("node bracey.js -a -p ".g:bracey_server_port." > " .g:bracey_server_log." &")
-	else
-		call system("node bracey.js -p ".g:bracey_server_port." > " .g:bracey_server_log." &")
+		let node_args .= " -a"
 	endif
+
+	call system("node bracey.js ".node_args." &")
+
 	execute 'cd -'
 	sleep 1000m
 	call bracey#setVars()
