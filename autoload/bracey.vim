@@ -1,6 +1,8 @@
 let s:plugin_path = expand('<sfile>:p:h:h')
 
 function! bracey#start()
+	call bracey#initPython()
+
 	if g:bracey_auto_start_server
 		call bracey#startServer()
 	endif
@@ -28,13 +30,16 @@ function! bracey#startServer()
 		let node_args .= " -a"
 	endif
 
-	echo "launching server with command node bracey.js ".node_args." &"
-	call system("node bracey.js ".node_args." &")
+	echom "launching server with command \"node bracey.js ".node_args." &\""
+	call system("node bracey.js ".node_args." 2>&1 > /dev/null &")
 
 	execute 'cd -'
 	sleep 1000m
 	call bracey#setVars()
 	call bracey#setFile()
+endfunction
+
+function! bracey#stopServer()
 endfunction
 
 function! bracey#setupHandlers()
@@ -50,6 +55,7 @@ function! bracey#setupHandlers()
 endfunction
 
 function! bracey#stop()
+	call bracey#stopServer()
 endfunction
 
 function! bracey#sendCurrentBuffer()
@@ -99,8 +105,8 @@ function! bracey#setCursor()
 	call bracey#sendCommand('p:'.len(line).':'.line.':'.len(column).':'.column)
 endfunction
 
-if has('python3')
-
+function! bracey#initPython()
+	if has('python3')
 python3 <<EOF
 import requests
 import vim
@@ -116,12 +122,33 @@ def send(msg):
 		pass #for now
 EOF
 
-endif
+	elseif has('python')
+python <<EOF
+import httplib
+import vim
+
+url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
+
+def send(msg):
+	try:
+		connection = httplib.HTTPConnection(url)
+		connection.request("POST", "", msg)
+	except:
+		pass #for now
+EOF
+	endif
+endfunction
 
 function! bracey#sendCommand(msg)
-if has('python3')
+	if has('python3')
 python3 <<EOF
 send(vim.eval("a:msg"))
 EOF
-endif
+	elseif has('python')
+python <<EOF
+send(vim.eval("a:msg"))
+EOF
+	else
+		call system("curl ".g:bracey_server_path.':'.g:bracey_server_port." --data ".a:msg)
+	endif
 endfunction
