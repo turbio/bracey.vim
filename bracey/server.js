@@ -327,7 +327,7 @@ var httpServer = http.createServer(function(request, response){
 		handleFileRequest(request, response);
 	}else if(request.method == 'POST'
 			&& (settings['allow-remote-editor']
-				|| request.connection.remoteAddress == settings['editor-address'])){
+				|| request.connection.remoteAddress.includes(settings['editor-address']))){
 		var postData = '';
 
 		request.on('data', function(data){
