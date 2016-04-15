@@ -1,4 +1,5 @@
 let s:plugin_path = expand('<sfile>:p:h:h')
+let s:bracey_server_process = 0
 
 function! bracey#start()
 	call bracey#initPython()
@@ -8,6 +9,11 @@ function! bracey#start()
 	endif
 
 	call bracey#setupHandlers()
+
+	"TODO: find a better way to do this than sleeping
+	sleep 1000m
+	call bracey#setVars()
+	call bracey#setFile()
 
 	if g:bracey_auto_start_browser
 		call bracey#startBrowser(g:bracey_server_path.':'.g:bracey_server_port)
@@ -23,23 +29,56 @@ function! bracey#startBrowser(url)
 endfunction
 
 function! bracey#startServer()
-	execute 'cd' fnameescape(s:plugin_path . "/bracey")
+	if has('python3')
+python3 <<EOF
+args = [
+	'node', 'bracey.js',
+	'--port', vim.eval("g:bracey_server_port"),
+]
 
-	let node_args = "-p ".g:bracey_server_port
-	if g:bracey_server_allow_remote_connetions
-		let node_args .= " -a"
+if int(vim.eval("g:bracey_server_allow_remote_connetions")) != 0:
+	args.append('--allow-remote-web')
+
+print('starting server with args "' + str(args) + '"')
+try:
+	bracey_server_process = subprocess.Popen(
+		args,
+		cwd=vim.eval("s:plugin_path") + '/bracey',
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE)
+except Exception as e:
+	print('could not start bracey server: ' + str(e))
+
+EOF
+	elseif has('python')
+python <<EOF
+args = [
+	'node', 'bracey.js',
+	'--port', vim.eval("g:bracey_server_port"),
+]
+
+if int(vim.eval("g:bracey_server_allow_remote_connetions")) != 0:
+	args.append('--allow-remote-web')
+
+print('starting server with args "' + str(args) + '"')
+try:
+	bracey_server_process = subprocess.Popen(
+		args,
+		cwd=vim.eval("s:plugin_path") + '/bracey',
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE)
+except Exception as e:
+	print('could not start bracey server: ' + str(e))
+
+EOF
 	endif
-
-	echom "launching server with command \"node bracey.js ".node_args." &\""
-	call system("node bracey.js ".node_args." 2>&1 > /dev/null &")
-
-	execute 'cd -'
-	sleep 1000m
-	call bracey#setVars()
-	call bracey#setFile()
 endfunction
 
 function! bracey#stopServer()
+	"TODO: implement function
+	if has('python3')
+	elseif has('python')
+	endif
 endfunction
 
 function! bracey#setupHandlers()
@@ -109,7 +148,10 @@ function! bracey#initPython()
 	if has('python3')
 python3 <<EOF
 import requests
+import subprocess
 import vim
+
+bracey_server_process = None
 
 url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
 
@@ -124,15 +166,19 @@ EOF
 
 	elseif has('python')
 python <<EOF
-import httplib
+import urllib2
+import subprocess
 import vim
 
+bracey_server_process = None
+
 url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
+opener = urllib2.build_opener(urllib2.ProxyHandler({}))
 
 def send(msg):
 	try:
-		connection = httplib.HTTPConnection(url)
-		connection.request("POST", "", msg)
+		connection = opener.open(url, msg)
+		result = connection.read()
 	except:
 		pass #for now
 EOF
@@ -148,7 +194,5 @@ EOF
 python <<EOF
 send(vim.eval("a:msg"))
 EOF
-	else
-		call system("curl ".g:bracey_server_path.':'.g:bracey_server_port." --data ".a:msg)
 	endif
 endfunction
