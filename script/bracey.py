@@ -49,7 +49,8 @@ def startServer():
 			args,
 			cwd=vim.eval("s:plugin_path") + '/bracey',
 			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
+			stderr=subprocess.PIPE,
+			stdin=subprocess.PIPE)
 	except Exception as e:
 		print('could not start bracey server: ' + str(e))
 
