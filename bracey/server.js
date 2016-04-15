@@ -233,6 +233,7 @@ function handleEditorCommand(command, data){
 			break;
 		//reload page
 		case 'r':
+			broadcast({'command': 'reload_page'});
 			break;
 		//set the current file
 		//buffer number, name, path, type
