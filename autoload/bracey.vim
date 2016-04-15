@@ -1,8 +1,17 @@
+if !has('python') && !has('python3')
+	echo 'bracey requires python in order to communicate with the server'
+	finish
+endif
+
 let s:plugin_path = expand('<sfile>:p:h:h')
-let s:bracey_server_process = 0
+let s:script_path = s:plugin_path.'/script/bracey.py'
 
 function! bracey#start()
-	call bracey#initPython()
+	if has('python3')
+		execute 'py3file '.fnameescape(s:script_path)
+	elseif has('python')
+		execute 'pyfile '.fnameescape(s:script_path)
+	endif
 
 	if g:bracey_auto_start_server
 		call bracey#startServer()
@@ -30,54 +39,17 @@ endfunction
 
 function! bracey#startServer()
 	if has('python3')
-python3 <<EOF
-args = [
-	'node', 'bracey.js',
-	'--port', vim.eval("g:bracey_server_port"),
-]
-
-if int(vim.eval("g:bracey_server_allow_remote_connetions")) != 0:
-	args.append('--allow-remote-web')
-
-print('starting server with args "' + str(args) + '"')
-try:
-	bracey_server_process = subprocess.Popen(
-		args,
-		cwd=vim.eval("s:plugin_path") + '/bracey',
-		stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-except Exception as e:
-	print('could not start bracey server: ' + str(e))
-
-EOF
+		python3 startServer()
 	elseif has('python')
-python <<EOF
-args = [
-	'node', 'bracey.js',
-	'--port', vim.eval("g:bracey_server_port"),
-]
-
-if int(vim.eval("g:bracey_server_allow_remote_connetions")) != 0:
-	args.append('--allow-remote-web')
-
-print('starting server with args "' + str(args) + '"')
-try:
-	bracey_server_process = subprocess.Popen(
-		args,
-		cwd=vim.eval("s:plugin_path") + '/bracey',
-		stdout=subprocess.PIPE,
-		stderr=subprocess.PIPE)
-except Exception as e:
-	print('could not start bracey server: ' + str(e))
-
-EOF
+		python startServer()
 	endif
 endfunction
 
 function! bracey#stopServer()
-	"TODO: implement function
 	if has('python3')
+		python3 stopServer()
 	elseif has('python')
+		python stopServer()
 	endif
 endfunction
 
@@ -91,6 +63,7 @@ function! bracey#setupHandlers()
 	if g:bracey_refresh_on_save
 		autocmd BufWritePost *.html call bracey#reload()
 	endif
+	autocmd VimLeave * call bracey#stop()
 endfunction
 
 function! bracey#stop()
@@ -144,55 +117,10 @@ function! bracey#setCursor()
 	call bracey#sendCommand('p:'.len(line).':'.line.':'.len(column).':'.column)
 endfunction
 
-function! bracey#initPython()
-	if has('python3')
-python3 <<EOF
-import requests
-import subprocess
-import vim
-
-bracey_server_process = None
-
-url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
-
-def send(msg):
-	try:
-		requests.post(
-			url,
-			data=msg)
-	except:
-		pass #for now
-EOF
-
-	elseif has('python')
-python <<EOF
-import urllib2
-import subprocess
-import vim
-
-bracey_server_process = None
-
-url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
-opener = urllib2.build_opener(urllib2.ProxyHandler({}))
-
-def send(msg):
-	try:
-		connection = opener.open(url, msg)
-		result = connection.read()
-	except:
-		pass #for now
-EOF
-	endif
-endfunction
-
 function! bracey#sendCommand(msg)
 	if has('python3')
-python3 <<EOF
-send(vim.eval("a:msg"))
-EOF
+		python3 send(vim.eval("a:msg"))
 	elseif has('python')
-python <<EOF
-send(vim.eval("a:msg"))
-EOF
+		python send(vim.eval("a:msg"))
 	endif
 endfunction
