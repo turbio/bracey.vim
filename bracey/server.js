@@ -67,8 +67,6 @@ var files = {
 		throw 'not implemented';
 	},
 	getByWebPath: function(path){
-		console.log('web file requested ' + path);
-
 		if(path[0] == '/'){
 			path = path.substr(1);
 		}
@@ -281,7 +279,13 @@ function handleEditorCommand(command, data){
 	}
 }
 
+function stripParams(url){
+	return url.split('?')[0]
+}
+
 function handleFileRequest(request, response){
+	console.log('web file requested ' + request.url);
+
 	if(request.url == '/'){
 		var currentFile = files.getCurrentHtmlFile();
 		if(currentFile == null){
@@ -296,18 +300,20 @@ function handleFileRequest(request, response){
 			response.end();
 		}
 		return;
-
 	}
 
-	var file = files.getByWebPath(request.url);
+	var url = stripParams(request.url);
+	var file = files.getByWebPath(url);
 
 	if(file){
+		console.log('already known to bracey as ' + url);
 		response.writeHead(200, {
-			"Content-Type": mime.lookup(request.url)
+			"Content-Type": mime.lookup(url)
 		});
 		response.end(file.webSrc());
 	}else{
-		fs.readFile(files.editorRoot + request.url, function(err, data){
+		console.log('loading from ' + files.editorRoot + url);
+		fs.readFile(files.editorRoot + url, function(err, data){
 			if(err){
 				response.writeHead(404);
 				response.end(errorPage.webSrc(
@@ -315,7 +321,7 @@ function handleFileRequest(request, response){
 					err.toString()));
 			}else{
 				response.writeHead(200, {
-					"Content-Type": mime.lookup(request.url)
+					"Content-Type": mime.lookup(url)
 				});
 				response.end(data, "binary");
 			}
