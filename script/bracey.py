@@ -5,28 +5,23 @@ import sys
 python_version = int(sys.version[0])
 
 if python_version is 2:
-	import urllib2
+	import urllib2 as requests
 else:
-	import requests
+	from urllib import request as requests
 
 bracey_server_process = None
 url = vim.eval("g:bracey_server_path.':'.g:bracey_server_port")
 
-if python_version is 2:
-	opener = urllib2.build_opener(urllib2.ProxyHandler({}))
+opener = requests.build_opener(requests.ProxyHandler({}))
 
 
 def send(msg):
-	if python_version is 2:
-		try:
-			opener.open(url, msg).read()
-		except:
-			pass  # for now
-	else:
-		try:
-			requests.post(url, data=msg)
-		except:
-			pass  # for now
+	if python_version is not 2:
+		msg = msg.encode('utf-8')
+	try:
+		opener.open(url, msg).read()
+	except Exception as e:
+		print("bracey error: " + str(e))
 
 
 def startServer():
