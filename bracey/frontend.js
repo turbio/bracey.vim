@@ -109,7 +109,6 @@
 						}
 						for(attrib in change.value){
 							element.setAttribute(attrib, change.value[attrib]);
-							console.log(element);
 						}
 						break;
 				}
@@ -228,29 +227,44 @@
 		};
 	};
 
+	var setUrlParam = function(url, key, value){
+		var parts = url.split('?');
+		var path = parts[0];
+		var params = parts[1];
+
+		if(!params){
+			url += '?' + key + '=' + value;
+		}else{
+			params = params.split('&');
+
+			for(var i = 0; i < params.length; i++){
+				var param_parts = params[i].split('=');
+				if(param_parts[0] == key){
+					params[i] = key + '=' + value;
+					break;
+				}
+			}
+
+			url = path + '?' + params.join('&');
+		}
+
+		return url;
+	}
+
 	var reloadCSS = function(){
 		var elements = document.getElementsByTagName("link");
-
 		var c = 0;
 
 		for(var i = 0; i < elements.length; i++){
 			if(elements[c].rel == "stylesheet"){
-				var href = elements[i].getAttribute("data-href");
-
-				if (href == null) {
+				//var href = elements[i].getAttribute("data-href");
+				var href = null;
+				if (href == null){
 					href = elements[c].href;
 					elements[c].setAttribute("data-href", href);
 				}
 
-				if (window.__BL_OVERRIDE_CACHE) {
-					var link = document.createElement("link");
-					link.href = href;
-					link.rel = "stylesheet";
-					document.head.appendChild(link);
-					document.head.removeChild(elements[c]);
-					continue;
-				}
-				elements[i].href = href;
+				elements[i].href = setUrlParam(href, 'bracey-cache-buster', (new Date).getTime());
 			}
 			c++;
 		}
