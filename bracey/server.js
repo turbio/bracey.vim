@@ -211,6 +211,8 @@ function handleEditorCommand(command, data){
 				currentFile.setContent(data[0], function(err, diff){
 					if(!err){
 						sendEdit(diff);
+					}else{
+						console.log('file ' + currentFile.name + ' parse error');
 					}
 				});
 				sendSelect(null, currentFile.errorState);
@@ -218,6 +220,8 @@ function handleEditorCommand(command, data){
 				currentFile.setContent(data[0], function(err){
 					if(!err){
 						broadcast({'command': 'reload_css'});
+					}else{
+						console.log('file ' + currentFile.name + ' parse error');
 					}
 				});
 			}
@@ -342,6 +346,7 @@ var httpServer = http.createServer(function(request, response){
 		});
 
 		request.on('end', function(){
+			console.log('recieved from editor: ' + postData);
 			parseEditorRequest(postData);
 		});
 
