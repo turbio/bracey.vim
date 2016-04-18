@@ -346,12 +346,12 @@ var httpServer = http.createServer(function(request, response){
 		});
 
 		request.on('end', function(){
+			response.writeHead(200);
+			response.end();
 			console.log('recieved from editor: ' + postData);
+
 			parseEditorRequest(postData);
 		});
-
-		response.writeHead(200);
-		response.end();
 	}
 });
 
