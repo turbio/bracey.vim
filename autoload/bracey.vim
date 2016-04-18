@@ -31,7 +31,11 @@ endfunction
 
 function! bracey#startBrowser(url)
 	if g:bracey_browser_command == 0
-		call system('xdg-open '.a:url.' &')
+		if has('python3')
+			python3 openBrowser(vim.eval("a:url"))
+		elseif has('python')
+			python openBrowser(vim.eval("a:url"))
+		endif
 	else
 		call system(g:bracey_browser_command.' '.a:url.' &')
 	endif

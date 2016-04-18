@@ -1,3 +1,4 @@
+import webbrowser
 import subprocess
 import vim
 import sys
@@ -60,3 +61,6 @@ def stopServer():
 	bracey_server_process.terminate()
 	bracey_server_process.wait()
 	bracey_server_process = None
+
+def openBrowser(url):
+	webbrowser.open(url, autoraise=False)
