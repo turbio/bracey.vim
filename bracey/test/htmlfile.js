@@ -209,8 +209,12 @@ describe('htmlfile', function(){
 			});
 		});
 
-		it('should report html element changes correctly');
-
-		it('should report errors in html');
+		it('should report errors in html', function(){
+			var brokenhtml = originalHtml.slice(0, 610) + '<li' + originalHtml.slice(610, -1);
+			file.setContent(brokenhtml, function(err, diff){
+				expect(err).to.be.ok;
+				expect(diff).to.not.be.ok;
+			});
+		});
 	});
 });

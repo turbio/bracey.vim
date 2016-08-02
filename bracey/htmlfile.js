@@ -115,16 +115,12 @@ HtmlFile.prototype.tagFromPosition = function(line, column){
 //or, if there are no differences, doesn't call it
 //changes this files contents to the new contents
 HtmlFile.prototype.setContent = function(newHtml, callback){
-	if(typeof(newHtml) !== 'string'){
-		callback('content can only be set to a string', null);
-		return;
-	}
-
 	//before even begining, check to make sure there are no errors
+	var errors;
 	try{
 		errors = htmlhint.verify(newHtml, { 'tag-pair': true, 'spec-char-escape': true });
 	}catch(e){
-		callback(e.message, null);
+		callback(e, null);
 		return;
 	}
 
