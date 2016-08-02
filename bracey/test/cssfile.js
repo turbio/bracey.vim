@@ -4,7 +4,7 @@ var cssfile = require('../cssfile');
 
 describe('cssfile', function(){
 	beforeEach(function(){
-		this.cssfilesrc = fs.readFileSync('test/style.css', 'utf8');
+		this.cssfilesrc = fs.readFileSync('test/fixtures/test_css.css', 'utf8');
 		this.file = new cssfile(this.cssfilesrc,
 				'saladman',
 				function(err){
