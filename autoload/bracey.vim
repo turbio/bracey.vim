@@ -31,10 +31,12 @@ endfunction
 
 function! bracey#startBrowser(url)
 	if g:bracey_browser_command == 0
-		if has('python3')
-			python3 openBrowser(vim.eval("a:url"))
-		elseif has('python')
-			python openBrowser(vim.eval("a:url"))
+		if has("unix")
+			if system("uname -s") == "Darwin"
+				call system('open '.a:url.' &')
+			else
+				call system('xdg-open '.a:url.' &')
+			endif
 		endif
 	else
 		call system(g:bracey_browser_command.' '.a:url.' &')

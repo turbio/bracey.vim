@@ -19,15 +19,6 @@ if !exists("g:bracey_server_allow_remote_connetions")
 	let g:bracey_server_allow_remote_connetions = 0
 endif
 
-"if !exists("g:bracey_file_search_method")
-	""auto/dir/cwd
-	"let g:bracey_file_search_method = 'cwd'
-"endif
-
-"if !exists("g:bracey_file_search_path")
-	"let g:bracey_file_search_path = ''
-"endif
-
 if !exists("g:bracey_auto_start_server")
 	let g:bracey_auto_start_server = 1
 endif
@@ -40,20 +31,12 @@ if !exists("g:bracey_refresh_on_save")
 	let g:bracey_refresh_on_save = 0
 endif
 
-"if !exists("g:bracey_highligh_cursor")
-	"let g:bracey_highligh_cursor = 1
-"endif
-
-"if !exists("g:bracey_live_update")
-	"let g:bracey_live_update = 1
-"endif
-
 if !exists("g:bracey_auto_start_browser")
 	let g:bracey_auto_start_browser = 1
 endif
 
 if !exists("g:bracey_browser_command")
-	"0 = auto
+	"0 = auto (using 
 	"'...' = command to run
 	let g:bracey_browser_command = 0
 endif
