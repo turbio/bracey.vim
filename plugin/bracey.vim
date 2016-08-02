@@ -36,7 +36,7 @@ if !exists("g:bracey_auto_start_browser")
 endif
 
 if !exists("g:bracey_browser_command")
-	"0 = auto (using 
+	"0 = auto (using
 	"'...' = command to run
 	let g:bracey_browser_command = 0
 endif
