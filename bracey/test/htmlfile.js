@@ -52,24 +52,34 @@ describe('htmlfile', function(){
 	});
 
 	describe('#webSrc()', function(){
-		var expectedHTML, injectedJS, injectedCSS;
+		var injectedJS, injectedCSS;
 
-		before(function(){
-			expectedHTML = fs.readFileSync(expectedHTMLPath, 'utf8').toString();
-			injectedJS = fs.readFileSync(injectedJSPath, 'utf8').toString();
-			injectedCSS = fs.readFileSync(injectedCSSPath, 'utf8').toString();
-		});
-
-		it('should have the contents of frontend.js injected inside', function(){
-			file.webSrc().should.include(injectedJS);
-		});
-
-		it('should have the contents of frontend.css injected inside', function(){
-			file.webSrc().should.include(injectedCSS);
-		});
-
-		it('should return correctly processed html', function(){
-			file.webSrc().should.equal(expectedHTML);
+		[
+			{
+				name: 'the contents of frontend.js injected inside',
+				data: fs.readFileSync(injectedJSPath, 'utf8').toString()
+			},
+			{
+				name: 'the contents of frontend.css injected inside',
+				data: fs.readFileSync(injectedCSSPath, 'utf8').toString()
+			},
+			{
+				name: 'body with bracey ids set',
+				data: fs.readFileSync(expectedHTMLPath, 'utf8').toString()
+			},
+			{
+				name: 'an opening html tag with id 1',
+				data: '<html meta-bracey-element-index="1">'
+			},
+			{ name: 'an closing html tag', data: '</html>' },
+			{ name: 'an opening head tag', data: '<head' },
+			{ name: 'an closing head tag', data: '</head>' },
+			{ name: 'an opening body tag', data: '<body' },
+			{ name: 'an closing body tag', data: '</body>' }
+		].forEach(function(test){
+			it('should have ' + test.name, function(){
+				file.webSrc().should.include(test.data);
+			});
 		});
 
 		it('should wrap html which does not have proper html/head/body tags');
@@ -83,22 +93,36 @@ describe('htmlfile', function(){
 		});
 
 		it('should not call callback when nothing has changed', function(){
-			file.setContent(this.indexhtml,function(err, diff){
+			file.setContent(originalHtml, function(err, diff){
 				throw 'reported changes when nothing was changed';
 			});
 		});
 
 		it('should ignore all whitespace changes to root', function(){
-			file.setContent(this.indexhtml + '   \n  ',function(err, diff){
+			file.setContent(originalHtml + '   \n  ',function(err, diff){
 				throw 'reported changes when only root whitespace was changed';
+			});
+		});
+
+		it('should call calback with error if non string is passed', function(){
+			file.setContent(undefined, function(err, diff){
+				expect(err).to.be.ok;
+			});
+
+			file.setContent({}, function(err, diff){
+				expect(err).to.be.ok;
+			});
+
+			file.setContent(12, function(err, diff){
+				expect(err).to.be.ok;
 			});
 		});
 
 		it('should call callback when changes are made', function(done){
 			//make a change...
-			var newhtml = this.indexhtml.slice(0, 46)
+			var newhtml = originalHtml.slice(0, 46)
 				+ 'still '
-				+ this.indexhtml.slice(46, -1);
+				+ originalHtml.slice(46, -1);
 
 			file.setContent(newhtml,function(err, diff){
 				done(err);
@@ -106,9 +130,9 @@ describe('htmlfile', function(){
 		});
 
 		it('should report a text element change correctly', function(done){
-			var newhtml = this.indexhtml.slice(0, 46)
+			var newhtml = originalHtml.slice(0, 46)
 				+ 'still '
-				+ this.indexhtml.slice(46, -1);
+				+ originalHtml.slice(46, -1);
 			file.setContent(newhtml,function(err, diff){
 				diff.should.deep.equal([
 					{
@@ -128,7 +152,7 @@ describe('htmlfile', function(){
 		});
 
 		it('should report a text element removal correctly', function(done){
-			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
+			var newhtml = originalHtml.slice(0, 38) + originalHtml.slice(52, -1);
 			file.setContent(newhtml,function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
@@ -142,14 +166,14 @@ describe('htmlfile', function(){
 		});
 
 		it('should report a text element addition correctly', function(done){
-			var newhtml = this.indexhtml.slice(0, 38) + this.indexhtml.slice(52, -1);
+			var newhtml = originalHtml.slice(0, 38) + originalHtml.slice(52, -1);
 			//first remove the title
 			file.setContent(newhtml, function(err, diff){
 				expect(err).to.be.null;
 			});
 
 			//and now read it
-			var newhtml = this.indexhtml.slice(0, 38) + 'a new title' + this.indexhtml.slice(52, -1);
+			var newhtml = originalHtml.slice(0, 38) + 'a new title' + originalHtml.slice(52, -1);
 			file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
@@ -165,7 +189,7 @@ describe('htmlfile', function(){
 
 		it('should report html element remove correctly', function(done){
 			//remove line
-			var newhtml = this.indexhtml.slice(0, 597) + this.indexhtml.slice(610, -1);
+			var newhtml = originalHtml.slice(0, 597) + originalHtml.slice(610, -1);
 
 			file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{"element":13,"changes":[{"index":4,"action":"change","what":"data","value":"\n\t"},{"index":5,"action":"remove"},{"index":5,"action":"remove"}]}]);
@@ -175,7 +199,7 @@ describe('htmlfile', function(){
 
 		it('should report html element addition correctly', function(done){
 			//remove line
-			var newhtml = this.indexhtml.slice(0, 610) + '<li>d</li>' + this.indexhtml.slice(610, -1);
+			var newhtml = originalHtml.slice(0, 610) + '<li>d</li>' + originalHtml.slice(610, -1);
 
 			file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-bracey-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
