@@ -99,23 +99,25 @@ describe('htmlfile', function(){
 		});
 
 		it('should ignore all whitespace changes to root', function(){
-			file.setContent(originalHtml + '   \n  ',function(err, diff){
+			file.setContent(originalHtml + '   \n  ', function(err, diff){
 				throw 'reported changes when only root whitespace was changed';
 			});
 		});
 
 		it('should call calback with error if non string is passed', function(){
-			file.setContent(undefined, function(err, diff){
-				expect(err).to.be.ok;
-			});
+			var errs = 0;
 
-			file.setContent({}, function(err, diff){
+			var onerr = function(err, diff){
+				errs++;
 				expect(err).to.be.ok;
-			});
+				expect(diff).to.not.be.ok;
+			};
 
-			file.setContent(12, function(err, diff){
-				expect(err).to.be.ok;
-			});
+			file.setContent(undefined, onerr);
+			file.setContent({}, onerr);
+			file.setContent(12, onerr);
+
+			expect(errs).to.equal(3);
 		});
 
 		it('should call callback when changes are made', function(done){
@@ -124,7 +126,7 @@ describe('htmlfile', function(){
 				+ 'still '
 				+ originalHtml.slice(46, -1);
 
-			file.setContent(newhtml,function(err, diff){
+			file.setContent(newhtml, function(err, diff){
 				done(err);
 			});
 		});
@@ -133,7 +135,7 @@ describe('htmlfile', function(){
 			var newhtml = originalHtml.slice(0, 46)
 				+ 'still '
 				+ originalHtml.slice(46, -1);
-			file.setContent(newhtml,function(err, diff){
+			file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([
 					{
 						"element":3,
@@ -153,7 +155,7 @@ describe('htmlfile', function(){
 
 		it('should report a text element removal correctly', function(done){
 			var newhtml = originalHtml.slice(0, 38) + originalHtml.slice(52, -1);
-			file.setContent(newhtml,function(err, diff){
+			file.setContent(newhtml, function(err, diff){
 				diff.should.deep.equal([{
 							"element":3,
 							"changes": [{
