@@ -24,6 +24,7 @@
 	overflow-y: hidden !important;
 	margin: 0 !important;
 	padding: 0 !important;
+	background: none !important;
 
 	animation-name: blink-background !important;
 	animation-duration: 0.75s !important;
