@@ -86,5 +86,5 @@ for(arg in settings){
 };
 
 var server = require("./server.js");
-server = new server();
-server.start(settings);
+server = new server(settings);
+server.start();

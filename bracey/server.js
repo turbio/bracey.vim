@@ -9,70 +9,61 @@ var fs = require("fs");
 var mime = require("mime");
 var filemanager = require("./filemanager.js");
 
-var errorPage = {
-	webSrc: function(title, details){
-		if(!this.template_source){
-			this.template_source = fs.readFileSync(this.template_path, "utf8");
-			this.template_source = this.template_source.replace(
-					/%JAVASCRIPT%/g,
-					injectedJs);
-		}
-
-		return this.template_source
-			.replace(/%TITLE%/g, title)
-			.replace(/%DETAILS%/g, details);
-	},
-	template_source: undefined,
-	template_path: 'error_template.html'
-};
-
 function Server(settings){
 	this.settings = settings;
 	this.connections = [];
-	this.files = new filemanager(function(file){
-		sendGoto(file.name)
-	});
 
 	var self = this;
-	this.httpServer = http.createServer(function(request, response){
-		if(request.method == 'GET'){
-			handleFileRequest(request, response);
-		}else if(request.method == 'POST'
-				&& (self.settings['allow-remote-editor']
-					|| request.connection.remoteAddress.includes(self.settings['editor-address']))){
-			var postData = '';
 
-			request.on('data', function(data){
-				postData += data;
-			});
-
-			request.on('end', function(){
-				response.writeHead(200);
-				response.end();
-				console.log('recieved from editor: ' + postData);
-
-				self.parseEditorRequest(postData);
-			});
-		}
+	this.files = new filemanager(function(file){
+		self.sendGoto(file.name)
 	});
+}
+
+Server.prototype.start = function(){
+	this.httpServer = http.createServer(this.httpRequest.bind(this));
 
 	this.webSocketServer = new websocket.server({
 		httpServer: this.httpServer,
 		autoAcceptConnections: false
 	});
 
-	this.webSocketServer.on('request', this.webSocketRequest);
+	this.webSocketServer.on('request', this.webSocketRequest.bind(this));
 
-}
-
-Server.prototype.start = function(){
 	if(this.settings['allow-remote-web']){
 		console.log('starting http server on port ' + this.settings['port']);
+
 		this.httpServer.listen(this.settings['port']);
+
 	}else{
 		console.log('starting http server on port ' + this.settings['port']
 			+ ' with address restricted to ' + this.settings['web-address']);
+
 		this.httpServer.listen(this.settings['port'], this.settings['web-address']);
+	}
+
+};
+
+Server.prototype.httpRequest = function(request, response){
+	if(request.method == 'GET'){
+		this.handleFileRequest(request, response);
+	}else if(request.method == 'POST'
+			&& (this.settings['allow-remote-editor']
+			|| request.connection.remoteAddress.includes(this.settings['editor-address']))){
+		var postData = '';
+
+		request.on('data', function(data){
+			postData += data;
+		});
+
+		var self = this;
+		request.on('end', function(){
+			response.writeHead(200);
+			response.end();
+			console.log('recieved from editor: ' + postData);
+
+			//self.parseEditorRequest(postData);
+		});
 	}
 };
 
@@ -82,9 +73,9 @@ Server.prototype.stop = function(){
 };
 
 Server.prototype.parseEditorRequest = function(data){
-	if(data == 'ping'){
+	if(data === 'ping'){
 		console.log('recieved ping, sending pong');
-		sendPong();
+		this.sendPong();
 		return;
 	}
 
@@ -113,28 +104,30 @@ Server.prototype.parseEditorRequest = function(data){
 }
 
 Server.prototype.handleEditorCommand = function(command, data){
+	console.log(command);
 	switch(command){
-	//full buffer update
-	case 'b':
+	case 'b': //full buffer update
 		var currentFile = this.files.getCurrentFile();
 		if(!currentFile){
 			break;
 		}
 
 		if(currentFile.type == 'html'){
+			var self = this;
 			currentFile.setContent(data[0], function(err, diff){
 				if(!err){
-					sendEdit(diff);
+					self.sendEdit(diff);
 				}else{
 					console.log('file ' + currentFile.name + ' parse error');
 				}
 			});
-			sendSelect(null, currentFile.errorState);
+			this.sendSelect(null, currentFile.errorState);
 
 		}else if(currentFile.type == 'css'){
+			var self = this;
 			currentFile.setContent(data[0], function(err){
 				if(!err){
-					this.broadcast({'command': 'reload_css'});
+					self.broadcast({'command': 'reload_css'});
 				}else{
 					console.log('file ' + currentFile.name + ' parse error');
 				}
@@ -191,7 +184,7 @@ Server.prototype.handleEditorCommand = function(command, data){
 						currentFile.cursorY);
 			}
 			if(selector != null){
-				sendSelect(selector);
+				this.sendSelect(selector);
 			}
 		}
 
@@ -201,16 +194,16 @@ Server.prototype.handleEditorCommand = function(command, data){
 
 Server.prototype.stripParams = function(url){
 	return url.split('?')[0]
-}
+};
 
-Server.prototype.handleFileReques = function(request, response){
+Server.prototype.handleFileRequest = function(request, response){
 	console.log('web file requested ' + request.url);
 
 	if(request.url == '/'){
 		var currentFile = this.files.getCurrentHtmlFile();
 		if(currentFile === undefined){
 			response.writeHead(200);
-			response.end(errorPage.webSrc(
+			response.end(this.files.errorPage.webSrc(
 				'wait for file...',
 				"vim hasn't opened an html file yet, or at least bracey isn't aware of any"));
 		}else{
@@ -226,6 +219,7 @@ Server.prototype.handleFileReques = function(request, response){
 	var url = this.stripParams(request.url);
 	var file = this.files.getByWebPath(url);
 
+	var self = this;
 	if(file){
 		console.log('already known to bracey as ' + url);
 		response.writeHead(200, {
@@ -238,7 +232,7 @@ Server.prototype.handleFileReques = function(request, response){
 		fs.readFile(this.files.editorRoot + url, function(err, data){
 			if(err){
 				response.writeHead(404);
-				response.end(errorPage.webSrc(
+				response.end(self.files.errorPage.webSrc(
 					'file could not be read',
 					err.toString()));
 			}else{
@@ -249,22 +243,20 @@ Server.prototype.handleFileReques = function(request, response){
 			}
 		});
 	}
-}
+};
 
 Server.prototype.webSocketRequest = function(request){
 	var connection = request.accept('', request.origin);
 	this.connections.push(connection)
 	var i = this.connections.length - 1;
 
-	connection.on('close', function(reason, description){
-		this.connections.splice(i, 1);
-	});
+	connection.on('close', this.connections.splice.bind(this, i, 1));
 
 	connection.on('message', function(message){
 		var content = JSON.parse(message.utf8Data);
 		//TODO: handle client messages
 	});
-}
+};
 
 var lastGoto = '';
 Server.prototype.sendGoto = function(location){
@@ -275,18 +267,18 @@ Server.prototype.sendGoto = function(location){
 		});
 		lastGoto = location;
 	}
-}
+};
 
 Server.prototype.sendPong = function(){
 	this.broadcast({'command': 'pong'});
-}
+};
 
 Server.prototype.sendEdit = function(diff){
 	this.broadcast({
 		'command': 'edit',
 		'changes': diff
 	});
-}
+};
 
 var lastSelector = undefined;
 var lastError = undefined;
@@ -318,12 +310,12 @@ Server.prototype.sendSelect = function(selector, error){
 	if(hasChange){
 		this.broadcast(cmd);
 	}
-}
+};
 
 Server.prototype.broadcast = function(command){
 	for(var i = 0; i < this.connections.length; i++){
 		this.connections[i].sendUTF(JSON.stringify(command));
 	}
-}
+};
 
 module.exports = Server;

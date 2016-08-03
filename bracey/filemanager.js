@@ -13,14 +13,14 @@ var FileManager = function(changePageCallback){
 	this.currentHtmlFile = undefined;
 	this.editorRoot = undefined;
 
-	var injectedCss = fs.readFileSync('frontend.css', "utf8");
+	this.injectedCss = fs.readFileSync('frontend.css', "utf8");
 	console.log('loaded injected css');
 
-	var injectedJs = fs.readFileSync('frontend.js', "utf8");
+	this.injectedJs = fs.readFileSync('frontend.js', "utf8");
 	console.log('loaded injected js');
 
-	htmlfile.setCSS(injectedCss);
-	htmlfile.setJS(injectedJs);
+	htmlfile.setCSS(this.injectedCss);
+	htmlfile.setJS(this.injectedJs);
 }
 
 FileManager.prototype.newFile = function(id, name, path, type, source){
@@ -127,5 +127,23 @@ FileManager.prototype.getEditorRoot = function(){
 	}
 	return this.editorRoot;
 };
+
+FileManager.prototype.errorPage = {
+	webSrc: function(title, details){
+		if(!this.template_source){
+			this.template_source = fs.readFileSync(this.template_path, "utf8");
+			this.template_source = this.template_source.replace(
+					/%JAVASCRIPT%/g,
+					this.injectedJs);
+		}
+
+		return this.template_source
+			.replace(/%TITLE%/g, title)
+			.replace(/%DETAILS%/g, details);
+	},
+	template_source: undefined,
+	template_path: 'error_template.html'
+};
+
 
 module.exports = FileManager;
