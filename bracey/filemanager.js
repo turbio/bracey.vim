@@ -13,14 +13,16 @@ var FileManager = function(changePageCallback){
 	this.currentHtmlFile = undefined;
 	this.editorRoot = undefined;
 
-	this.injectedCss = fs.readFileSync('frontend.css', "utf8");
+	var injectedCss = fs.readFileSync('frontend.css', "utf8");
 	console.log('loaded injected css');
 
-	this.injectedJs = fs.readFileSync('frontend.js', "utf8");
+	var injectedJs = fs.readFileSync('frontend.js', "utf8");
 	console.log('loaded injected js');
 
-	htmlfile.setCSS(this.injectedCss);
-	htmlfile.setJS(this.injectedJs);
+	htmlfile.setCSS(injectedCss);
+	htmlfile.setJS(injectedJs);
+
+	this.errorPage.injectedJs = injectedJs;
 }
 
 FileManager.prototype.newFile = function(id, name, path, type, source){
@@ -69,7 +71,7 @@ FileManager.prototype.newFile = function(id, name, path, type, source){
 }
 
 FileManager.prototype.getById = function(id){
-	return this.files[id] || null;
+	return this.files[id];
 };
 
 FileManager.prototype.getByPath = function(path){
@@ -142,8 +144,8 @@ FileManager.prototype.errorPage = {
 			.replace(/%DETAILS%/g, details);
 	},
 	template_source: undefined,
+	injectedJs: undefined,
 	template_path: 'error_template.html'
 };
-
 
 module.exports = FileManager;
