@@ -77,6 +77,33 @@
 			case 'eval':
 				eval.call(window, message['js']);
 				break;
+			case 'error':
+				if(message['action'] === 'show'){
+					showError(message['message']);
+				}else if(message['action'] === 'clear'){
+					clearError();
+				}
+				break;
+		}
+	};
+
+	var errorDialogs = [];
+
+	var showError = function(message){
+
+		var newDialog = document.createElement('div');
+		newDialog.className = 'bracey-dialog-error';
+		newDialog.innerHTML = message;
+
+		errorDialogs.push(newDialog);
+
+		document.body.appendChild(newDialog);
+	};
+
+	var clearError = function(){
+		while(errorDialogs.length > 0){
+			var dialog = errorDialogs.pop();
+			dialog.parentElement.removeChild(dialog);
 		}
 	};
 

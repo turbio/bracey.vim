@@ -104,7 +104,6 @@ Server.prototype.parseEditorRequest = function(data){
 }
 
 Server.prototype.handleEditorCommand = function(command, data){
-	console.log(command);
 	switch(command){
 	case 'b': //full buffer update
 		var currentFile = this.files.getCurrentFile();
@@ -115,21 +114,29 @@ Server.prototype.handleEditorCommand = function(command, data){
 		if(currentFile.type == 'html'){
 			var self = this;
 			currentFile.setContent(data[0], function(err, diff){
-				if(!err){
-					self.sendEdit(diff);
-				}else{
+				console.log('err');
+
+				if(err){
 					console.log('file ' + currentFile.name + ' parse error');
+					self.setError(err);
+				}else{
+					self.setError(false);
+					
+					if(diff){
+						self.sendEdit(diff);
+					}
 				}
 			});
-			this.sendSelect(null, currentFile.errorState);
 
 		}else if(currentFile.type == 'css'){
 			var self = this;
 			currentFile.setContent(data[0], function(err){
 				if(!err){
+					self.setError(false);
 					self.broadcast({'command': 'reload_css'});
 				}else{
 					console.log('file ' + currentFile.name + ' parse error');
+					self.setError(err);
 				}
 			});
 		}
@@ -280,9 +287,37 @@ Server.prototype.sendEdit = function(diff){
 	});
 };
 
+Server.prototype.setError = function(message){
+
+	//message = (message == true);
+	//if(message !== lastError){
+		//cmd['message'] = message;
+		//lastError = error;
+		//hasChange = true;
+	//}
+
+	if(message){
+		var err = message.pop();
+
+		this.broadcast({
+			'command': 'error',
+			'action': 'show',
+			'message': err.message + ':' + err.line + ':' + err.col
+		});
+
+		if(err.length > 0){
+			this.setError(message);
+		}
+	}else{
+		this.broadcast({
+			'command': 'error',
+			'action': 'clear'
+		});
+	}
+};
+
 var lastSelector = undefined;
-var lastError = undefined;
-Server.prototype.sendSelect = function(selector, error){
+Server.prototype.sendSelect = function(selector){
 	var cmd = {
 		'command': 'select'
 	};
@@ -298,13 +333,6 @@ Server.prototype.sendSelect = function(selector, error){
 			hasChange = true;
 		}
 		lastSelector = selector;
-	}
-
-	error = (error == true);
-	if(error !== lastError){
-		cmd['error'] = error;
-		lastError = error;
-		hasChange = true;
 	}
 
 	if(hasChange){

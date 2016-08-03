@@ -27,6 +27,8 @@ function HtmlFile(source, callback){
 		throw 'must set injected js and css of htmlfile';
 	}
 
+	callback = callback || function(){};
+
 	//starts at 1 because 0 is the document root
 	this.currentElemIndex = 1;
 	this.setContent(source, callback);
@@ -138,6 +140,7 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 	//point, thus no diffing required
 	if(this.parsedHtml == undefined){
 		this.parsedHtml = parse.call(this, newHtml, true);
+		callback(null, null);
 		return;
 	}
 
@@ -152,6 +155,8 @@ HtmlFile.prototype.setContent = function(newHtml, callback){
 		updateCharIndex(newParsedHtml, this.parsedHtml);
 
 		callback(null, diff);
+	}else{
+		callback(null, null);
 	}
 };
 

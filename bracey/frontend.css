@@ -34,3 +34,19 @@
 	border-color: rgba(255, 182, 255, 0.69) !important;
 	background: rgba(255, 182, 255, 0.45) !important;
 }
+
+.bracey-dialog-error{
+	z-index: 2147483647 !important;
+	position: fixed !important;
+	top: 0;
+	left: 0;
+	border-style: solid !important;
+	border-width: 1px !important;
+	pointer-events: none !important;
+	overflow-x: hidden !important;
+	overflow-y: hidden !important;
+	margin: 10px !important;
+	padding: 10px !important;
+	border-color: rgb(255, 182, 255) !important;
+	background: rgb(255, 182, 255) !important;
+}
