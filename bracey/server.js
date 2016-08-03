@@ -7,9 +7,7 @@ var websocket = require("websocket");
 var http = require("http");
 var fs = require("fs");
 var mime = require("mime");
-var files = require("./filemanager.js");
-
-var connections = [];
+var filemanager = require("./filemanager.js");
 
 var errorPage = {
 	webSrc: function(title, details){
@@ -30,23 +28,57 @@ var errorPage = {
 
 function Server(settings){
 	this.settings = settings;
-	this.files = new Files();
+	this.connections = [];
+	this.files = new filemanager(function(file){
+		sendGoto(file.name)
+	});
+
+	var self = this;
+	this.httpServer = http.createServer(function(request, response){
+		if(request.method == 'GET'){
+			handleFileRequest(request, response);
+		}else if(request.method == 'POST'
+				&& (self.settings['allow-remote-editor']
+					|| request.connection.remoteAddress.includes(self.settings['editor-address']))){
+			var postData = '';
+
+			request.on('data', function(data){
+				postData += data;
+			});
+
+			request.on('end', function(){
+				response.writeHead(200);
+				response.end();
+				console.log('recieved from editor: ' + postData);
+
+				self.parseEditorRequest(postData);
+			});
+		}
+	});
+
+	this.webSocketServer = new websocket.server({
+		httpServer: this.httpServer,
+		autoAcceptConnections: false
+	});
+
+	this.webSocketServer.on('request', this.webSocketRequest);
+
 }
 
 Server.prototype.start = function(){
 	if(this.settings['allow-remote-web']){
 		console.log('starting http server on port ' + this.settings['port']);
-		httpServer.listen(this.settings['port']);
+		this.httpServer.listen(this.settings['port']);
 	}else{
 		console.log('starting http server on port ' + this.settings['port']
 			+ ' with address restricted to ' + this.settings['web-address']);
-		httpServer.listen(this.settings['port'], this.settings['web-address']);
+		this.httpServer.listen(this.settings['port'], this.settings['web-address']);
 	}
 };
 
 Server.prototype.stop = function(){
 	console.log('stopping http server');
-	httpServer.close();
+	this.httpServer.close();
 };
 
 Server.prototype.parseEditorRequest = function(data){
@@ -56,13 +88,12 @@ Server.prototype.parseEditorRequest = function(data){
 		return;
 	}
 
-
 	var command = data[0];
 	var headerLength = data.indexOf(':', 2);
 	var dataLength = parseInt(data.substr(2, headerLength - 2));
 	var commandData = data.substr(headerLength + 1, dataLength);
 
-	commandArgs = [commandData];
+	var commandArgs = [commandData];
 
 	while(data[headerLength + dataLength + 1] == ':'){
 		data = data.substr(headerLength + dataLength + 2);
@@ -72,109 +103,112 @@ Server.prototype.parseEditorRequest = function(data){
 		commandArgs.push(commandData);
 	}
 
-	handleEditorCommand(command, commandArgs);
+	this.handleEditorCommand(command, commandArgs);
 
 	var remaining = data.substr(headerLength + dataLength + 1);
+
 	if(remaining.length > 0){
 		this.parseEditorRequest(remaining);
 	}
 }
 
-function handleEditorCommand(command, data){
+Server.prototype.handleEditorCommand = function(command, data){
 	switch(command){
-		//full buffer update
-		case 'b':
-			var currentFile = this.files.getCurrentFile();
-			if(!currentFile){
-				break;
-			}
-
-			if(currentFile.type == 'html'){
-				currentFile.setContent(data[0], function(err, diff){
-					if(!err){
-						sendEdit(diff);
-					}else{
-						console.log('file ' + currentFile.name + ' parse error');
-					}
-				});
-				sendSelect(null, currentFile.errorState);
-			}else if(currentFile.type == 'css'){
-				currentFile.setContent(data[0], function(err){
-					if(!err){
-						broadcast({'command': 'reload_css'});
-					}else{
-						console.log('file ' + currentFile.name + ' parse error');
-					}
-				});
-			}
+	//full buffer update
+	case 'b':
+		var currentFile = this.files.getCurrentFile();
+		if(!currentFile){
 			break;
-		//eval js
-		case 'e':
-			broadcast({
-				'command': 'eval',
-				'js': data[0]
+		}
+
+		if(currentFile.type == 'html'){
+			currentFile.setContent(data[0], function(err, diff){
+				if(!err){
+					sendEdit(diff);
+				}else{
+					console.log('file ' + currentFile.name + ' parse error');
+				}
 			});
-			break;
-		//reload page
-		case 'r':
-			broadcast({'command': 'reload_page'});
-			break;
-		//set the current file
-		//buffer number, name, path, type
-		case 'f':
-			var file = this.files.getById(data[0]);
-			if(!file){
-				this.files.newFile(data[0], data[1], data[2], data[3]);
-			}
-			this.files.setCurrentFile(data[0]);
-			break;
-		//set variables
-		case 'v':
-			this.files.editorRoot = data[0];
-			break;
-		//cursor position
-		case 'p':
-			var currentFile = this.files.getCurrentFile();
-			if(!currentFile){
-				break;
-			}
+			sendSelect(null, currentFile.errorState);
 
-			if(!currentFile.errorState){
-				currentFile.cursorX = data[0] - 1;
-				currentFile.cursorY = data[1] - 1;
-
-				var selector = null;
-				if(currentFile.type == 'html'){
-					selector = currentFile.tagFromPosition(
-							currentFile.cursorX,
-							currentFile.cursorY);
-					if(selector != null){
-						selector = selector.index;
-					}
-				}else if(currentFile.type == 'css'){
-					selector = currentFile.selectorFromPosition(
-							currentFile.cursorX,
-							currentFile.cursorY);
+		}else if(currentFile.type == 'css'){
+			currentFile.setContent(data[0], function(err){
+				if(!err){
+					this.broadcast({'command': 'reload_css'});
+				}else{
+					console.log('file ' + currentFile.name + ' parse error');
 				}
+			});
+		}
+
+		break;
+
+	case 'e': //eval js
+		this.broadcast({
+			'command': 'eval',
+			'js': data[0]
+		});
+		break;
+	
+	case 'r': //reload page
+		this.broadcast({'command': 'reload_page'});
+		break;
+	
+	case 'f': //set the current file buffer number, name, path, type
+		var file = this.files.getById(data[0]);
+		if(!file){
+			this.files.newFile(data[0], data[1], data[2], data[3]);
+		}
+		this.files.setCurrentFile(data[0]);
+		break;
+	
+	case 'v': //set variables
+		this.files.editorRoot = data[0];
+		break;
+	
+	case 'p': //cursor position
+		var currentFile = this.files.getCurrentFile();
+
+		if(!currentFile){
+			break;
+		}
+
+		if(!currentFile.errorState){
+			currentFile.cursorX = data[0] - 1;
+			currentFile.cursorY = data[1] - 1;
+
+			var selector = null;
+			if(currentFile.type == 'html'){
+				selector = currentFile.tagFromPosition(
+						currentFile.cursorX,
+						currentFile.cursorY);
 				if(selector != null){
-					sendSelect(selector);
+					selector = selector.index;
 				}
+			}else if(currentFile.type == 'css'){
+				selector = currentFile.selectorFromPosition(
+						currentFile.cursorX,
+						currentFile.cursorY);
 			}
+			if(selector != null){
+				sendSelect(selector);
+			}
+		}
 
-			break;
+		break;
 	}
 }
 
-function stripParams(url){
+Server.prototype.stripParams = function(url){
 	return url.split('?')[0]
 }
 
-function handleFileRequest(request, response){
+Server.prototype.handleFileReques = function(request, response){
 	console.log('web file requested ' + request.url);
 
 	if(request.url == '/'){
 		var currentFile = this.files.getCurrentHtmlFile();
-		if(currentFile == null){
+		if(currentFile === undefined){
 			response.writeHead(200);
 			response.end(errorPage.webSrc(
 				'wait for file...',
@@ -185,10 +219,11 @@ function handleFileRequest(request, response){
 			});
 			response.end();
 		}
+
 		return;
 	}
 
-	var url = stripParams(request.url);
+	var url = this.stripParams(request.url);
 	var file = this.files.getByWebPath(url);
 
 	if(file){
@@ -197,6 +232,7 @@ function handleFileRequest(request, response){
 			"Content-Type": mime.lookup(url)
 		});
 		response.end(file.webSrc());
+
 	}else{
 		console.log('loading from ' + this.files.editorRoot + url);
 		fs.readFile(this.files.editorRoot + url, function(err, data){
@@ -215,42 +251,13 @@ function handleFileRequest(request, response){
 	}
 }
 
-var httpServer = http.createServer(function(request, response){
-	if(request.method == 'GET'){
-		handleFileRequest(request, response);
-	}else if(request.method == 'POST'
-			&& (this.settings['allow-remote-editor']
-				|| request.connection.remoteAddress.includes(this.settings['editor-address']))){
-		var postData = '';
-
-		request.on('data', function(data){
-			postData += data;
-		});
-
-		request.on('end', function(){
-			response.writeHead(200);
-			response.end();
-			console.log('recieved from editor: ' + postData);
-
-			this.parseEditorRequest(postData);
-		});
-	}
-});
-
-var webSocketServer = new websocket.server({
-	httpServer: httpServer,
-	autoAcceptConnections: false
-});
-
-webSocketServer.on('request', webSocketRequest);
-
-function webSocketRequest(request){
+Server.prototype.webSocketRequest = function(request){
 	var connection = request.accept('', request.origin);
-	connections.push(connection)
-	var i = connections.length - 1;
+	this.connections.push(connection)
+	var i = this.connections.length - 1;
 
 	connection.on('close', function(reason, description){
-		connections.splice(i, 1);
+		this.connections.splice(i, 1);
 	});
 
 	connection.on('message', function(message){
@@ -260,9 +267,9 @@ function webSocketRequest(request){
 }
 
 var lastGoto = '';
-function sendGoto(location){
+Server.prototype.sendGoto = function(location){
 	if(lastGoto != location){
-		broadcast({
+		this.broadcast({
 			'command': 'goto',
 			'location': location
 		});
@@ -270,12 +277,12 @@ function sendGoto(location){
 	}
 }
 
-function sendPong(){
-	broadcast({'command': 'pong'});
+Server.prototype.sendPong = function(){
+	this.broadcast({'command': 'pong'});
 }
 
-function sendEdit(diff){
-	broadcast({
+Server.prototype.sendEdit = function(diff){
+	this.broadcast({
 		'command': 'edit',
 		'changes': diff
 	});
@@ -283,7 +290,7 @@ function sendEdit(diff){
 
 var lastSelector = undefined;
 var lastError = undefined;
-function sendSelect(selector, error){
+Server.prototype.sendSelect = function(selector, error){
 	var cmd = {
 		'command': 'select'
 	};
@@ -309,13 +316,13 @@ function sendSelect(selector, error){
 	}
 
 	if(hasChange){
-		broadcast(cmd);
+		this.broadcast(cmd);
 	}
 }
 
-function broadcast(command){
-	for(var i = 0; i < connections.length; i++){
-		connections[i].sendUTF(JSON.stringify(command));
+Server.prototype.broadcast = function(command){
+	for(var i = 0; i < this.connections.length; i++){
+		this.connections[i].sendUTF(JSON.stringify(command));
 	}
 }
 
