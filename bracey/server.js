@@ -62,7 +62,7 @@ Server.prototype.httpRequest = function(request, response){
 			response.end();
 			console.log('recieved from editor: ' + postData);
 
-			//self.parseEditorRequest(postData);
+			self.parseEditorRequest(postData);
 		});
 	}
 };
@@ -149,7 +149,7 @@ Server.prototype.handleEditorCommand = function(command, data){
 	
 	case 'f': //set the current file buffer number, name, path, type
 		var file = this.files.getById(data[0]);
-		if(!file){
+		if(file === undefined){
 			this.files.newFile(data[0], data[1], data[2], data[3]);
 		}
 		this.files.setCurrentFile(data[0]);
