@@ -35,18 +35,34 @@
 	background: rgba(255, 182, 255, 0.45) !important;
 }
 
-.bracey-dialog-error{
+.bracey-error-indicator{
 	z-index: 2147483647 !important;
 	position: fixed !important;
-	top: 0;
-	left: 0;
+	top: 0 !important;
+	left: 0 !important;
 	border-style: solid !important;
 	border-width: 1px !important;
-	pointer-events: none !important;
-	overflow-x: hidden !important;
-	overflow-y: hidden !important;
-	margin: 10px !important;
-	padding: 10px !important;
+	padding: 8px !important;
+	border-radius: 100% !important;
+	margin: 5px !important;
 	border-color: rgb(255, 182, 255) !important;
-	background: rgb(255, 182, 255) !important;
+	background: rgb(250, 152, 200) !important;
+}
+
+.bracey-error-indicator *{
+	display: none;
+	z-index: 2147483647 !important;
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	border-style: solid !important;
+	border-width: 1px !important;
+	padding: 8px !important;
+	margin: 5px !important;
+	border-color: rgb(255, 182, 255) !important;
+	background: rgb(250, 152, 200) !important;
+}
+
+.bracey-error-indicator:hover *{
+	display: block;
 }

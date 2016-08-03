@@ -87,23 +87,28 @@
 		}
 	};
 
-	var errorDialogs = [];
+	var errorIndicator = undefined;
 
 	var showError = function(message){
 
-		var newDialog = document.createElement('div');
-		newDialog.className = 'bracey-dialog-error';
-		newDialog.innerHTML = message;
+		if(!errorIndicator){
+			errorIndicator = document.createElement('div');
+			errorIndicator.className = 'bracey-error-indicator';
 
-		errorDialogs.push(newDialog);
+			document.body.appendChild(errorIndicator);
+		}
 
-		document.body.appendChild(newDialog);
+		var msg =
+			errorIndicator.firstChild
+			|| errorIndicator.appendChild(document.createElement('div'));
+
+		msg.textContent = message;
 	};
 
 	var clearError = function(){
-		while(errorDialogs.length > 0){
-			var dialog = errorDialogs.pop();
-			dialog.parentElement.removeChild(dialog);
+		if(errorIndicator){
+			errorIndicator.parentElement.removeChild(errorIndicator);
+			errorIndicator = undefined;
 		}
 	};
 
