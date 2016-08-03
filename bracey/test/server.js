@@ -1,7 +1,14 @@
 var expect = require('chai').expect;
 var http = require('http');
+var bracey = require('../server.js');
 var WebSocketClient = require('websocket').client;
-var port = 1337;
+var port = 13378;
+
+var serverSettings = {
+	port: port,
+	'web-address': '127.0.0.1',
+	'editor-address': '127.0.0.1'
+}
 
 var  connection;
 
@@ -40,9 +47,8 @@ function recieve(callback){
 
 describe('server', function(){
 	before(function(done){
-		var bracey = require('../server.js');
-		server = new bracey();
-		server.start(port);
+		server = new bracey(serverSettings);
+		server.start();
 
 		var client = new WebSocketClient();
 		client.connect('ws://localhost:' + port);
