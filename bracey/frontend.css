@@ -31,8 +31,8 @@
 }
 
 .bracey-highlight-error{
-	border-color: rgba(255, 182, 255, 0.69) !important;
-	background: rgba(255, 182, 255, 0.45) !important;
+	border-color: rgba(239, 83, 80, 0.75) !important;
+	background: rgba(239, 83, 80, 0.25) !important;
 }
 
 .bracey-error-indicator{
@@ -45,11 +45,16 @@
 	padding: 8px !important;
 	border-radius: 100% !important;
 	margin: 5px !important;
-	border-color: rgb(255, 182, 255) !important;
-	background: rgb(250, 152, 200) !important;
+	border-color: rgb(239, 83, 80) !important;
+    background: rgba(239, 83, 80, .75) !important;
 }
 
-.bracey-error-indicator *{
+.bracey-error-indicator:hover{
+	background: none !important;
+	border: none !important;
+}
+
+.bracey-error-indicator > div{
 	display: none;
 	z-index: 2147483647 !important;
 	position: fixed !important;
@@ -59,10 +64,11 @@
 	border-width: 1px !important;
 	padding: 8px !important;
 	margin: 5px !important;
-	border-color: rgb(255, 182, 255) !important;
-	background: rgb(250, 152, 200) !important;
+	border-color: rgb(239, 83, 80) !important;
+    background: rgba(239, 83, 80, .75) !important;
+	color: #fff !important;
 }
 
-.bracey-error-indicator:hover *{
+.bracey-error-indicator:hover > div{
 	display: block;
 }

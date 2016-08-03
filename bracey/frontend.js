@@ -34,10 +34,6 @@
 		//console.log(message);
 		switch(message['command']){
 			case 'select':
-				if('error' in message){
-					setError(message['error']);
-				}
-
 				if('index' in message){
 					setHighlighted(
 							'[meta-bracey-element-index=\"' +
@@ -103,6 +99,7 @@
 			|| errorIndicator.appendChild(document.createElement('div'));
 
 		msg.textContent = message;
+		selectorErrorState(true);
 	};
 
 	var clearError = function(){
@@ -110,9 +107,10 @@
 			errorIndicator.parentElement.removeChild(errorIndicator);
 			errorIndicator = undefined;
 		}
+		selectorErrorState(false);
 	};
 
-	var setError = function(state){
+	var selectorErrorState = function(state){
 		var existingSelectors = document.querySelectorAll('.bracey-currently-selected-highlight');
 		for(var i = 0; i < existingSelectors.length; i++){
 			if(state){
@@ -122,6 +120,7 @@
 			}
 		}
 	};
+
 
 	var makeChange = function(element, change){
 		switch(change.action){

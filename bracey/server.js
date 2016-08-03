@@ -114,8 +114,6 @@ Server.prototype.handleEditorCommand = function(command, data){
 		if(currentFile.type == 'html'){
 			var self = this;
 			currentFile.setContent(data[0], function(err, diff){
-				console.log('err');
-
 				if(err){
 					console.log('file ' + currentFile.name + ' parse error');
 					self.setError(err);
@@ -288,26 +286,18 @@ Server.prototype.sendEdit = function(diff){
 };
 
 Server.prototype.setError = function(message){
-
-	//message = (message == true);
-	//if(message !== lastError){
-		//cmd['message'] = message;
-		//lastError = error;
-		//hasChange = true;
-	//}
+	if(this.hasError === message) {
+		return;
+	}
 
 	if(message){
-		var err = message.pop();
+		var err = message[0];
 
 		this.broadcast({
 			'command': 'error',
 			'action': 'show',
-			'message': err.message + ':' + err.line + ':' + err.col
+			'message': err.line + ':' + err.col + ': ' + err.message
 		});
-
-		if(err.length > 0){
-			this.setError(message);
-		}
 	}else{
 		this.broadcast({
 			'command': 'error',
