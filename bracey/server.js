@@ -131,7 +131,9 @@ Server.prototype.handleEditorCommand = function(command, data){
 			currentFile.setContent(data[0], function(err){
 				if(!err){
 					self.setError(false);
-					self.broadcast({'command': 'reload_css'});
+					if(diff){
+						self.broadcast({'command': 'reload_css'});
+					}
 				}else{
 					console.log('file ' + currentFile.name + ' parse error');
 					self.setError(err);
