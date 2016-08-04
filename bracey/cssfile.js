@@ -69,6 +69,8 @@ CssFile.prototype.setContent = function(source, callback){
 
 	if(changed){
 		callback(null);
+	}else{
+		callback(null, null);
 	}
 };
 
