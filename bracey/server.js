@@ -31,13 +31,13 @@ Server.prototype.start = function(){
 	this.webSocketServer.on('request', this.webSocketRequest.bind(this));
 
 	if(this.settings['allow-remote-web']){
-		console.log('starting http server on port ' + this.settings['port']);
+		//console.log('starting http server on port ' + this.settings['port']);
 
 		this.httpServer.listen(this.settings['port']);
 
 	}else{
-		console.log('starting http server on port ' + this.settings['port']
-			+ ' with address restricted to ' + this.settings['web-address']);
+		//console.log('starting http server on port ' + this.settings['port']
+			//+ ' with address restricted to ' + this.settings['web-address']);
 
 		this.httpServer.listen(this.settings['port'], this.settings['web-address']);
 	}
@@ -60,7 +60,7 @@ Server.prototype.httpRequest = function(request, response){
 		request.on('end', function(){
 			response.writeHead(200);
 			response.end();
-			console.log('recieved from editor: ' + postData);
+			//console.log('recieved from editor: ' + postData);
 
 			self.parseEditorRequest(postData);
 		});
@@ -68,13 +68,13 @@ Server.prototype.httpRequest = function(request, response){
 };
 
 Server.prototype.stop = function(){
-	console.log('stopping http server');
+	//console.log('stopping http server');
 	this.httpServer.close();
 };
 
 Server.prototype.parseEditorRequest = function(data){
 	if(data === 'ping'){
-		console.log('recieved ping, sending pong');
+		//console.log('recieved ping, sending pong');
 		this.sendPong();
 		return;
 	}
@@ -115,7 +115,7 @@ Server.prototype.handleEditorCommand = function(command, data){
 			var self = this;
 			currentFile.setContent(data[0], function(err, diff){
 				if(err){
-					console.log('file ' + currentFile.name + ' parse error');
+					//console.log('file ' + currentFile.name + ' parse error');
 					self.setError(err);
 				}else{
 					self.setError(false);
@@ -135,7 +135,7 @@ Server.prototype.handleEditorCommand = function(command, data){
 						self.broadcast({'command': 'reload_css'});
 					}
 				}else{
-					console.log('file ' + currentFile.name + ' parse error');
+					//console.log('file ' + currentFile.name + ' parse error');
 					self.setError(err);
 				}
 			});
@@ -204,7 +204,7 @@ Server.prototype.stripParams = function(url){
 };
 
 Server.prototype.handleFileRequest = function(request, response){
-	console.log('web file requested ' + request.url);
+	//console.log('web file requested ' + request.url);
 
 	if(request.url == '/'){
 		var currentFile = this.files.getCurrentHtmlFile();
@@ -228,14 +228,14 @@ Server.prototype.handleFileRequest = function(request, response){
 
 	var self = this;
 	if(file){
-		console.log('already known to bracey as ' + url);
+		//console.log('already known to bracey as ' + url);
 		response.writeHead(200, {
 			"Content-Type": mime.lookup(url)
 		});
 		response.end(file.webSrc());
 
 	}else{
-		console.log('loading from ' + this.files.editorRoot + url);
+		//console.log('loading from ' + this.files.editorRoot + url);
 		fs.readFile(this.files.editorRoot + url, function(err, data){
 			if(err){
 				response.writeHead(404);
