@@ -207,8 +207,6 @@ describe('htmlfile', function(){
 			//remove line
 			var newhtml = originalHtml.slice(0, 613) + '<li>d</li>' + originalHtml.slice(613, -1);
 
-			console.log(newhtml);
-
 			file.setContent(newhtml, function(err, diff){
 				expect(err).to.be.null;
 				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-bracey-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
