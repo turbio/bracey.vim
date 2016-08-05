@@ -92,15 +92,19 @@ describe('htmlfile', function(){
 			originalHtml = fs.readFileSync(testHtmlPath, 'utf8').toString();
 		});
 
-		it('should not call callback when nothing has changed', function(){
+		it('should call callback when nothing has changed', function(done){
 			file.setContent(originalHtml, function(err, diff){
-				throw 'reported changes when nothing was changed';
+				expect(err).to.be.null;
+				expect(diff).to.be.null;
+				done(err);
 			});
 		});
 
-		it('should ignore all whitespace changes to root', function(){
+		it('should ignore all whitespace changes to root', function(done){
 			file.setContent(originalHtml + '   \n  ', function(err, diff){
-				throw 'reported changes when only root whitespace was changed';
+				expect(err).to.be.null;
+				expect(diff).to.be.null;
+				done(err);
 			});
 		});
 
