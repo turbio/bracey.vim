@@ -288,11 +288,12 @@ Server.prototype.sendEdit = function(diff){
 };
 
 Server.prototype.setError = function(message){
-	if(this.hasError === message) {
+	if(!this.hasError && !message) {
 		return;
 	}
 
 	if(message){
+		this.hasError = false;
 		var err = message[0];
 
 		this.broadcast({
