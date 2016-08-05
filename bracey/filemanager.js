@@ -4,7 +4,7 @@ var fs = require("fs");
 
 var FileManager = function(changePageCallback){
 	this.changePageCallback = changePageCallback || function(){
-		console.log('page change will be ignored');
+		//console.log('page change will be ignored');
 	};
 
 	this.files = {};
@@ -14,10 +14,10 @@ var FileManager = function(changePageCallback){
 	this.editorRoot = undefined;
 
 	var injectedCss = fs.readFileSync('frontend.css', "utf8");
-	console.log('loaded injected css');
+	//console.log('loaded injected css');
 
 	var injectedJs = fs.readFileSync('frontend.js', "utf8");
-	console.log('loaded injected js');
+	//console.log('loaded injected js');
 
 	htmlfile.setCSS(injectedCss);
 	htmlfile.setJS(injectedJs);
@@ -26,8 +26,8 @@ var FileManager = function(changePageCallback){
 }
 
 FileManager.prototype.newFile = function(id, name, path, type, source){
-	console.log('created a new file with id: ' + id + ', name: ' + name
-			+ ', path: ' + path + ', type: ' + type);
+	//console.log('created a new file with id: ' + id + ', name: ' + name
+			//+ ', path: ' + path + ', type: ' + type);
 
 	if(source == undefined){
 		source = '';
@@ -42,7 +42,7 @@ FileManager.prototype.newFile = function(id, name, path, type, source){
 			createdFile = new cssfile(source);
 			break;
 		default:
-			console.log('it\'s not a recognized filetype so we\'ll ignore this');
+			//console.log('it\'s not a recognized filetype so we\'ll ignore this');
 			//TODO: for now...
 			return;
 			break;
@@ -125,7 +125,7 @@ FileManager.prototype.getCurrentHtmlFile = function(){
 
 FileManager.prototype.getEditorRoot = function(){
 	if(!this.editorRoot){
-		console.log('requested editor root before it was defined');
+		//console.log('requested editor root before it was defined');
 	}
 	return this.editorRoot;
 };

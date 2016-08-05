@@ -8,7 +8,6 @@ describe('cssfile', function(){
 		this.file = new cssfile(this.cssfilesrc,
 				'saladman',
 				function(err){
-					console.log(err);
 			expect(err).to.be.null;
 		});
 	});

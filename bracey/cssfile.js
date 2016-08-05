@@ -2,6 +2,7 @@ var csslint = require('csslint').CSSLint;
 var cssparser = require('css');
 
 function CssFile(source, path, callback){
+	callback = callback || function(){}
 	this.path = path;
 	this.setContent(source, callback);
 }
