@@ -3,9 +3,11 @@ var expect = require('chai').expect;
 var cssfile = require('../cssfile');
 
 describe('cssfile', function(){
+	var cssFileSrc, file;
+
 	beforeEach(function(){
-		this.cssfilesrc = fs.readFileSync('test/fixtures/test_css.css', 'utf8');
-		this.file = new cssfile(this.cssfilesrc,
+		cssFileSrc = fs.readFileSync('test/fixtures/test_css.css', 'utf8');
+		file = new cssfile(cssFileSrc,
 				'saladman',
 				function(err){
 			expect(err).to.be.null;
@@ -14,14 +16,20 @@ describe('cssfile', function(){
 
 	describe('constructor', function(){
 		it('sets the path', function(){
-			expect(this.file.path).to.equal('saladman');
+			expect(file.path).to.equal('saladman');
 		});
+
 		it('calls callback with errors', function(done){
 			var invalidCss = 'body{ background: red color: white}';
-			this.file = new cssfile(invalidCss, 'can be whatever', function(err){
+			file = new cssfile(invalidCss, 'can be whatever', function(err){
 				err.should.not.be.null;
 				done();
 			});
+		});
+
+		it('should not error if no callback is given', function(){
+			var validCss = 'div{ color: red; }';
+			file = new cssfile(validCss, 'can be whatever');
 		});
 	});
 
@@ -34,30 +42,39 @@ describe('cssfile', function(){
 			{line: 30, column: 6, expected: '#identifiable'}
 		].forEach(function(test){
 			it('returns the correct selector for ' + test.line + ':' + test.column, function(){
-				expect(this.file.selectorFromPosition(test.line, test.column)).to.equal(test.expected);
+				expect(file.selectorFromPosition(test.line, test.column)).to.equal(test.expected);
 			});
 		});
 		it('returns null when no selector for position', function(){
-			expect(this.file.selectorFromPosition(100, 1)).to.equal(null);
+			expect(file.selectorFromPosition(100, 1)).to.equal(null);
 		});
 	});
 
 	describe('#webSrc()', function(){
 		it('returns its content', function(){
-			expect(this.file.webSrc()).to.equal(this.cssfilesrc);
+			expect(file.webSrc()).to.equal(cssFileSrc);
 		});
 	});
 
 	describe('#setContent()', function(){
 		it('calls callback if file was changed', function(done){
 			var newValidCss = 'body{background: red}'
-			this.file.setContent(newValidCss, function(err){
+			file.setContent(newValidCss, function(err){
 				done(err);
 			});
 		});
+
+		it('calls callback if file was not changed', function(done){
+			file.setContent(cssFileSrc, function(err, diff){
+				expect(diff).to.be.null;
+				expect(err).to.be.null;
+				done(err);
+			});
+		});
+
 		it('calls callback if there were any errors', function(done){
 			var newInvalidCss = 'body{background red more invalid stuff:::}'
-			this.file.setContent(newInvalidCss, function(err){
+			file.setContent(newInvalidCss, function(err){
 				expect(err).to.not.be.null;
 				done();
 			});
