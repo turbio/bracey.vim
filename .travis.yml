@@ -1,5 +1,10 @@
+before:
+  - cd bracey
+install:
+  - npm install
 language: node_js
 node_js:
+  - "6"
   - "5.2"
   - "5.1"
   - "5.0"
