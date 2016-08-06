@@ -88,7 +88,7 @@ describe('server', function(){
 
 	describe('position', function(){
 		before(function(done){
-			testHtmlFile = fs.readFileSync('test/fixtures/test_html.html', 'utf8');
+			var testHtmlFile = fs.readFileSync('test/fixtures/test_html.html', 'utf8');
 
 
 			web.recieve(function(msg){
@@ -132,5 +132,39 @@ describe('server', function(){
 		it('responds to changes in the document');
 		it('makes no changes when given invalid html');
 		it('reports invalid html erorrs');
+	});
+
+	describe('buffer change', function(){
+		var testCssFile;
+
+		before(function(done){
+			var testHtmlFile = fs.readFileSync('test/fixtures/test_html.html', 'utf8');
+			testCssFile = fs.readFileSync('test/fixtures/test_css.css', 'utf8');
+
+
+			web.recieve(function(msg){
+				msg.command.should.equal('goto')
+				msg.location.should.equal('test.html')
+
+				web.recieve(function(msg){
+					msg.should.be.ok;
+					msg.command.should.equal('edit');
+					done();
+				});
+				editor.send('b:' + testHtmlFile.length + ':' + testHtmlFile);
+			});
+
+			editor.send('f:1:1:9:test.html:10:/home/html:4:html');
+		});
+
+		it('should change between html and css file', function(done){
+			//web.recieve(function(msg){
+				//msg.command.should.equal('goto')
+				//msg.location.should.equal('test.html')
+				//done();
+			//});
+
+			//editor.send('f:1:1:9:test.html:10:/home/html:4:html');
+		});
 	});
 });

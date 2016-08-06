@@ -131,9 +131,7 @@ Server.prototype.handleEditorCommand = function(command, data){
 			currentFile.setContent(data[0], function(err){
 				if(!err){
 					self.setError(false);
-					if(diff){
-						self.broadcast({'command': 'reload_css'});
-					}
+					self.broadcast({'command': 'reload_css'});
 				}else{
 					//console.log('file ' + currentFile.name + ' parse error');
 					self.setError(err);
@@ -293,7 +291,7 @@ Server.prototype.setError = function(message){
 	}
 
 	if(message){
-		this.hasError = false;
+		this.hasError = true;
 		var err = message[0];
 
 		this.broadcast({
@@ -302,6 +300,7 @@ Server.prototype.setError = function(message){
 			'message': err.line + ':' + err.col + ': ' + err.message
 		});
 	}else{
+		this.hasError = false;
 		this.broadcast({
 			'command': 'error',
 			'action': 'clear'
