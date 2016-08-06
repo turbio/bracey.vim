@@ -157,7 +157,7 @@ describe('server', function(){
 			editor.send('f:1:1:9:test.html:10:/home/html:4:html');
 		});
 
-		it('should change between html and css file', function(done){
+		//it('should change between html and css file', function(done){
 			//web.recieve(function(msg){
 				//msg.command.should.equal('goto')
 				//msg.location.should.equal('test.html')
@@ -165,6 +165,6 @@ describe('server', function(){
 			//});
 
 			//editor.send('f:1:1:9:test.html:10:/home/html:4:html');
-		});
+		//});
 	});
 });
