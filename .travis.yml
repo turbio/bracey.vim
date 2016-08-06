@@ -1,6 +1,9 @@
 language: node_js
-node_js:
-  - "0.8"
-  - "0.6"
 before_install:
   - cd bracey
+node_js:
+  - "node"
+  - "iojs"
+  - "6"
+  - "5"
+  - "4"
