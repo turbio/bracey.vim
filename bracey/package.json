@@ -8,11 +8,8 @@
     "csslint": "^0.10.0",
     "domhandler": "^2.3.0",
     "domutils": "^1.5.1",
-    "fs": "^0.0.2",
     "htmlhint": "^0.9.12",
     "htmlparser2": "^3.9.0",
-    "http": "^0.0.0",
-    "jsondiffpatch": "^0.1.38",
     "mime": "^1.3.4",
     "websocket": "^1.0.22"
   },
