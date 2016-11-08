@@ -1,4 +1,6 @@
-# ![bracey logo](readme_images/logo.png)
+# ![bracey logo](readme_images/logo.png)  
+[![Build Status](https://travis-ci.org/turbio/bracey.vim.svg?branch=master)](https://travis-ci.org/turbio/bracey.vim)
+
 plugin for live html, css, and javascript editing in vim
 
 ![live html editing demo](readme_images/demo1.gif)
