@@ -47,7 +47,7 @@ install its dependencies.
    plugin manager but should be something like
    * `cd ~/.vim/bundle/bracey.vim` for pathogen/neoBundle/vundle
    * `cd ~/.vim/plugged/bracey.vim` for plug
-2. run `npm install --prefix bracey`
+2. run `npm install --prefix server`
 
 in order to automatically open your default browser when bracey starts, the
 `xdg-open` command must be available.

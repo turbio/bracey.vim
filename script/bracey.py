@@ -32,7 +32,7 @@ def startServer():
         return
 
     args = [
-        'node', 'bracey.js',
+        'node', 'launch.js',
         '--port', vim.eval("g:bracey_server_port"),
     ]
 
@@ -44,7 +44,7 @@ def startServer():
     try:
         bracey_server_process = subprocess.Popen(
             args,
-            cwd=vim.eval("s:plugin_path") + '/bracey',
+            cwd=vim.eval("s:plugin_path") + '/server',
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE)
