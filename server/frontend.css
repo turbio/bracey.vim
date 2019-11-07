@@ -1,4 +1,4 @@
-@keyframes blink-background{
+@keyframes bracey-blink-background{
 	0% {
 		background: none;
 	}
@@ -24,10 +24,8 @@
 	overflow-y: hidden !important;
 	margin: 0 !important;
 	padding: 0 !important;
-	background: none !important;
 
-	animation-name: blink-background !important;
-	animation-duration: 0.75s !important;
+	animation: bracey-blink-background 0.75s !important;
 }
 
 .bracey-highlight-error{
@@ -46,7 +44,7 @@
 	border-radius: 100% !important;
 	margin: 5px !important;
 	border-color: rgb(239, 83, 80) !important;
-    background: rgba(239, 83, 80, .75) !important;
+	background: rgba(239, 83, 80, .75) !important;
 }
 
 .bracey-error-indicator:hover{
@@ -65,7 +63,7 @@
 	padding: 8px !important;
 	margin: 5px !important;
 	border-color: rgb(239, 83, 80) !important;
-    background: rgba(239, 83, 80, .75) !important;
+	background: rgba(239, 83, 80, .75) !important;
 	color: #fff !important;
 }
 
