@@ -40,7 +40,7 @@ def startServer():
         '--port', vim.eval("g:bracey_server_port"),
     ]
 
-    if int(vim.eval("g:bracey_server_allow_remote_connetions")) != 0:
+    if int(vim.eval("g:bracey_server_allow_remote_connections")) != 0:
         args.append('--allow-remote-web')
 
     print('starting server with args "' + str(args) + '"')

@@ -111,7 +111,7 @@ g:bracey_auto_start_server
 * (false: 0, true: 1) whether or not to start the node server when `:Bracey` is run
 
 ```
-g:bracey_server_allow_remote_connetions
+g:bracey_server_allow_remote_connections
 ```
 **default:** 0
 * (false: 0, true: 1) whether or not to allow other machines on the network to connect to the node server's webpage. This is useful if you want to view what changes will look like on other platforms at the same time
