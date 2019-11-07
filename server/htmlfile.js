@@ -42,31 +42,25 @@ HtmlFile.prototype.webSrc = function(){
 	//and for now... just assume this is a full html document
 	//this basically just adds the required css and js to the head
 	//also set the index attribute
-	var head = htmlparser.DomUtils.filter(function(elem){
-		return htmlparser.DomUtils.getName(elem) == 'head';
-	}, webSourceHtml)[0];
+	var first = htmlparser.DomUtils.findOne(function() {return true}, webSourceHtml);
 
-	if(head !== undefined){
-		htmlparser.DomUtils.appendChild(head, {
-			type: 'script',
-			name: 'script',
-			attribs: {language: 'javascript'},
-			children: [{
-				data: HtmlFile.injectedJS,
-				type: 'text'
-			}]
-		});
-		htmlparser.DomUtils.appendChild(head, {
-			type: 'style',
-			name: 'style',
-			children: [{
-				data: HtmlFile.injectedCSS,
-				type: 'text'
-			}]
-		});
-	}else{
-		throw 'currently, only a full html document is supported';
-	}
+	htmlparser.DomUtils.appendChild(first, {
+		type: 'script',
+		name: 'script',
+		attribs: {language: 'javascript'},
+		children: [{
+			data: HtmlFile.injectedJS,
+			type: 'text'
+		}]
+	});
+	htmlparser.DomUtils.appendChild(first, {
+		type: 'style',
+		name: 'style',
+		children: [{
+			data: HtmlFile.injectedCSS,
+			type: 'text'
+		}]
+	});
 
 	return htmlparser.DomUtils.getOuterHTML(webSourceHtml);
 };
@@ -195,7 +189,7 @@ function stripElement(elem, include_index){
 			newElem.attribs = {};
 		}
 
-		newElem.attribs['meta-bracey-element-index'] = elem.index;
+		newElem.attribs['meta-bracey-element-index'] = elem.index.toString();
 	}
 
 	if(elem.data)
