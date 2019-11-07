@@ -27,11 +27,6 @@ var args = [
 		long: 'allow-remote-editor',
 		value: false
 	},
-	{
-		short: 'l',
-		long: 'log-path',
-		value: true
-	},
 ];
 
 var settings = {};
@@ -69,14 +64,9 @@ for(var i = 2; i < process.argv.length; i++){
 settings['port'] = settings.port || 13378;
 settings['web-address'] = settings.address || '127.0.0.1';
 settings['editor-address'] = settings.address || '127.0.0.1';
-settings['log-path'] = settings.address || '/tmp/bracey_server.log';
-
-var log_file = fs.createWriteStream(settings['log-path'], {flags : 'w'});
-var log_stdout = process.stdout;
 
 console.log = function(msg) {
-	log_file.write(util.format(msg) + '\n');
-	log_stdout.write(util.format(msg) + '\n');
+	process.stderr.write(util.format(msg) + '\n');
 };
 
 console.log('starting bracey with arguments:');

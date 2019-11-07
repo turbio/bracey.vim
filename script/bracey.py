@@ -16,6 +16,10 @@ opener = requests.build_opener(requests.ProxyHandler({}))
 
 
 def send(msg):
+    if bracey_server_process is None:
+        print('bracey server is not running!')
+        return
+
     if python_version is not 2:
         msg = msg.encode('utf-8')
 
@@ -41,16 +45,21 @@ def startServer():
 
     print('starting server with args "' + str(args) + '"')
 
+    log_to = subprocess.PIPE
+
+    log_path = vim.eval('g:bracey_server_log')
+    if log_path is not None:
+        log_to = open(log_path, 'a')
+
     try:
         bracey_server_process = subprocess.Popen(
             args,
             cwd=vim.eval("s:plugin_path") + '/server',
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=log_to,
             stdin=subprocess.PIPE)
     except Exception as e:
         print('could not start bracey server: ' + str(e))
-
 
 def stopServer():
     global bracey_server_process
