@@ -4,7 +4,7 @@ import sys
 
 python_version = int(sys.version[0])
 
-if python_version is 2:
+if python_version == 2:
     import urllib2 as requests
 else:
     from urllib import request as requests
@@ -20,7 +20,7 @@ def send(msg):
         print('bracey server is not running!')
         return
 
-    if python_version is not 2:
+    if python_version != 2:
         msg = msg.encode('utf-8')
 
     try:
@@ -60,6 +60,7 @@ def startServer():
             stdin=subprocess.PIPE)
     except Exception as e:
         print('could not start bracey server: ' + str(e))
+
 
 def stopServer():
     global bracey_server_process
