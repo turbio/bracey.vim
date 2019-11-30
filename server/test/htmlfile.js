@@ -209,7 +209,7 @@ describe('htmlfile', function(){
 
 			file.setContent(newhtml, function(err, diff){
 				expect(err).to.be.null;
-				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-bracey-element-index":64},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
+				diff.should.deep.equal([{"element":13,"changes":[{"index":6,"action":"add","value":{"type":"tag","name":"li","attribs":{"meta-bracey-element-index":"64"},"index":64,"children":[{"type":"text","data":"d"}]}}]}]);
 				done(err);
 			});
 		});
