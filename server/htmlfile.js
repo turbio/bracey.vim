@@ -1,6 +1,7 @@
 var htmlparser = require("htmlparser2");
 var util = require('util');
-var htmlhint  = require("htmlhint").HTMLHint;
+var HTMLHintClass  = require("htmlhint").HTMLHint;
+var htmlhint = new HTMLHintClass;
 
 HtmlFile.setCSS = function(source){
 	HtmlFile.injectedCSS = source;
