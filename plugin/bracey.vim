@@ -12,7 +12,9 @@ if !exists("g:bracey_server_path")
 endif
 
 if !exists("g:bracey_server_port")
-	let g:bracey_server_port = 13378 + (getpid() % 80000)
+	let offset = 13378
+	let port_max = 65536
+	let g:bracey_server_port = offset + (getpid() % (port_max-offset))
 endif
 
 if !exists("g:bracey_server_allow_remote_connections")
