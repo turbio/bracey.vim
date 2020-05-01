@@ -32,7 +32,7 @@ endfunction
 function! bracey#startBrowser(url)
 	if g:bracey_browser_command == 0
 		if has("unix")
-			if system("uname")[0] == "Darwin"
+			if system('uname') =~ "Darwin"
 				call system('open '.a:url.' &')
 			else
 				call system('xdg-open '.a:url.' &')
