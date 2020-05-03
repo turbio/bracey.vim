@@ -450,6 +450,22 @@ function parse(inputSrc, include_index){
 		}
 	});
 
+	if (!parsedHtml.length) {
+		parsedHtml = [
+			{
+				type: 'tag',
+				name: 'html',
+				attribs: {},
+				children: [],
+				next: null,
+				startIndex: 0,
+				prev: null,
+				parent: null,
+				endIndex: inputSrc.length,
+			}
+		]
+	}
+
 	return parsedHtml;
 };
 
