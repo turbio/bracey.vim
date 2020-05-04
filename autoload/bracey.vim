@@ -1,5 +1,6 @@
 if !has('python') && !has('python3')
-	echo 'bracey requires python in order to communicate with the server'
+	echo 'It looks like your vim does not have python support. Bracey depends on python to run!'
+	echo 'Make sure your vim has python2 or python3 support and try again.'
 	finish
 endif
 
