@@ -22,7 +22,7 @@ describe('cssfile', function(){
 		it('calls callback with errors', function(done){
 			var invalidCss = 'body{ background: red color: white}';
 			file = new cssfile(invalidCss, 'can be whatever', function(err){
-				err.should.not.be.null;
+				expect(err).to.not.be.null;
 				done();
 			});
 		});

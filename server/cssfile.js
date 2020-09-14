@@ -1,5 +1,5 @@
 var csslint = require('csslint').CSSLint;
-var cssparser = require('css');
+var cssparser = require('postcss');
 
 function CssFile(source, path, callback){
 	callback = callback || function(){}
@@ -12,28 +12,25 @@ CssFile.prototype.webSrc = function(){
 };
 
 CssFile.prototype.selectorFromPosition = function(line, column){
-	var rules = this.parsed.stylesheet.rules;
-	for(var i = 0; i < rules.length; i++){
-		var position = rules[i].position;
-		if((position.start.line < line && position.end.line > line)
-				|| (position.start.line == line
-					&& position.end.line != line
-					&& position.start.column <= line)
-				|| (position.start.line != line
-					&& position.end.line == line
-					&& position.start.column >= line)
-				|| (position.start.line == line
-					&& position.end.line == line
-					&& position.start.column <= line
-					&& position.end.column >= line)){
-			if(rules[i].selectors){
-				return rules[i].selectors.join(' ');
-			}else{
-				return null;
-			}
+	for (const rule of this.parsed.nodes) {
+		const {
+			start: { line: startLine, column: startColumn },
+			end: { line: endLine, column: endColumn },
+		} = rule.source
+		if((startLine < line && endLine > line)
+			|| (startLine == line
+				&& endLine != line
+				&& startColumn <= line)
+			|| (startLine != line
+				&& endLine == line
+				&& startColumn >= line)
+			|| (startLine == line
+				&& endLine == line
+				&& startColumn <= line
+				&& endColumn >= line)){
+			return rule.selector || null;
 		}
 	}
-
 	return null;
 };
 
@@ -62,11 +59,12 @@ CssFile.prototype.setContent = function(source, callback){
 		return;
 	}
 
-	this.parsed.stylesheet.rules.forEach(function(rule){
-		var position = rule.position;
-		position.start.line--;
-		position.start.column--;
-	});
+	for (const rule of this.parsed.nodes) {
+		let source = rule.source;
+		source.start.line--;
+		source.start.column--;
+		source.end.column++;
+	}
 
 	if(changed){
 		callback(null);
