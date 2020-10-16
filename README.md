@@ -48,6 +48,7 @@ install its dependencies.
    * `cd ~/.vim/bundle/bracey.vim` for pathogen/neoBundle/vundle
    * `cd ~/.vim/plugged/bracey.vim` for plug
 2. run `npm install --prefix server`
+   * you can automate this for `vim-plug` by using the following command in your `.vimrc`: `Plug 'turbio/bracey.vim', {'do': 'npm install --prefix server'}`. This will run the npm command every time you update the plugin as well
 
 in order to automatically open your default browser when bracey starts, the
 `xdg-open` command must be available.
