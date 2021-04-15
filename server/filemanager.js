@@ -30,7 +30,7 @@ FileManager.prototype.newFile = function(id, name, path, type, source){
 			//+ ', path: ' + path + ', type: ' + type);
 
 	if(source == undefined){
-		source = '/';
+		source = '';
 	}
 
 	var createdFile = {};
