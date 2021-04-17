@@ -28,7 +28,7 @@ describe('cssfile', function(){
 		});
 
 		it('should not error if no callback is given', function(){
-			var validCss = 'div{ color: red; }';
+			var validCss = 'div { color: red; }\n';
 			file = new cssfile(validCss, 'can be whatever');
 		});
 	});
@@ -58,7 +58,7 @@ describe('cssfile', function(){
 
 	describe('#setContent()', function(){
 		it('calls callback if file was changed', function(done){
-			var newValidCss = 'body{background: red}'
+			var newValidCss = 'body { background: red; }\n'
 			file.setContent(newValidCss, function(err){
 				done(err);
 			});

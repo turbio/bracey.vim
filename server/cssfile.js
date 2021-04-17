@@ -35,45 +35,64 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 };
 
 CssFile.prototype.setContent = function(source, callback){
-	const messages = stylelint.lint({code: source}).then((result) => {
-		const results = result.results
-		const errors = [];
+	const errors = [];
+	this.source = source;
+	const lint = stylelint.lint({code: source}).then((result) => result.results).then(results => {
 		results.forEach((msg) =>{
-			if(msg.type == 'error'){
-				errors.push(msg);
-				}
-			});
+			if(msg.errored){
+				msg.warnings.forEach(warning => {
+					errors.push(warning)
+				});
+			}
+		})
+		return results
+	}).then(results => {
 		if(errors.length > 0 && callback){
-			callback(errors);
-			return;
+			throw new Error("Errors found")
 		}
-
+		return results
+	}).catch(err => {
+		return err
 	})
 
-
-	var changed = (this.source != undefined && this.source != source);
-
-	this.source = source;
-
-	try{
-		this.parsed = cssparser.parse(source);
-	}catch(err){
-		callback(err);
-		return;
+	const parser =  new Promise((res, rej) => { 
+		try {
+			const parsed = cssparser.parse(source)
+			this.parsed = parsed
+			res(parsed)
+		}
+		catch(err){
+			rej(err);}
 	}
+	).then((parsed) => {
+		for (const rule of parsed.nodes) {
+			let source = rule.source;
+			source.start.line--;
+			source.start.column--;
+			source.end.column++;
+		}
+	}).catch(err => {
+		return err
+	})
 
-	for (const rule of this.parsed.nodes) {
-		let source = rule.source;
-		source.start.line--;
-		source.start.column--;
-		source.end.column++;
+	Promise.all([lint, parser]).then(result => {
+		var changed = (this.source != undefined && this.source != source);
+		if(changed){
+			callback(null);
+		}else{
+			callback(null, null);
+		}
 	}
+	).catch(err => {
+		if (err === "Errors found") {
+			callback(errors)
+		}else {
+			callback(err)
+		}
+	})
 
-	if(changed){
-		callback(null);
-	}else{
-		callback(null, null);
-	}
-};
+	return
+
+}
 
 module.exports = CssFile;
