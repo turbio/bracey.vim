@@ -1,0 +1,144 @@
+*bracey-vim.txt* Plugin for live html, css, and javascript editing in vim
+*bracey*
+
+License: GPLv2
+Author: Mason Clayton <hi@turb.io>
+
+=============================================================================
+CONTENTS                                                           *bracey-toc*
+
+  1. Commands.............|bracey-commands|
+  2. Options..............|bracey-options|
+
+=============================================================================
+1. Commands                                                   *bracey-commands*
+
+Bracey                                                                *:Bracey*
+
+  This starts the bracey server and optionally opens your default web browser
+  to bracey's address. if you have an html file open as your current buffer,
+  it will be displayed and you may begin editing it live.
+
+BraceyStop                                                        *:BraceyStop*
+
+  Shutdown the server and stop sending commands.
+
+BraceyReload                                                    *:BraceyReload*
+
+  Force the current webpage to be reloaded.
+
+BraceyEval {args}                                                 *:BraceyEval*
+
+  If any arguments are provided, evaluate them as javascript in the browser.
+  If none are give, evaluate the entire buffer (regardless of its filetype).
+
+=============================================================================
+2. Options                                                     *bracey-options*
+
+g:bracey_browser_command                             *g:bracey_browser_command*
+
+  Type: |Number| or |String|
+  Default: `0`
+
+  If set to a |String|, will be used as command to launch the browser. If set
+  to `0`, browser will be automatically detected using `xdg-open`.
+
+g:bracey_auto_start_browser                       *g:bracey_auto_start_browser*
+
+  Type: |Number|
+  Default: `1`
+
+  Whether or not to start the browser (by running |g:bracey_browser_command|)
+  when |:Bracey| is run.
+
+g:bracey_refresh_on_save                             *g:bracey_refresh_on_save*
+
+  Type: |Number|
+  Default: `0`
+
+  Whether or not to reload the current web page whenever its corresponding
+  buffer is written.
+
+g:bracey_eval_on_save                                   *g:bracey_eval_on_save*
+
+  Type: |Number|
+  Default: `1`
+
+  Whether or not to evaluate a buffer containing javascript when it is saved.
+
+g:bracey_auto_start_server                         *g:bracey_auto_start_server*
+
+  Type: |Number|
+  Default: `1`
+
+  Whether or not to start the node server when |:Bracey| is run.
+
+                                     *g:bracey_server_allow_remote_connections*
+g:bracey_server_allow_remote_connections
+
+  Type: |Number|
+  Default: `0`
+
+  Whether or not to allow other machines on the network to connect to the 
+  node server's webpage. This is useful if you want to view what changes will
+  look like on other platforms at the same time.
+
+g:bracey_server_port                                     *g:bracey_server_port*
+
+  Type: |Number|
+  Default: `random-ish number derived from vim's pid`
+
+  The port that the node server will serve files at and receive commands at.
+
+g:bracey_server_path                                     *g:bracey_server_path*
+
+  Type: |String|
+  Default: `'http://127.0.0.1'`
+
+  Address at which the node server will reside at (should start with
+  `'http://'` and not include port).
+
+g:bracey_server_log                                       *g:bracey_server_log*
+
+  Type: |String|
+  Default: `'/tmp/bracey_server_logfile'`
+
+  Location to log the node servers output.
+
+=============================================================================
+3. How It Works                                           *bracey-architecture*
+
+The architecture looks something like this:
+
++-----+--------+    +--------+     +---------+
+| vim | python |    | nodejs |     | browser |
+|     | plugin ---->| server ----> | client  |
+|     |        |    |        |     |         |
++-----+--------+    +--------+     +---------+
+
+Vim uses python to launch and communicate with the nodejs server. All
+relevant actions (cursor move, text change, buffer switch, etc.) are sent to
+the node server. The nodejs web server sits at the heart of bracey. This
+server maintains file state, serves assets, transforms documents, and
+forwards events.  The browser client is created by transforming and injecting
+scripts into the user's code. This client carries out actions on behalf of
+the nodejs server.
+
+When the server first starts up it waits for messages indicating the
+project's root directory and current buffer. Once these are received it will
+begin serving the current buffer along with any static assets.
+
+To serve an HTML document it must first parse it into an AST, annotate the
+elements, inject the client, and send the result to the web browser. Edits
+from Vim will diffed against the existing AST to produce a (ideally) minimal
+set of tree modifications to send to the client. Reducing the number of ops
+is vital as any remounted element loses runtime state and too many remounts
+might as well just be a page refresh.
+
+Highlighting the element under the cursor is done through the AST's
+line/column annotations. The HTML transformation step includes tagging each
+element with a unique key. Once an AST node is selected a unique key is
+looked up and sent to the client.
+
+=============================================================================
+vim:tw=78:ts=2:sts=2:sw=2:ft=help:norl:
