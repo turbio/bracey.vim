@@ -36,7 +36,6 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 
 CssFile.prototype.setContent = function(source, callback){
 	const errors = [];
-	this.source = source;
 	const lint = stylelint.lint({code: source}).then((result) => result.results).then(results => {
 		results.forEach((msg) =>{
 			if(msg.errored){
@@ -48,51 +47,33 @@ CssFile.prototype.setContent = function(source, callback){
 		return results
 	}).then(results => {
 		if(errors.length > 0 && callback){
-			throw new Error("Errors found")
+			callback(errors)
 		}
 		return results
 	}).catch(err => {
-		return err
+	 //console.log(err)  //TODO: a proper catch to the errors
 	})
 
-	const parser =  new Promise((res, rej) => { 
-		try {
-			const parsed = cssparser.parse(source)
-			this.parsed = parsed
-			res(parsed)
-		}
-		catch(err){
-			rej(err);}
+	try {
+		this.parsed = cssparser.parse(source)
 	}
-	).then((parsed) => {
-		for (const rule of parsed.nodes) {
-			let source = rule.source;
-			source.start.line--;
-			source.start.column--;
-			source.end.column++;
-		}
-	}).catch(err => {
-		return err
-	})
-
-	Promise.all([lint, parser]).then(result => {
-		var changed = (this.source != undefined && this.source != source);
-		if(changed){
-			callback(null);
-		}else{
-			callback(null, null);
-		}
+	catch(err){
+		callback(err);
 	}
-	).catch(err => {
-		if (err === "Errors found") {
-			callback(errors)
-		}else {
-			callback(err)
-		}
-	})
+	for (const rule of this.parsed.nodes) {
+		let source = rule.source;
+		source.start.line--;
+		source.start.column--;
+		source.end.column++;
+	}
 
-	return
-
+	var changed = (this.source != undefined && this.source != source);
+	this.source = source;
+	if(changed){
+		callback(null);
+	}else{
+		callback(null, null);
+	}
 }
 
 module.exports = CssFile;

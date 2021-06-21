@@ -1,4 +1,4 @@
-body {
+body{
 	color: #333;
 	font-family: sans-serif;
 	max-width: 50%;
@@ -6,48 +6,48 @@ body {
 	margin-left: auto;
 	margin-right: auto;
 }
-hr {
+hr{
 	border: none;
 	height: 1px;
 	background: #333;
 }
-td {
+td{
 	border: none;
 	padding: 5px;
 }
-tr:nth-child(even) {
+tr:nth-child(even){
 	background: #eee;
 }
-div {
+div{
 	background: #eee;
 	margin: 1em;
 	padding: 1em;
 }
-.classy {
+.classy{
 	background: #B2FF9E;
 }
-#identifiable {
+#identifiable{
 	background: #FFCD82;
 }
-#relative {
+#relative{
 	position: relative;
 	left: 50%;
 	width: 10em;
 	background: #A0C9FB;
 }
-#fixed {
+#fixed{
 	position: fixed;
 	background: #FF8AFF;
 	bottom: 0;
 	right: 0;
 }
-#absolute {
+#absolute{
 	position: absolute;
 	right: 0;
 	top: 50%;
 	background: #FF9E9E;
 }
-.floaty {
+.floaty{
 	float: left;
 	background: #FFFF87;
 }
