@@ -31,7 +31,7 @@ function! bracey#start()
 endfunction
 
 function! bracey#startBrowser(url)
-	if g:bracey_browser_command == 0
+	if type(g:bracey_browser_command) == type(0)
 		if has("unix")
 			if system("uname -s") =~ "Darwin"
 				call system('open '.a:url.' &')
