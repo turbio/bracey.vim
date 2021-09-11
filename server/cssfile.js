@@ -1,5 +1,5 @@
-var csslint = require('csslint').CSSLint;
-var cssparser = require('postcss');
+var stylelint = require('stylelint');
+var postcss = require('postcss');
 
 function CssFile(source, path, callback){
 	callback = callback || function(){}
@@ -35,25 +35,32 @@ CssFile.prototype.selectorFromPosition = function(line, column){
 };
 
 CssFile.prototype.setContent = function(source, callback){
-	var messages = csslint.verify(source).messages;
-	var errors = [];
-	messages.forEach(function(msg){
-		if(msg.type == 'error'){
-			errors.push(msg);
-		}
-	});
 
-	if(errors.length > 0 && callback){
-		callback(errors);
-		return;
-	}
+   var messages = stylelint.lint({ code: source });
+   messages.then(result => {
+      let messages = JSON.parse(result.output);
+      var errors = [];
+
+      messages[0].warnings.forEach(msg => {
+         if (msg.severity == 'error') {
+            data = { type: msg.severity, line: msg.line, col: msg.column, 
+               message: msg.rule, evidence: msg.text }
+            errors.push(data);
+         }
+      });
+
+      if (errors.length > 0 && callback) {
+         callback(errors);
+         return;
+      }
+   });
 
 	var changed = (this.source != undefined && this.source != source);
 
 	this.source = source;
 
 	try{
-		this.parsed = cssparser.parse(source);
+		this.parsed = postcss.parse(source);
 	}catch(err){
 		callback(err);
 		return;
